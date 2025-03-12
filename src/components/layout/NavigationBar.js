@@ -1,14 +1,9 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
+import UserIdentifier from './UserIdentifier';
 
 function NavigationBar() {
-  // Add state to track if mobile menu is open
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-
-  // Toggle mobile menu
-  const toggleMobileMenu = () => {
-    setMobileMenuOpen(!mobileMenuOpen);
-  };
 
   return (
     <nav className="navigation-bar">
@@ -17,7 +12,7 @@ function NavigationBar() {
       </div>
       
       {/* Mobile menu toggle button */}
-      <button className="menu-toggle" onClick={toggleMobileMenu}>
+      <button className="menu-toggle" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
         <span className={mobileMenuOpen ? "rotate-down" : ""}></span>
         <span className={mobileMenuOpen ? "fade-out" : ""}></span>
         <span className={mobileMenuOpen ? "rotate-up" : ""}></span>
@@ -28,6 +23,8 @@ function NavigationBar() {
         <li><Link to="/" onClick={() => setMobileMenuOpen(false)}>搜尋商品</Link></li>
         <li><Link to="/add-merchant" onClick={() => setMobileMenuOpen(false)}>新增商人</Link></li>
       </ul>
+      
+      <UserIdentifier />
     </nav>
   );
 }
