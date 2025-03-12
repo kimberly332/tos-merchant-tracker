@@ -1,14 +1,14 @@
-import { collection, addDoc, query, where, getDocs, serverTimestamp } from 'firebase/firestore';
+import { collection, addDoc, query, where, getDocs, serverTimestamp, orderBy, limit } from 'firebase/firestore';
 import { db } from './config';
 
-// Add regular merchant data
-export const addRegularMerchant = async (merchantData) => {
+// Add merchant data (handles both regular and special merchants)
+export const addMerchant = async (merchantData) => {
   try {
     // Calculate expiration time (24 hours)
     const expiresAt = new Date();
     expiresAt.setHours(expiresAt.getHours() + 24);
     
-    const docRef = await addDoc(collection(db, 'regularMerchants'), {
+    const docRef = await addDoc(collection(db, 'merchants'), {
       ...merchantData,
       timestamp: serverTimestamp(),
       expiresAt
@@ -21,49 +21,86 @@ export const addRegularMerchant = async (merchantData) => {
   }
 };
 
-// Add special merchant data
-export const addSpecialMerchant = async (merchantData) => {
+// Get all merchant data (with optional limit)
+export const getAllMerchants = async (maxResults = 100) => {
   try {
-    // Calculate expiration time (24 hours)
-    const expiresAt = new Date();
-    expiresAt.setHours(expiresAt.getHours() + 24);
+    const now = new Date();
+    const merchantsRef = collection(db, 'merchants');
+    // 只獲取未過期的商人資訊，並按時間戳降序排序
+    const merchantQuery = query(
+      merchantsRef,
+      where('expiresAt', '>', now),
+      orderBy('expiresAt', 'desc'),
+      limit(maxResults)
+    );
     
-    const docRef = await addDoc(collection(db, 'specialMerchants'), {
-      ...merchantData,
-      timestamp: serverTimestamp(),
-      expiresAt
+    const merchantSnapshot = await getDocs(merchantQuery);
+    const merchants = [];
+    
+    merchantSnapshot.forEach(doc => {
+      const data = doc.data();
+      const merchantData = {
+        id: doc.id,
+        playerId: data.playerId,
+        serverName: data.serverName,
+        guildName: data.guildName,
+        items: data.items || [],
+        timestamp: data.timestamp?.toDate() || new Date(),
+        discount: data.discount || null
+      };
+      
+      // 添加五商特有資訊
+      if (data.isSpecialMerchant) {
+        merchantData.isSpecialMerchant = true;
+        merchantData.location = data.location;
+        merchantData.exchangeRate = data.exchangeRate;
+        merchantData.totalAmount = data.totalAmount;
+      }
+      
+      merchants.push(merchantData);
     });
     
-    return { success: true, id: docRef.id };
+    return merchants;
   } catch (error) {
-    console.error('Error adding special merchant:', error);
-    return { success: false, error };
+    console.error('Error fetching merchants:', error);
+    throw error;
   }
 };
 
 // Search for items
 export const searchItems = async (searchTerm) => {
   try {
-    // Search in regular merchants
+    // Search in merchants collection
     const results = [];
-    const regularQuery = query(collection(db, 'regularMerchants'));
-    const regularSnapshot = await getDocs(regularQuery);
+    const merchantQuery = query(collection(db, 'merchants'));
+    const merchantSnapshot = await getDocs(merchantQuery);
     
-    regularSnapshot.forEach(doc => {
+    merchantSnapshot.forEach(doc => {
       const data = doc.data();
       const matchingItems = data.items.filter(item => 
         item.itemName.toLowerCase().includes(searchTerm.toLowerCase())
       );
       
       if (matchingItems.length > 0) {
-        results.push({
+        const commonData = {
           id: doc.id,
           playerId: data.playerId,
           serverName: data.serverName,
           guildName: data.guildName,
           items: matchingItems,
-          timestamp: data.timestamp?.toDate() || new Date()
-        });
+          timestamp: data.timestamp?.toDate() || new Date(),
+          discount: data.discount || null
+        };
+        
+        // Add special merchant data if available
+        if (data.isSpecialMerchant) {
+          commonData.isSpecialMerchant = true;
+          commonData.location = data.location;
+          commonData.exchangeRate = data.exchangeRate;
+          commonData.totalAmount = data.totalAmount;
+        }
+        
+        results.push(commonData);
       }
     });
     

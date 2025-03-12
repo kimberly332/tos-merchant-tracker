@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { addRegularMerchant } from '../../firebase/firestore';
+import { addMerchant } from '../../firebase/firestore';
 
 function MerchantInputForm() {
   const [formData, setFormData] = useState({
@@ -17,8 +17,14 @@ function MerchantInputForm() {
       exchangeItemName: '',
       customExchangeItem: '',
       exchangeQuantity: '1'
-    }]
+    }],
+    location: '',
+    exchangeRate: '',
+    totalAmount: ''
   });
+  
+  // State to track if current item is 家園幣
+  const [isSpecialMerchant, setIsSpecialMerchant] = useState(false);
   
   // 定義分類和物品
   // 物品名稱與交換物品將分別使用這些分類數據
@@ -37,7 +43,123 @@ function MerchantInputForm() {
         '蜂蜜'
       ]
     },
-    // Other category groups remain the same...
+    {
+      name: '調味品',
+      items: [
+        '鮮奶油',
+        '奶油',
+        '起司',
+        '砂糖',
+        '方糖',
+        '糖漿',
+        '番茄醬',
+        '披薩醬',
+        '草莓醬',
+        '魚露'
+      ]
+    },
+    {
+      name: '飲料',
+      items: [
+        '胡蘿蔔汁',
+        '番茄汁',
+        '草莓鮮奶汁',
+        '混合果汁'
+      ]
+    },
+    {
+      name: '烘焙食品',
+      items: [
+        '小麵包',
+        '玉米麵包',
+        '曲奇餅'
+      ]
+    },
+    {
+      name: '甜點',
+      items: [
+        '鮮奶油霜淇淋',
+        '玉米霜淇淋',
+        '草莓霜淇淋',
+        '奶油霜淇淋',
+        '鮮奶油蛋糕',
+        '起司蛋糕',
+        '胡蘿蔔蛋糕',
+        '蜂蜜蛋糕',
+        '草莓蛋糕'
+      ]
+    },
+    {
+      name: '熟食',
+      items: [
+        '田園披薩',
+        '起司披薩',
+        '水果披薩'
+      ]
+    },
+    {
+      name: '裝飾 - 花園',
+      items: [
+        '湛藍花圃',
+        '湛藍花壇',
+        '湛藍盆栽',
+        '明黃花圃',
+        '明黃花壇',
+        '明黃盆栽',
+        '嫣紅花圃',
+        '嫣紅花壇',
+        '嫣紅盆栽',
+        '紫紅花圃'
+      ]
+    },
+    {
+      name: '裝飾 - 建築',
+      items: [
+        '湛藍方門',
+        '明黃木門',
+        '嫣紅拱門'
+      ]
+    },
+    {
+      name: '裝飾 - 休憩',
+      items: [
+        '奇異果凳',
+        '檸檬凳',
+        '西瓜凳',
+        '香橙凳'
+      ]
+    },
+    {
+      name: '裝飾 - 圍欄',
+      items: [
+        '淺原木圍欄',
+        '深原木圍欄',
+        '白蠟木圍欄',
+        '紅橡木圍欄',
+        '淺灰尖頭圍欄',
+        '淺藍尖頭圍欄'
+      ]
+    },
+    {
+      name: '裝飾 - 主題',
+      items: [
+        '女神',
+        '風車',
+        '貼紙',
+        '戲劇舞台',
+        '藍藍天空',
+        '木質邊框',
+        '奇思妙想',
+        '貴族',
+        '田園'
+      ]
+    },
+    {
+      name: '家園幣',
+      items: [
+        '家園幣',
+      ]
+    },
     {
       name: '其他',
       items: [
@@ -62,7 +184,66 @@ function MerchantInputForm() {
         '蜂蜜'
       ]
     },
-    // Other exchange category groups remain the same...
+    {
+      name: '調味品',
+      items: [
+        '鮮奶油',
+        '奶油',
+        '起司',
+        '砂糖',
+        '方糖',
+        '糖漿',
+        '番茄醬',
+        '披薩醬',
+        '草莓醬',
+        '魚露'
+      ]
+    },
+    {
+      name: '飲料',
+      items: [
+        '胡蘿蔔汁',
+        '番茄汁',
+        '草莓鮮奶汁',
+        '混合果汁'
+      ]
+    },
+    {
+      name: '烘焙食品',
+      items: [
+        '小麵包',
+        '玉米麵包',
+        '曲奇餅'
+      ]
+    },
+    {
+      name: '甜點',
+      items: [
+        '鮮奶油霜淇淋',
+        '玉米霜淇淋',
+        '草莓霜淇淋',
+        '奶油霜淇淋',
+        '鮮奶油蛋糕',
+        '起司蛋糕',
+        '胡蘿蔔蛋糕',
+        '蜂蜜蛋糕',
+        '草莓蛋糕'
+      ]
+    },
+    {
+      name: '熟食',
+      items: [
+        '田園披薩',
+        '起司披薩',
+        '水果披薩'
+      ]
+    },
+    {
+      name: '家園幣',
+      items: [
+        '家園幣',
+      ]
+    },
     {
       name: '其他',
       items: [
@@ -117,6 +298,18 @@ function MerchantInputForm() {
       [name]: value
     };
     
+    // Check if current item is 家園幣
+    const isHomeToken = value === '家園幣';
+    if (name === 'category' && isHomeToken) {
+      setIsSpecialMerchant(true);
+      
+      // For 家園幣, force barter exchange and disable coin exchange
+      updatedItems[index].allowsCoinExchange = false;
+      updatedItems[index].allowsBarterExchange = true;
+    } else if (name === 'category' && !isHomeToken && updatedItems.every(item => item.category !== '家園幣')) {
+      setIsSpecialMerchant(false);
+    }
+    
     setFormData(prev => ({
       ...prev,
       items: updatedItems
@@ -151,6 +344,11 @@ function MerchantInputForm() {
     if (formData.items.length === 1) return;
     
     const updatedItems = formData.items.filter((_, i) => i !== index);
+    
+    // Check if any remaining items are 家園幣
+    const hasHomeToken = updatedItems.some(item => item.category === '家園幣');
+    setIsSpecialMerchant(hasHomeToken);
+    
     setFormData(prev => ({
       ...prev,
       items: updatedItems
@@ -165,6 +363,7 @@ function MerchantInputForm() {
     // 處理數據
     const processedData = {
       ...formData,
+      isSpecialMerchant,
       items: formData.items.map(item => ({
         ...item,
         price: Number(item.price),
@@ -174,9 +373,15 @@ function MerchantInputForm() {
         exchangeItemName: item.exchangeItemName === '其他' ? item.customExchangeItem : item.exchangeItemName
       }))
     };
+    
+    // Convert special merchant fields if needed
+    if (isSpecialMerchant) {
+      processedData.exchangeRate = Number(formData.exchangeRate);
+      processedData.totalAmount = formData.totalAmount ? Number(formData.totalAmount) : null;
+    }
   
     try {
-      const result = await addRegularMerchant(processedData);
+      const result = await addMerchant(processedData);
       if (result.success) {
         setSubmitResult({ 
           success: true, 
@@ -199,8 +404,12 @@ function MerchantInputForm() {
             exchangeItemName: '',
             customExchangeItem: '',
             exchangeQuantity: '1'
-          }]
+          }],
+          location: '',
+          exchangeRate: '',
+          totalAmount: ''
         });
+        setIsSpecialMerchant(false);
       } else {
         setSubmitResult({ 
           success: false, 
@@ -261,6 +470,53 @@ function MerchantInputForm() {
             onChange={handleChange}
           />
         </div>
+        
+        {/* 五商專用欄位 - 只有當販售家園幣時出現 */}
+        {isSpecialMerchant && (
+          <>
+            <div className="form-group">
+              <label htmlFor="location">五商位置</label>
+              <input
+                type="text"
+                id="location"
+                name="location"
+                value={formData.location}
+                onChange={handleChange}
+                required
+                placeholder="例如：克雷亞城 東北區"
+              />
+            </div>
+            
+            <div className="form-group">
+              <label htmlFor="exchangeRate">兌換比率</label>
+              <input
+                type="number"
+                id="exchangeRate"
+                name="exchangeRate"
+                value={formData.exchangeRate}
+                onChange={handleChange}
+                required
+                min="1"
+                placeholder="例如：1.2"
+              />
+              <small>1 家園幣能兌換多少銀幣</small>
+            </div>
+            
+            <div className="form-group">
+              <label htmlFor="totalAmount">總交易額度</label>
+              <input
+                type="number"
+                id="totalAmount"
+                name="totalAmount"
+                value={formData.totalAmount}
+                onChange={handleChange}
+                min="1"
+                placeholder="可選填"
+              />
+              <small>此五商能兌換的家園幣總量</small>
+            </div>
+          </>
+        )}
         
         <div className="form-group">
           <label htmlFor="discount">今日折扣</label>
@@ -347,6 +603,7 @@ function MerchantInputForm() {
                     name={`exchangeType-${index}`}
                     checked={item.allowsCoinExchange}
                     onChange={(e) => handleExchangeToggle(index, 'coin', e.target.checked)}
+                    disabled={item.category === '家園幣'} // 禁用家園幣的家園幣交易選項
                   />
                   支持家園幣交易
                 </label>
@@ -358,6 +615,7 @@ function MerchantInputForm() {
                     onChange={(e) => handleExchangeToggle(index, 'barter', e.target.checked)}
                   />
                   支持以物易物
+                  {item.category === '家園幣' && <span className="required-tag">必選</span>}
                 </label>
               </div>
             
@@ -472,7 +730,8 @@ function MerchantInputForm() {
           disabled={submitting || formData.items.some(item => 
             (!item.allowsCoinExchange && !item.allowsBarterExchange) || 
             (item.allowsCoinExchange && item.price === '') ||
-            (item.allowsBarterExchange && item.exchangeItemName === '')
+            (item.allowsBarterExchange && item.exchangeItemName === '') ||
+            (isSpecialMerchant && (!formData.location || !formData.exchangeRate))
           )}
         >
           {submitting ? '提交中...' : '提交商人資訊'}

@@ -42,6 +42,7 @@ function ItemSearch() {
     
     return merchant.items.some(item => 
       item.category === selectedCategory || 
+      item.itemName === selectedCategory || 
       // Handle case when items don't have categories in older data
       (selectedCategory === '其他' && !item.category)
     );
@@ -120,7 +121,7 @@ function ItemSearch() {
                 if (!remainingTime) return null;
                 
                 return (
-                  <div key={index} className="merchant-item">
+                  <div key={index} className={`merchant-item ${merchant.isSpecialMerchant ? 'special-merchant' : ''}`}>
                     <div className="merchant-header">
                       <p className="server-info">{merchant.serverName} 伺服器</p>
                       {merchant.guildName && (
@@ -129,7 +130,21 @@ function ItemSearch() {
                       {merchant.discount && (
                         <p className="discount-info">今日折扣: {merchant.discount}</p>
                       )}
+                      {merchant.isSpecialMerchant && (
+                        <div className="special-merchant-badge">五商</div>
+                      )}
                     </div>
+                    
+                    {/* Show special merchant info if available */}
+                    {merchant.isSpecialMerchant && (
+                      <div className="special-merchant-info">
+                        <p className="location">位置: {merchant.location || '未知'}</p>
+                        <p className="exchange-rate">兌換比率: {merchant.exchangeRate} 銀幣/家園幣</p>
+                        {merchant.totalAmount && (
+                          <p className="total-amount">總交易額度: {merchant.totalAmount} 家園幣</p>
+                        )}
+                      </div>
+                    )}
                     
                     <div className="items-list">
                       <h4>販售物品:</h4>
@@ -138,7 +153,17 @@ function ItemSearch() {
                           <li key={itemIndex} className="item">
                             <span className="item-name">{item.itemName}</span>
                             <span className="item-category">類別: {item.category || '其他'}</span>
-                            <span className="item-price">價格: {item.price} 銀幣</span>
+                            
+                            {item.allowsCoinExchange && (
+                              <span className="item-price">價格: {item.price} 銀幣</span>
+                            )}
+                            
+                            {item.allowsBarterExchange && (
+                              <span className="item-exchange">
+                                交換: {item.exchangeQuantity} {item.exchangeItemName}
+                              </span>
+                            )}
+                            
                             {item.quantity > 1 && (
                               <span className="item-quantity">數量: {item.quantity}</span>
                             )}

@@ -1,5 +1,5 @@
 import React from 'react';
-import ItemSearch from '../components/search/ItemSearch';
+import MerchantList from '../components/merchants/MerchantList';
 
 function HomePage() {
   return (
@@ -8,7 +8,7 @@ function HomePage() {
       <p className="description">
         搜尋你需要的物品，查看哪些商人正在販售它們。
       </p>
-      <ItemSearch />
+      <MerchantList />
     </div>
   );
 }

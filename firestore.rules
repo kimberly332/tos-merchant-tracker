@@ -2,13 +2,7 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     // Allow read for all merchant data
-    match /regularMerchants/{document=**} {
-      allow read: if true;
-      allow create, update: if request.auth != null || true; // Remove "|| true" for production
-      allow delete: if false; // Only allow deletion through admin functions
-    }
-    
-    match /specialMerchants/{document=**} {
+    match /merchants/{document=**} {
       allow read: if true;
       allow create, update: if request.auth != null || true; // Remove "|| true" for production
       allow delete: if false; // Only allow deletion through admin functions

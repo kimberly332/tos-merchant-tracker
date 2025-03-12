@@ -3,7 +3,6 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import NavigationBar from './components/layout/NavigationBar';
 import HomePage from './pages/HomePage';
 import AddMerchantPage from './pages/AddMerchantPage';
-import AddSpecialMerchantPage from './pages/AddSpecialMerchantPage';
 import './styles/global.css';
 
 function App() {
@@ -15,7 +14,6 @@ function App() {
           <Routes>
             <Route path="/" element={<HomePage />} />
             <Route path="/add-merchant" element={<AddMerchantPage />} />
-            <Route path="/add-special-merchant" element={<AddSpecialMerchantPage />} />
           </Routes>
         </main>
       </div>

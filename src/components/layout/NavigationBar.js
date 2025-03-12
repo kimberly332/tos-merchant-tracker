@@ -9,8 +9,7 @@ function NavigationBar() {
       </div>
       <ul className="nav-links">
         <li><Link to="/">搜尋商品</Link></li>
-        <li><Link to="/add-merchant">新增普通商人</Link></li>
-        <li><Link to="/add-special-merchant">新增五商</Link></li>
+        <li><Link to="/add-merchant">新增商人</Link></li>
       </ul>
     </nav>
   );
