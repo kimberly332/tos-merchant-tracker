@@ -1,13 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { getAllMerchants } from '../../firebase/firestore';
 import ItemCategoryFilter from '../search/ItemCategoryFilter';
+import { useNavigate } from 'react-router-dom';
 
 function MerchantList() {
+  const navigate = useNavigate();
   const [merchants, setMerchants] = useState([]);
   const [filteredMerchants, setFilteredMerchants] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('全部');
+  // 修改為數組以支持多選
+  const [selectedCategories, setSelectedCategories] = useState(['全部']);
   const [error, setError] = useState(null);
   const [copyMessage, setCopyMessage] = useState(null);
   
@@ -63,13 +66,16 @@ function MerchantList() {
     let results = JSON.parse(JSON.stringify(merchants));
     
     // 類別篩選
-    if (selectedCategory !== '全部') {
+    // 如果選擇了「全部」類別或沒有選擇任何類別，則不進行類別篩選
+    if (!selectedCategories.includes('全部') && selectedCategories.length > 0) {
       results = results.filter(merchant => 
-        merchant.items && merchant.items.some(item => 
-          (item.itemName && item.itemName.includes(selectedCategory)) || 
-          (item.category && item.category.includes(selectedCategory)) ||
-          (selectedCategory === '其他' && (!item.category || item.category === '其他'))
-        )
+        merchant.items && merchant.items.some(item => {
+          // 檢查項目是否匹配任何已選擇的類別
+          return selectedCategories.some(selectedCategory => 
+            (item.itemName && item.itemName.includes(selectedCategory)) || 
+            (item.category && item.category.includes(selectedCategory))
+          );
+        })
       );
     }
     
@@ -161,14 +167,15 @@ function MerchantList() {
     }
     
     setFilteredMerchants(results);
-  }, [merchants, searchTerm, selectedCategory, showRegularMerchants, showSpecialMerchants, sortOption]);
+  }, [merchants, searchTerm, selectedCategories, showRegularMerchants, showSpecialMerchants, sortOption]);
 
   const handleSearchChange = (e) => {
     setSearchTerm(e.target.value);
   };
 
-  const handleCategorySelect = (category) => {
-    setSelectedCategory(category);
+  // 更新類別選擇處理函數以支持多選
+  const handleCategorySelect = (categories) => {
+    setSelectedCategories(categories);
   };
   
   const handleSortChange = (e) => {
@@ -197,10 +204,10 @@ function MerchantList() {
   return (
     <div className="merchant-list-container">
         {copyMessage && (
-  <div className="copy-message">
-    {copyMessage}
-  </div>
-)}
+          <div className="copy-message">
+            {copyMessage}
+          </div>
+        )}
       <div className="search-filter-section">
         <div className="search-input-container">
           <input
@@ -251,7 +258,7 @@ function MerchantList() {
         
         <ItemCategoryFilter 
           onCategorySelect={handleCategorySelect}
-          selectedCategory={selectedCategory}
+          selectedCategories={selectedCategories}
         />
       </div>
 
@@ -261,7 +268,7 @@ function MerchantList() {
         <div className="loading-indicator">載入中...</div>
       ) : filteredMerchants.length === 0 ? (
         <div className="no-results">
-          {searchTerm || selectedCategory !== '全部' ? 
+          {searchTerm || !selectedCategories.includes('全部') ? 
             `沒有符合條件的商人資訊。` : 
             `目前沒有商人資訊，請添加商人。`}
         </div>
@@ -354,6 +361,17 @@ function MerchantList() {
                     </p>
                   </div>
                 </div>
+                {localStorage.getItem('submitterPlayerId') === merchant.playerId && (
+  <div className="edit-controls">
+    <button 
+      className="edit-btn"
+      onClick={() => navigate(`/edit-merchant/${merchant.id}`)}
+      title="編輯商人資訊"
+    >
+      <span className="edit-icon">✏️</span> 編輯
+    </button>
+  </div>
+)}
               </div>
             );
           }).filter(Boolean)}

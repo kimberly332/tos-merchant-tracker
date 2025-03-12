@@ -67,6 +67,71 @@ export const addMerchant = async (merchantData) => {
   }
 };
 
+// src/firebase/firestore.js - Add these functions
+
+// Update an existing merchant
+export const updateMerchant = async (merchantId, updatedData) => {
+    try {
+      // Import needed functions
+      const { doc, updateDoc } = await import('firebase/firestore');
+      
+      // Reference to the merchant document
+      const merchantRef = doc(db, 'merchants', merchantId);
+      
+      // Update the document
+      await updateDoc(merchantRef, updatedData);
+      
+      return { success: true };
+    } catch (error) {
+      console.error('Error updating merchant:', error);
+      return { success: false, error };
+    }
+  };
+  
+  // Get a single merchant by ID
+  export const getMerchantById = async (merchantId) => {
+    try {
+        // Import needed functions
+        const { doc, getDoc } = await import('firebase/firestore');
+        
+        // Reference to the merchant document
+        const merchantRef = doc(db, 'merchants', merchantId);
+        
+        // Get the document
+        const merchantSnap = await getDoc(merchantRef);
+        
+        if (merchantSnap.exists()) {
+          const data = merchantSnap.data();
+          
+          // Format data similar to getAllMerchants output
+          const merchantData = {
+            id: merchantSnap.id,
+            playerId: data.playerId || '未知玩家',
+            items: data.items || [],
+            timestamp: data.timestamp?.toDate() || new Date(),
+            discount: data.discount || null,
+            expiresAt: data.expiresAt?.toDate() || getTaiwanEndOfDay()
+          };
+          
+          // Add special merchant info if applicable
+          if (data.isSpecialMerchant) {
+            merchantData.isSpecialMerchant = true;
+            merchantData.location = data.location;
+            merchantData.exchangeRate = data.exchangeRate;
+            merchantData.totalAmount = data.totalAmount;
+            merchantData.notes = data.notes;
+          }
+          
+          return merchantData;
+        } else {
+          throw new Error('Merchant not found');
+        }
+      } catch (error) {
+        console.error('Error fetching merchant:', error);
+        throw error;
+      }
+  };
+
 // Add special merchant data (for family token merchants)
 export const addSpecialMerchant = async (merchantData) => {
   try {

@@ -36,6 +36,7 @@ function SpecialMerchantForm() {
     try {
       const result = await addSpecialMerchant(processedData);
       if (result.success) {
+        localStorage.setItem('submitterPlayerId', formData.playerId);
         setSubmitResult({ 
           success: true, 
           message: '五商資訊已成功提交！謝謝您的分享。' 

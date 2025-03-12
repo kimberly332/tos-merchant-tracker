@@ -7,11 +7,12 @@ function ItemSearch() {
   const [searchResults, setSearchResults] = useState([]);
   const [searching, setSearching] = useState(false);
   const [searchPerformed, setSearchPerformed] = useState(false);
-  const [selectedCategory, setSelectedCategory] = useState('全部');
+  // 修改為數組以支持多選
+  const [selectedCategories, setSelectedCategories] = useState(['全部']);
   const [copyMessage, setCopyMessage] = useState(null);
 
   // 複製到剪貼板的函數
-const copyToClipboard = (text) => {
+  const copyToClipboard = (text) => {
     navigator.clipboard.writeText(text)
       .then(() => {
         // 顯示提示訊息
@@ -49,19 +50,26 @@ const copyToClipboard = (text) => {
     }
   };
   
-  const handleCategorySelect = (category) => {
-    setSelectedCategory(category);
+  // 更新類別選擇處理函數以支持多選
+  const handleCategorySelect = (categories) => {
+    setSelectedCategories(categories);
   };
   
-  // Filter results by category if needed
+  // Filter results by categories if needed
   const filteredResults = searchResults.filter(merchant => {
-    if (selectedCategory === '全部') return true;
+    // 如果選擇了「全部」類別或沒有選擇任何類別，則不進行類別篩選
+    if (selectedCategories.includes('全部') || selectedCategories.length === 0) {
+      return true;
+    }
     
+    // 檢查商人是否有任何項目匹配已選擇的類別
     return merchant.items.some(item => 
-      item.category === selectedCategory || 
-      item.itemName === selectedCategory || 
-      // Handle case when items don't have categories in older data
-      (selectedCategory === '其他' && !item.category)
+      selectedCategories.some(selectedCategory => 
+        item.category === selectedCategory || 
+        item.itemName === selectedCategory || 
+        // Handle case when items don't have categories in older data
+        (selectedCategory === '其他' && !item.category)
+      )
     );
   });
 
@@ -83,10 +91,10 @@ const copyToClipboard = (text) => {
   return (
     <div className="item-search-container">
         {copyMessage && (
-  <div className="copy-message">
-    {copyMessage}
-  </div>
-)}
+          <div className="copy-message">
+            {copyMessage}
+          </div>
+        )}
       <form onSubmit={handleSubmit} className="search-form">
         <div className="search-input-container">
           <input
@@ -109,11 +117,17 @@ const copyToClipboard = (text) => {
           
           {searchPerformed && <ItemCategoryFilter 
             onCategorySelect={handleCategorySelect}
-            selectedCategory={selectedCategory}
+            selectedCategories={selectedCategories}
           />}
           
           {(filteredResults.length === 0 && searchPerformed) ? (
-            <p className="no-results">無法找到符合「{searchTerm}」{selectedCategory !== '全部' ? `和類別「${selectedCategory}」` : ''}的商人資訊。</p>
+            <p className="no-results">
+              無法找到符合「{searchTerm}」
+              {!selectedCategories.includes('全部') ? 
+                `和選定類別 ${selectedCategories.join(', ')} ` : 
+                ''}
+              的商人資訊。
+            </p>
           ) : (
             <div className="results-list">
               {filteredResults.map((merchant, index) => {
@@ -125,13 +139,13 @@ const copyToClipboard = (text) => {
                 return (
                   <div key={index} className={`merchant-item ${merchant.isSpecialMerchant ? 'special-merchant' : ''}`}>
                     <div className="merchant-header">
-                    <p 
-  className="player-info-copy" 
-  onClick={() => copyToClipboard(merchant.playerId)}
-  title="點擊複製玩家ID"
->
-  {merchant.playerId} 提供 <span className="copy-icon">📋</span>
-</p>
+                      <p 
+                        className="player-info-copy" 
+                        onClick={() => copyToClipboard(merchant.playerId)}
+                        title="點擊複製玩家ID"
+                      >
+                        {merchant.playerId} 提供 <span className="copy-icon">📋</span>
+                      </p>
                       {merchant.discount && (
                         <p className="discount-info">今日折扣: {merchant.discount}</p>
                       )}
