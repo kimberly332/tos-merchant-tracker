@@ -1,18 +1,41 @@
 import React, { useState, useEffect } from 'react';
 import { getAllMerchants } from '../../firebase/firestore';
+import ItemCategoryFilter from '../search/ItemCategoryFilter';
+import { useNavigate } from 'react-router-dom';
 
 function MerchantList() {
+  const navigate = useNavigate();
   const [merchants, setMerchants] = useState([]);
   const [filteredMerchants, setFilteredMerchants] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('全部');
+  // 修改為數組以支持多選
+  const [selectedCategories, setSelectedCategories] = useState(['全部']);
+  const [error, setError] = useState(null);
+  const [copyMessage, setCopyMessage] = useState(null);
+  
+  // 排序選項 - 默認為五商優先
+  const [sortOption, setSortOption] = useState('specialMerchantFirst');
+
+  // 篩選選項
+  const [showRegularMerchants, setShowRegularMerchants] = useState(true);
   const [showSpecialMerchants, setShowSpecialMerchants] = useState(true);
-  const [sortOption, setSortOption] = useState('五商優先');
+
+  // Add the copyToClipboard function here, after all state variables
+  const copyToClipboard = (text) => {
+    navigator.clipboard.writeText(text)
+      .then(() => {
+        setCopyMessage(`已複製: ${text}`);
+        setTimeout(() => setCopyMessage(null), 3000);
+      })
+      .catch(err => {
+        console.error('無法複製文本: ', err);
+        setCopyMessage('複製失敗，請手動複製');
+        setTimeout(() => setCopyMessage(null), 3000);
+      });
+  };
   
-  const categories = ['全部', '家園幣', '食品原料', '調味品', '飲料'];
-  
-  // Fetch merchants
+  // 獲取所有商人數據
   useEffect(() => {
     const fetchMerchants = async () => {
       setLoading(true);
@@ -20,168 +43,328 @@ function MerchantList() {
         const data = await getAllMerchants();
         setMerchants(data);
         setFilteredMerchants(data);
-      } catch (error) {
-        console.error('Error fetching merchants:', error);
+      } catch (err) {
+        console.error('Error fetching merchants:', err);
+        setError('獲取商人資訊時發生錯誤，請稍後再試。');
       } finally {
         setLoading(false);
       }
     };
-    
+
     fetchMerchants();
   }, []);
-  
-  // Handle search input change
+
+  // 搜尋、篩選和排序
+  useEffect(() => {
+    // 確保有商人數據才進行處理
+    if (!merchants || merchants.length === 0) {
+      setFilteredMerchants([]);
+      return;
+    }
+    
+    // 創建商人數據的深拷貝
+    let results = JSON.parse(JSON.stringify(merchants));
+    
+    // 類別篩選
+    // 如果選擇了「全部」類別或沒有選擇任何類別，則不進行類別篩選
+    if (!selectedCategories.includes('全部') && selectedCategories.length > 0) {
+      results = results.filter(merchant => 
+        merchant.items && merchant.items.some(item => {
+          // 檢查項目是否匹配任何已選擇的類別
+          return selectedCategories.some(selectedCategory => 
+            (item.itemName && item.itemName.includes(selectedCategory)) || 
+            (item.category && item.category.includes(selectedCategory))
+          );
+        })
+      );
+    }
+    
+    // 搜尋關鍵詞
+    if (searchTerm.trim()) {
+      const term = searchTerm.toLowerCase();
+      results = results.filter(merchant =>
+        // 搜尋商人基本信息
+        (merchant.serverName && merchant.serverName.toLowerCase().includes(term)) ||
+        (merchant.playerId && merchant.playerId.toLowerCase().includes(term)) ||
+        (merchant.guildName && merchant.guildName.toLowerCase().includes(term)) ||
+        // 搜尋物品相關信息
+        (merchant.items && merchant.items.some(item => 
+          (item.itemName && item.itemName.toLowerCase().includes(term)) ||
+          (item.category && item.category.toLowerCase().includes(term)) ||
+          (item.exchangeItemName && item.exchangeItemName.toLowerCase().includes(term))
+        ))
+      );
+    }
+    
+    // 商人類型篩選
+    results = results.filter(merchant => 
+      (showRegularMerchants && !merchant.isSpecialMerchant) || 
+      (showSpecialMerchants && merchant.isSpecialMerchant)
+    );
+    
+    // 排序
+    switch (sortOption) {
+      case 'newest':
+        // 先根據是否為五商排序，再根據時間
+        results.sort((a, b) => {
+          // 如果 a 是五商而 b 不是，a 應該在前面
+          if (a.isSpecialMerchant && !b.isSpecialMerchant) return -1;
+          // 如果 b 是五商而 a 不是，b 應該在前面
+          if (!a.isSpecialMerchant && b.isSpecialMerchant) return 1;
+          // 如果兩者都是五商或都不是五商，則按時間排序
+          return new Date(b.timestamp) - new Date(a.timestamp);
+        });
+        break;
+      case 'oldest':
+        results.sort((a, b) => {
+          // 五商優先
+          if (a.isSpecialMerchant && !b.isSpecialMerchant) return -1;
+          if (!a.isSpecialMerchant && b.isSpecialMerchant) return 1;
+          // 時間排序
+          return new Date(a.timestamp) - new Date(b.timestamp);
+        });
+        break;
+      case 'priceAsc':
+        results.sort((a, b) => {
+          // 五商優先
+          if (a.isSpecialMerchant && !b.isSpecialMerchant) return -1;
+          if (!a.isSpecialMerchant && b.isSpecialMerchant) return 1;
+          // 價格排序
+          const aPrice = Math.min(...a.items.filter(i => i.price && i.price > 0).map(i => i.price) || [0]);
+          const bPrice = Math.min(...b.items.filter(i => i.price && i.price > 0).map(i => i.price) || [0]);
+          return aPrice - bPrice;
+        });
+        break;
+      case 'priceDesc':
+        results.sort((a, b) => {
+          // 五商優先
+          if (a.isSpecialMerchant && !b.isSpecialMerchant) return -1;
+          if (!a.isSpecialMerchant && b.isSpecialMerchant) return 1;
+          // 價格排序
+          const aPrice = Math.max(...a.items.filter(i => i.price && i.price > 0).map(i => i.price) || [0]);
+          const bPrice = Math.max(...b.items.filter(i => i.price && i.price > 0).map(i => i.price) || [0]);
+          return bPrice - aPrice;
+        });
+        break;
+      case 'specialMerchantFirst':
+        // 專門的五商優先排序選項
+        results.sort((a, b) => {
+          if (a.isSpecialMerchant && !b.isSpecialMerchant) return -1;
+          if (!a.isSpecialMerchant && b.isSpecialMerchant) return 1;
+          // 如果都是五商或都不是五商，則按時間排序
+          return new Date(b.timestamp) - new Date(a.timestamp);
+        });
+        break;
+      default:
+        // 默認也是五商優先
+        results.sort((a, b) => {
+          if (a.isSpecialMerchant && !b.isSpecialMerchant) return -1;
+          if (!a.isSpecialMerchant && b.isSpecialMerchant) return 1;
+          return new Date(b.timestamp) - new Date(a.timestamp);
+        });
+        break;
+    }
+    
+    setFilteredMerchants(results);
+  }, [merchants, searchTerm, selectedCategories, showRegularMerchants, showSpecialMerchants, sortOption]);
+
   const handleSearchChange = (e) => {
     setSearchTerm(e.target.value);
   };
-  
-  // Handle search form submission
-  const handleSearchSubmit = (e) => {
-    e.preventDefault();
-    // Filter merchants based on search term
-    filterMerchants();
+
+  // 更新類別選擇處理函數以支持多選
+  const handleCategorySelect = (categories) => {
+    setSelectedCategories(categories);
   };
   
-  // Filter merchants based on all criteria
-  const filterMerchants = () => {
-    let filtered = [...merchants];
-    
-    // Filter by search term
-    if (searchTerm) {
-      const term = searchTerm.toLowerCase();
-      filtered = filtered.filter(merchant => 
-        merchant.playerId.toLowerCase().includes(term) ||
-        merchant.items.some(item => 
-          item.itemName.toLowerCase().includes(term)
-        )
-      );
-    }
-    
-    // Filter by category
-    if (selectedCategory !== '全部') {
-      filtered = filtered.filter(merchant =>
-        merchant.items.some(item => 
-          item.category === selectedCategory || item.itemName === selectedCategory
-        )
-      );
-    }
-    
-    // Filter by merchant type
-    if (!showSpecialMerchants) {
-      filtered = filtered.filter(merchant => !merchant.isSpecialMerchant);
-    }
-    
-    // Sort merchants
-    if (sortOption === '五商優先') {
-      filtered.sort((a, b) => {
-        if (a.isSpecialMerchant && !b.isSpecialMerchant) return -1;
-        if (!a.isSpecialMerchant && b.isSpecialMerchant) return 1;
-        return 0;
-      });
-    }
-    
-    setFilteredMerchants(filtered);
+  const handleSortChange = (e) => {
+    setSortOption(e.target.value);
   };
-  
+
+  // Format timestamp to a readable date and time
+  const formatTimestamp = (timestamp) => {
+    if (!timestamp) return '未知時間';
+    
+    const date = new Date(timestamp);
+    
+    return date.toLocaleString('zh-TW', {
+      year: 'numeric',
+      month: 'numeric',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  };
+
+  // 計算五商數量和普通商人數量
+  const specialMerchantCount = filteredMerchants.filter(m => m.isSpecialMerchant).length;
+  const regularMerchantCount = filteredMerchants.filter(m => !m.isSpecialMerchant).length;
+
   return (
-    <div className="merchant-list">
-      <h1 className="page-title">搜尋商人</h1>
-      
-      <div className="search-container">
-        <form className="search-form" onSubmit={handleSearchSubmit}>
+    <div className="merchant-list-container">
+        {copyMessage && (
+          <div className="copy-message">
+            {copyMessage}
+          </div>
+        )}
+      <div className="search-filter-section">
+        <div className="search-input-container">
           <input
             type="text"
             value={searchTerm}
             onChange={handleSearchChange}
-            placeholder="搜尋物品、商人..."
+            placeholder="搜尋物品、商人、伺服器..."
             className="search-input"
           />
-          <button type="submit" className="search-button">搜尋</button>
-        </form>
-        
-        <div className="filter-pills">
-          {categories.map(category => (
-            <button
-              key={category}
-              className={`filter-pill ${selectedCategory === category ? 'active' : ''}`}
-              onClick={() => setSelectedCategory(category)}
-            >
-              {category}
-            </button>
-          ))}
         </div>
         
-        <div className="filter-row">
+        <div className="filter-options">
           <div className="merchant-type-filter">
-            <input
-              type="checkbox"
-              id="special-merchant-filter"
-              checked={showSpecialMerchants}
-              onChange={() => setShowSpecialMerchants(!showSpecialMerchants)}
-            />
-            <label htmlFor="special-merchant-filter">五商</label>
+            <label className="filter-label">
+              <input
+                type="checkbox"
+                checked={showSpecialMerchants}
+                onChange={() => setShowSpecialMerchants(!showSpecialMerchants)}
+              />
+              顯示五商 ({specialMerchantCount})
+            </label>
+            <label className="filter-label">
+              <input
+                type="checkbox"
+                checked={showRegularMerchants}
+                onChange={() => setShowRegularMerchants(!showRegularMerchants)}
+              />
+              顯示普通商人 ({regularMerchantCount})
+            </label>
           </div>
           
-          <select
-            className="sort-dropdown"
-            value={sortOption}
-            onChange={(e) => setSortOption(e.target.value)}
-          >
-            <option value="五商優先">五商優先</option>
-            <option value="最新發布">最新發布</option>
-            <option value="價格低到高">價格低到高</option>
-          </select>
+          <div className="sort-options">
+            <label htmlFor="sort-select">排序方式:</label>
+            <select 
+              id="sort-select" 
+              value={sortOption} 
+              onChange={handleSortChange}
+              className="sort-select"
+            >
+              <option value="specialMerchantFirst">五商優先</option>
+              <option value="newest">最新發布</option>
+              <option value="oldest">最早發布</option>
+              <option value="priceAsc">價格低到高</option>
+              <option value="priceDesc">價格高到低</option>
+            </select>
+          </div>
         </div>
+        
+        <ItemCategoryFilter 
+          onCategorySelect={handleCategorySelect}
+          selectedCategories={selectedCategories}
+        />
       </div>
+
+      {error && <div className="error-message">{error}</div>}
       
       {loading ? (
-        <div className="loading">載入中...</div>
+        <div className="loading-indicator">載入中...</div>
       ) : filteredMerchants.length === 0 ? (
-        <div className="no-results">無符合條件的商人</div>
+        <div className="no-results">
+          {searchTerm || !selectedCategories.includes('全部') ? 
+            `沒有符合條件的商人資訊。` : 
+            `目前沒有商人資訊，請添加商人。`}
+        </div>
       ) : (
-        <div className="merchant-cards">
-          {filteredMerchants.map((merchant, index) => (
-            <div 
-              key={index}
-              className={`merchant-card ${merchant.isSpecialMerchant ? 'special-merchant-card' : 'regular-merchant-card'}`}
-            >
-              <div className="merchant-header">
-                <div className="merchant-id">玩家ID: {merchant.playerId}</div>
+        <div className="merchants-grid">
+          {filteredMerchants.map((merchant, index) => {
+            const remainingTime = true; // 保留這個變數但改變其用途，僅用於檢查項目是否已過期
+            
+            // Skip if expired
+            if (!merchant.expiresAt || new Date() > new Date(merchant.expiresAt)) return null;
+            
+            return (
+              <div key={index} className={`merchant-card ${merchant.isSpecialMerchant ? 'special-merchant-card' : ''}`}>
+                <div className="merchant-header">
+                <div className="merchant-title">
+                <h3 
+                    className="player-id-copy" 
+                    onClick={() => copyToClipboard(merchant.playerId)}
+                    title="點擊複製玩家ID"
+                >
+                    {merchant.playerId} 提供 <span className="copy-icon">📋</span>
+                </h3>
                 {merchant.isSpecialMerchant && (
-                  <div className="merchant-badge">五商</div>
+                    <span className="special-merchant-badge">五商</span>
+                )}
+                </div>
+                  {merchant.discount && (
+                    <p className="discount-info">折扣: {merchant.discount}</p>
+                  )}
+                </div>
+                
+                {/* Removed special merchant info section with location, exchangeRate, and totalAmount */}
+                
+                {merchant.items && merchant.items.length > 0 ? (
+                  <div className="items-section">
+                    <h4>販售物品:</h4>
+                    <ul className="items-list">
+                      {merchant.items.map((item, itemIndex) => (
+                        <li key={itemIndex} className="item">
+                          <div className="item-name-container">
+                            <span className="item-name">{item.itemName || '未知物品'}</span>
+                            {item.quantity > 1 && (
+                              <span className="item-quantity">x{item.quantity}</span>
+                            )}
+                          </div>
+                          
+                          <div className="item-details">
+                            {item.category && item.category !== '其他' && item.category !== item.itemName && (
+                              <span className="item-category">{item.category}</span>
+                            )}
+                            
+                            {/* 價格顯示，如果允許家園幣交易 */}
+                            {(item.allowsCoinExchange || typeof item.allowsCoinExchange === 'undefined') && item.price > 0 && (
+                              <div className="price-tag">
+                                <span className="coin-icon">💰</span>
+                                <span>{item.price}</span>
+                              </div>
+                            )}
+                            
+                            {/* 交換物品顯示，如果允許以物易物交易 */}
+                            {item.allowsBarterExchange && item.exchangeItemName && (
+                              <div className="exchange-tag">
+                                <span className="exchange-icon">🔄</span>
+                                <span>{item.exchangeQuantity || 1} {item.exchangeItemName}</span>
+                              </div>
+                            )}
+                          </div>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ) : (
+                  <div className="no-items">此商人沒有物品信息</div>
+                )}
+                
+                <div className="merchant-footer">
+                  <div className="time-info">
+                    <p className="submission-time">
+                      <span className="time-label">提交時間:</span>
+                      <span>{formatTimestamp(merchant.timestamp)}</span>
+                    </p>
+                  </div>
+                </div>
+                {localStorage.getItem('submitterPlayerId') === merchant.playerId && (
+                  <div className="edit-controls">
+                    <button 
+                      className="edit-btn"
+                      onClick={() => navigate(`/edit-merchant/${merchant.id}`)}
+                      title="編輯商人資訊"
+                    >
+                      <span className="edit-icon">✏️</span> 編輯
+                    </button>
+                  </div>
                 )}
               </div>
-              
-              <div className="merchant-items">
-                {merchant.items.map((item, itemIndex) => (
-                  <div key={itemIndex} className="item-row">
-                    <div className="item-name">{item.itemName}</div>
-                    <div className="item-quantity">x{item.quantity}</div>
-                  </div>
-                ))}
-                
-                {merchant.items.map((item, itemIndex) => (
-                  <div key={`tag-${itemIndex}`} className="item-tags">
-                    {item.allowsCoinExchange && (
-                      <div className="item-tag price-tag">
-                        💰 價格: {item.price}
-                      </div>
-                    )}
-                    
-                    {item.allowsBarterExchange && (
-                      <div className="item-tag exchange-tag">
-                        🔄 交換: {item.exchangeQuantity} {item.exchangeItemName}
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-              
-              <div className="merchant-footer">
-                提交時間: {new Date(merchant.timestamp).toLocaleString()}
-              </div>
-            </div>
-          ))}
+            );
+          }).filter(Boolean)}
         </div>
       )}
     </div>

@@ -1,0 +1,319 @@
+/* Form styles */
+
+.merchant-form-container, .special-merchant-form-container {
+    max-width: 800px;
+    margin: 0 auto;
+    background-color: white;
+    border-radius: var(--border-radius);
+    padding: 2rem;
+    box-shadow: var(--box-shadow);
+  }
+  
+  .merchant-form, .special-merchant-form {
+    display: grid;
+    gap: 1.5rem;
+  }
+  
+  .form-group {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .form-group label {
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+  }
+  
+  .form-group input, 
+  .form-group select, 
+  .form-group textarea {
+    padding: 0.8rem;
+    border: 1px solid var(--gray-medium);
+    border-radius: var(--border-radius);
+    font-size: 1rem;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  
+  .form-group input:focus, 
+  .form-group select:focus, 
+  .form-group textarea:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.2);
+    outline: none;
+  }
+  
+  .form-group small {
+    margin-top: 0.3rem;
+    color: var(--text-light);
+    font-size: 0.8rem;
+  }
+  
+  .item-entry-container {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    padding: 1.5rem;
+    background-color: var(--gray-light);
+    border-radius: var(--border-radius);
+    position: relative;
+  }
+  
+  .item-section-title {
+    margin-bottom: 1rem;
+    font-size: 1rem;
+    color: var(--text-primary);
+  }
+  
+  .item-entry, .barter-item-entry {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+  }
+  
+  .exchange-options {
+    display: flex;
+    gap: 1.5rem;
+    margin-bottom: 1rem;
+  }
+  
+  .exchange-option {
+    display: flex;
+    align-items: center;
+    font-weight: 500;
+    cursor: pointer;
+  }
+  
+  .exchange-option input {
+    margin-right: 0.5rem;
+    width: 18px;
+    height: 18px;
+    accent-color: var(--primary-color);
+  }
+  
+  .required-tag {
+    background-color: var(--accent-color);
+    color: white;
+    padding: 0.1rem 0.4rem;
+    border-radius: 4px;
+    font-size: 0.7rem;
+    margin-left: 0.5rem;
+  }
+  
+  .remove-item-btn {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background-color: var(--error-light);
+    color: var(--error-color);
+    border: none;
+    border-radius: 4px;
+    padding: 0.4rem 0.8rem;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: background-color 0.2s;
+  }
+  
+  .remove-item-btn:hover {
+    background-color: var(--error-color);
+    color: white;
+  }
+  
+  .add-item-btn {
+    background-color: var(--primary-light);
+    color: var(--primary-color);
+    border: 1px dashed var(--primary-color);
+    border-radius: var(--border-radius);
+    padding: 0.8rem;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    margin-bottom: 1.5rem;
+  }
+  
+  .add-item-btn:hover {
+    background-color: rgba(74, 144, 226, 0.2);
+  }
+  
+  .submit-btn {
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: var(--border-radius);
+    padding: 1rem;
+    font-size: 1.1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s;
+  }
+  
+  .submit-btn:hover {
+    background-color: var(--primary-dark);
+  }
+  
+  .submit-btn:disabled {
+    background-color: var(--gray-dark);
+    cursor: not-allowed;
+  }
+  
+  .submit-result {
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+    border-radius: var(--border-radius);
+    text-align: center;
+    font-weight: 500;
+  }
+  
+  .submit-result.success {
+    background-color: var(--success-light);
+    color: var(--success-color);
+  }
+  
+  .submit-result.error {
+    background-color: var(--error-light);
+    color: var(--error-color);
+  }
+  
+  /* Responsive form layouts */
+  @media (max-width: 768px) {
+    .item-entry, .barter-item-entry {
+      grid-template-columns: 1fr;
+    }
+    
+    .item-entry-container {
+      padding: 1rem;
+    }
+    
+    .remove-item-btn {
+      top: 0.5rem;
+      right: 0.5rem;
+    }
+    
+    .exchange-options {
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+  }
+
+  /* Edit functionality styles - Add to styles/forms.css */
+
+/* Edit controls on merchant cards */
+.edit-controls {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 1rem;
+    padding-top: 0.8rem;
+    border-top: 1px solid var(--gray-medium);
+  }
+  
+  .edit-btn {
+    background-color: var(--primary-light);
+    color: var(--primary-color);
+    border: 1px solid var(--primary-color);
+    border-radius: var(--border-radius);
+    padding: 0.4rem 0.8rem;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+  
+  .edit-btn:hover {
+    background-color: var(--primary-color);
+    color: white;
+  }
+  
+  .edit-icon {
+    font-size: 1rem;
+  }
+  
+  /* Edit form specific styles */
+  .edit-description {
+    margin-bottom: 1.5rem;
+    padding: 1rem;
+    background-color: var(--primary-light);
+    border-radius: var(--border-radius);
+    border-left: 3px solid var(--primary-color);
+    color: var(--primary-dark);
+    font-size: 0.95rem;
+  }
+  
+  .form-buttons {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1.5rem;
+  }
+  
+  .cancel-btn {
+    background-color: var(--gray-light);
+    color: var(--text-secondary);
+    border: 1px solid var(--gray-medium);
+    border-radius: var(--border-radius);
+    padding: 1rem;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    flex: 1;
+  }
+  
+  .cancel-btn:hover {
+    background-color: var(--gray-medium);
+    color: var(--text-primary);
+  }
+  
+  .form-buttons .submit-btn {
+    flex: 2;
+  }
+  
+  /* Unauthorized message styles */
+  .unauthorized-message {
+    text-align: center;
+    padding: 2rem;
+    background-color: white;
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
+    margin: 2rem auto;
+    max-width: 600px;
+  }
+  
+  .unauthorized-message h2 {
+    color: var(--error-color);
+    margin-bottom: 1rem;
+  }
+  
+  .unauthorized-message p {
+    margin-bottom: 1.5rem;
+    color: var(--text-secondary);
+  }
+  
+  .back-btn {
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: var(--border-radius);
+    padding: 0.8rem 1.5rem;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s;
+  }
+  
+  .back-btn:hover {
+    background-color: var(--primary-dark);
+  }
+  
+  /* Responsive adjustments */
+  @media (max-width: 768px) {
+    .form-buttons {
+      flex-direction: column;
+    }
+    
+    .cancel-btn, .form-buttons .submit-btn {
+      flex: 1;
+    }
+  }

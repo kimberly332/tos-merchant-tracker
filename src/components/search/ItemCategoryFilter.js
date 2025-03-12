@@ -1,6 +1,7 @@
 import React from 'react';
 
 function ItemCategoryFilter({ onCategorySelect, selectedCategories }) {
+  // Categories list from the image
   const categories = [
     '全部', // All categories
     '女神', 
@@ -38,28 +39,38 @@ function ItemCategoryFilter({ onCategorySelect, selectedCategories }) {
     '家園幣', 
   ];
 
+  // 處理類別的選擇和取消選擇
   const handleCategoryToggle = (category) => {
+    // 如果點擊的是「全部」類別
     if (category === '全部') {
+      // 如果目前已選擇「全部」，則取消所有選擇
       if (selectedCategories.includes('全部')) {
         onCategorySelect([]);
       } else {
+        // 否則選擇「全部」，並取消其他所有選擇
         onCategorySelect(['全部']);
       }
       return;
     }
     
+    // 處理其他類別的選擇
     let newSelectedCategories = [...selectedCategories];
     
+    // 如果已經選擇了「全部」，需要先取消它
     if (newSelectedCategories.includes('全部')) {
       newSelectedCategories = newSelectedCategories.filter(c => c !== '全部');
     }
     
+    // 切換當前類別的選擇狀態
     if (newSelectedCategories.includes(category)) {
+      // 取消選擇
       newSelectedCategories = newSelectedCategories.filter(c => c !== category);
     } else {
+      // 增加選擇
       newSelectedCategories.push(category);
     }
     
+    // 如果沒有選擇任何類別，自動選擇「全部」
     if (newSelectedCategories.length === 0) {
       newSelectedCategories = ['全部'];
     }
