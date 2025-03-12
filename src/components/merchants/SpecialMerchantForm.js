@@ -5,10 +5,8 @@ function SpecialMerchantForm() {
   const [formData, setFormData] = useState({
     playerId: '',
     // serverName: '',
-    location: '',
-    exchangeRate: '',
-    totalAmount: '',
     notes: ''
+    // Removed: location, exchangeRate, totalAmount
   });
   const [submitting, setSubmitting] = useState(false);
   const [submitResult, setSubmitResult] = useState(null);
@@ -26,15 +24,8 @@ function SpecialMerchantForm() {
     setSubmitting(true);
     setSubmitResult(null);
 
-    // Convert numeric fields
-    const processedData = {
-      ...formData,
-      exchangeRate: Number(formData.exchangeRate),
-      totalAmount: formData.totalAmount ? Number(formData.totalAmount) : null
-    };
-
     try {
-      const result = await addSpecialMerchant(processedData);
+      const result = await addSpecialMerchant(formData);
       if (result.success) {
         localStorage.setItem('submitterPlayerId', formData.playerId);
         setSubmitResult({ 
@@ -45,10 +36,6 @@ function SpecialMerchantForm() {
         // Reset form
         setFormData({
           playerId: '',
-          serverName: '',
-          location: '',
-          exchangeRate: '',
-          totalAmount: '',
           notes: ''
         });
       } else {
@@ -89,59 +76,7 @@ function SpecialMerchantForm() {
           />
         </div>
         
-        {/* <div className="form-group">
-          <label htmlFor="serverName">伺服器名稱</label>
-          <input
-            type="text"
-            id="serverName"
-            name="serverName"
-            value={formData.serverName}
-            onChange={handleChange}
-            required
-          />
-        </div> */}
-        
-        <div className="form-group">
-          <label htmlFor="location">五商位置</label>
-          <input
-            type="text"
-            id="location"
-            name="location"
-            value={formData.location}
-            onChange={handleChange}
-            required
-            placeholder="例如：克雷亞城 東北區"
-          />
-        </div>
-        
-        <div className="form-group">
-          <label htmlFor="exchangeRate">兌換比率</label>
-          <input
-            type="number"
-            id="exchangeRate"
-            name="exchangeRate"
-            value={formData.exchangeRate}
-            onChange={handleChange}
-            required
-            min="1"
-            placeholder="例如：1.2"
-          />
-          <small>1 家園幣能兌換多少銀幣</small>
-        </div>
-        
-        <div className="form-group">
-          <label htmlFor="totalAmount">總交易額度</label>
-          <input
-            type="number"
-            id="totalAmount"
-            name="totalAmount"
-            value={formData.totalAmount}
-            onChange={handleChange}
-            min="1"
-            placeholder="可選填"
-          />
-          <small>此五商能兌換的家園幣總量</small>
-        </div>
+        {/* Removed location, exchangeRate, and totalAmount fields */}
         
         <div className="form-group">
           <label htmlFor="notes">備註</label>

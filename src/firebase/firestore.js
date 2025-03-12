@@ -67,8 +67,6 @@ export const addMerchant = async (merchantData) => {
   }
 };
 
-// src/firebase/firestore.js - Add these functions
-
 // Update an existing merchant
 export const updateMerchant = async (merchantId, updatedData) => {
     try {
@@ -88,49 +86,47 @@ export const updateMerchant = async (merchantId, updatedData) => {
     }
   };
   
-  // Get a single merchant by ID
-  export const getMerchantById = async (merchantId) => {
-    try {
-        // Import needed functions
-        const { doc, getDoc } = await import('firebase/firestore');
+// Get a single merchant by ID
+export const getMerchantById = async (merchantId) => {
+  try {
+      // Import needed functions
+      const { doc, getDoc } = await import('firebase/firestore');
+      
+      // Reference to the merchant document
+      const merchantRef = doc(db, 'merchants', merchantId);
+      
+      // Get the document
+      const merchantSnap = await getDoc(merchantRef);
+      
+      if (merchantSnap.exists()) {
+        const data = merchantSnap.data();
         
-        // Reference to the merchant document
-        const merchantRef = doc(db, 'merchants', merchantId);
+        // Format data similar to getAllMerchants output
+        const merchantData = {
+          id: merchantSnap.id,
+          playerId: data.playerId || '未知玩家',
+          items: data.items || [],
+          timestamp: data.timestamp?.toDate() || new Date(),
+          discount: data.discount || null,
+          expiresAt: data.expiresAt?.toDate() || getTaiwanEndOfDay()
+        };
         
-        // Get the document
-        const merchantSnap = await getDoc(merchantRef);
-        
-        if (merchantSnap.exists()) {
-          const data = merchantSnap.data();
-          
-          // Format data similar to getAllMerchants output
-          const merchantData = {
-            id: merchantSnap.id,
-            playerId: data.playerId || '未知玩家',
-            items: data.items || [],
-            timestamp: data.timestamp?.toDate() || new Date(),
-            discount: data.discount || null,
-            expiresAt: data.expiresAt?.toDate() || getTaiwanEndOfDay()
-          };
-          
-          // Add special merchant info if applicable
-          if (data.isSpecialMerchant) {
-            merchantData.isSpecialMerchant = true;
-            merchantData.location = data.location;
-            merchantData.exchangeRate = data.exchangeRate;
-            merchantData.totalAmount = data.totalAmount;
-            merchantData.notes = data.notes;
-          }
-          
-          return merchantData;
-        } else {
-          throw new Error('Merchant not found');
+        // Add special merchant info if applicable
+        if (data.isSpecialMerchant) {
+          merchantData.isSpecialMerchant = true;
+          // Removed the fields: location, exchangeRate, totalAmount
+          merchantData.notes = data.notes;
         }
-      } catch (error) {
-        console.error('Error fetching merchant:', error);
-        throw error;
+        
+        return merchantData;
+      } else {
+        throw new Error('Merchant not found');
       }
-  };
+    } catch (error) {
+      console.error('Error fetching merchant:', error);
+      throw error;
+    }
+};
 
 // Add special merchant data (for family token merchants)
 export const addSpecialMerchant = async (merchantData) => {
@@ -187,9 +183,7 @@ export const getAllMerchants = async (maxResults = 100) => {
       // Add special merchant info
       if (data.isSpecialMerchant) {
         merchantData.isSpecialMerchant = true;
-        merchantData.location = data.location;
-        merchantData.exchangeRate = data.exchangeRate;
-        merchantData.totalAmount = data.totalAmount;
+        // Removed the fields: location, exchangeRate, and totalAmount
         merchantData.notes = data.notes;
       }
       
@@ -238,9 +232,7 @@ export const searchItems = async (searchTerm) => {
         // Add special merchant data if available
         if (data.isSpecialMerchant) {
           commonData.isSpecialMerchant = true;
-          commonData.location = data.location;
-          commonData.exchangeRate = data.exchangeRate;
-          commonData.totalAmount = data.totalAmount;
+          // Removed the fields: location, exchangeRate, and totalAmount
           commonData.notes = data.notes;
         }
         

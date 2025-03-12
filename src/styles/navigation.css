@@ -335,3 +335,212 @@
       flex: 1;
     }
   }
+
+  /* Navigation styles */
+
+.navigation-bar {
+    background-color: var(--primary-color);
+    color: white;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 2rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+  }
+  
+  .logo a {
+    color: white;
+    font-size: 1.5rem;
+    font-weight: bold;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+  }
+  
+  .logo a img {
+    height: 32px;
+    margin-right: 10px;
+  }
+  
+  .nav-links {
+    display: flex;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  
+  .nav-links li {
+    margin-left: 1.5rem;
+  }
+  
+  .nav-links a {
+    color: white;
+    text-decoration: none;
+    font-weight: 500;
+    padding: 0.5rem 0.8rem;
+    border-radius: 4px;
+    transition: background-color 0.2s;
+  }
+  
+  .nav-links a:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+  }
+  
+  /* Mobile menu toggle */
+  .menu-toggle {
+    display: none;
+    flex-direction: column;
+    justify-content: space-between;
+    width: 30px;
+    height: 21px;
+    cursor: pointer;
+    background: none;
+    border: none;
+    padding: 0;
+    z-index: 10;
+  }
+  
+  .menu-toggle span {
+    width: 100%;
+    height: 3px;
+    background-color: white;
+    border-radius: 3px;
+    transition: all 0.3s ease;
+    transform-origin: left center;
+  }
+  
+  .menu-toggle span.rotate-down {
+    transform: rotate(45deg);
+    transform-origin: left center;
+  }
+  
+  .menu-toggle span.fade-out {
+    opacity: 0;
+    transform: translateX(15px);
+  }
+  
+  .menu-toggle span.rotate-up {
+    transform: rotate(-45deg);
+    transform-origin: left center;
+  }
+  
+  /* Responsive navigation */
+  @media (max-width: 768px) {
+    .navigation-bar {
+      padding: 1rem;
+      flex-wrap: wrap;
+    }
+    
+    .menu-toggle {
+      display: flex;
+    }
+    
+    .nav-links {
+      display: none;
+      flex-direction: column;
+      width: 100%;
+      background-color: var(--primary-color);
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      padding: 1rem;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    
+    .nav-links.show {
+      display: flex;
+    }
+    
+    .nav-links li {
+      margin: 0.5rem 0;
+      margin-left: 0;
+    }
+    
+    .nav-links a {
+      display: block;
+      width: 100%;
+      padding: 0.8rem;
+    }
+  }
+  
+  /* User identifier styles - Add to styles/navigation.css */
+  .user-identifier {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    margin-left: auto;
+    padding-left: 1.5rem;
+    border-left: 1px solid rgba(255, 255, 255, 0.2);
+  }
+  
+  .user-greeting {
+    color: white;
+    font-size: 0.9rem;
+  }
+  
+  .logout-btn {
+    background-color: rgba(255, 255, 255, 0.2);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 0.3rem 0.6rem;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: background-color 0.2s;
+  }
+  
+  .logout-btn:hover {
+    background-color: rgba(255, 255, 255, 0.3);
+  }
+  
+  /* Responsive adjustments */
+  @media (max-width: 768px) {
+    .user-identifier {
+      order: 3;
+      width: 100%;
+      margin-top: 0.5rem;
+      padding: 0.5rem 0 0;
+      border-left: none;
+      border-top: 1px solid rgba(255, 255, 255, 0.2);
+      justify-content: flex-end;
+    }
+  }
+  
+  /* Edit functionality styles - Add to styles/forms.css */
+  
+  /* Edit controls on merchant cards */
+  .edit-controls {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 1rem;
+    padding-top: 0.8rem;
+    border-top: 1px solid var(--gray-medium);
+  }
+  
+  .edit-btn {
+    background-color: var(--primary-light);
+    color: var(--primary-color);
+    border: 1px solid var(--primary-color);
+    border-radius: var(--border-radius);
+    padding: 0.4rem 0.8rem;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+  
+  .edit-btn:hover {
+    background-color: var(--primary-color);
+    color: white;
+  }
+  
+  .edit-icon {
+    font-size: 1rem;
+  }

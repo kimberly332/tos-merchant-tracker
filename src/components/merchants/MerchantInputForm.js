@@ -17,10 +17,8 @@ function MerchantInputForm() {
       exchangeItemName: '',
       customExchangeItem: '',
       exchangeQuantity: '1'
-    }],
-    location: '',
-    exchangeRate: '',
-    totalAmount: ''
+    }]
+    // Removed: location, exchangeRate, totalAmount
   });
   
   // State to track if current item is 家園幣
@@ -373,12 +371,6 @@ function MerchantInputForm() {
         exchangeItemName: item.exchangeItemName === '其他' ? item.customExchangeItem : item.exchangeItemName
       }))
     };
-    
-    // Convert special merchant fields if needed
-    if (isSpecialMerchant) {
-      processedData.exchangeRate = Number(formData.exchangeRate);
-      processedData.totalAmount = formData.totalAmount ? Number(formData.totalAmount) : null;
-    }
   
     try {
       const result = await addMerchant(processedData);
@@ -394,8 +386,6 @@ function MerchantInputForm() {
         // Reset form
         setFormData({
           playerId: '',
-          serverName: '',
-          guildName: '',
           discount: '',
           items: [{ 
             category: '其他', 
@@ -407,10 +397,7 @@ function MerchantInputForm() {
             exchangeItemName: '',
             customExchangeItem: '',
             exchangeQuantity: '1'
-          }],
-          location: '',
-          exchangeRate: '',
-          totalAmount: ''
+          }]
         });
         setIsSpecialMerchant(false);
       } else {
@@ -451,75 +438,7 @@ function MerchantInputForm() {
           />
         </div>
         
-        {/* <div className="form-group">
-          <label htmlFor="serverName">伺服器名稱</label>
-          <input
-            type="text"
-            id="serverName"
-            name="serverName"
-            value={formData.serverName}
-            onChange={handleChange}
-            required
-          />
-        </div>
-        
-        <div className="form-group">
-          <label htmlFor="guildName">公會名稱</label>
-          <input
-            type="text"
-            id="guildName"
-            name="guildName"
-            value={formData.guildName}
-            onChange={handleChange}
-          />
-        </div> */}
-        
-        {/* 五商專用欄位 - 只有當販售家園幣時出現 */}
-        {isSpecialMerchant && (
-          <>
-            <div className="form-group">
-              <label htmlFor="location">五商位置</label>
-              <input
-                type="text"
-                id="location"
-                name="location"
-                value={formData.location}
-                onChange={handleChange}
-                required
-                placeholder="例如：克雷亞城 東北區"
-              />
-            </div>
-            
-            <div className="form-group">
-              <label htmlFor="exchangeRate">兌換比率</label>
-              <input
-                type="number"
-                id="exchangeRate"
-                name="exchangeRate"
-                value={formData.exchangeRate}
-                onChange={handleChange}
-                required
-                min="1"
-                placeholder="例如：1.2"
-              />
-              <small>1 家園幣能兌換多少銀幣</small>
-            </div>
-            
-            <div className="form-group">
-              <label htmlFor="totalAmount">總交易額度</label>
-              <input
-                type="number"
-                id="totalAmount"
-                name="totalAmount"
-                value={formData.totalAmount}
-                onChange={handleChange}
-                min="1"
-                placeholder="可選填"
-              />
-              <small>此五商能兌換的家園幣總量</small>
-            </div>
-          </>
-        )}
+        {/* Removed the five merchant specific fields (location, exchangeRate, totalAmount) */}
         
         <div className="form-group">
           <label htmlFor="discount">今日折扣</label>
@@ -733,8 +652,7 @@ function MerchantInputForm() {
           disabled={submitting || formData.items.some(item => 
             (!item.allowsCoinExchange && !item.allowsBarterExchange) || 
             (item.allowsCoinExchange && item.price === '') ||
-            (item.allowsBarterExchange && item.exchangeItemName === '') ||
-            (isSpecialMerchant && (!formData.location || !formData.exchangeRate))
+            (item.allowsBarterExchange && item.exchangeItemName === '')
           )}
         >
           {submitting ? '提交中...' : '提交商人資訊'}

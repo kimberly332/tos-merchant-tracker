@@ -87,7 +87,6 @@ function MerchantList() {
         (merchant.serverName && merchant.serverName.toLowerCase().includes(term)) ||
         (merchant.playerId && merchant.playerId.toLowerCase().includes(term)) ||
         (merchant.guildName && merchant.guildName.toLowerCase().includes(term)) ||
-        (merchant.location && merchant.location.toLowerCase().includes(term)) ||
         // 搜尋物品相關信息
         (merchant.items && merchant.items.some(item => 
           (item.itemName && item.itemName.toLowerCase().includes(term)) ||
@@ -300,16 +299,7 @@ function MerchantList() {
                   )}
                 </div>
                 
-                {/* 五商特有信息 */}
-                {merchant.isSpecialMerchant && (
-                  <div className="special-merchant-info">
-                    <p className="location">位置: {merchant.location || '未知'}</p>
-                    <p className="exchange-rate">兌換比率: {merchant.exchangeRate} 銀幣/家園幣</p>
-                    {merchant.totalAmount && (
-                      <p className="total-amount">總額度: {merchant.totalAmount} 家園幣</p>
-                    )}
-                  </div>
-                )}
+                {/* Removed special merchant info section with location, exchangeRate, and totalAmount */}
                 
                 {merchant.items && merchant.items.length > 0 ? (
                   <div className="items-section">
@@ -362,16 +352,16 @@ function MerchantList() {
                   </div>
                 </div>
                 {localStorage.getItem('submitterPlayerId') === merchant.playerId && (
-  <div className="edit-controls">
-    <button 
-      className="edit-btn"
-      onClick={() => navigate(`/edit-merchant/${merchant.id}`)}
-      title="編輯商人資訊"
-    >
-      <span className="edit-icon">✏️</span> 編輯
-    </button>
-  </div>
-)}
+                  <div className="edit-controls">
+                    <button 
+                      className="edit-btn"
+                      onClick={() => navigate(`/edit-merchant/${merchant.id}`)}
+                      title="編輯商人資訊"
+                    >
+                      <span className="edit-icon">✏️</span> 編輯
+                    </button>
+                  </div>
+                )}
               </div>
             );
           }).filter(Boolean)}

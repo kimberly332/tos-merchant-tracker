@@ -154,16 +154,7 @@ function ItemSearch() {
                       )}
                     </div>
                     
-                    {/* Show special merchant info if available */}
-                    {merchant.isSpecialMerchant && (
-                      <div className="special-merchant-info">
-                        <p className="location">位置: {merchant.location || '未知'}</p>
-                        <p className="exchange-rate">兌換比率: {merchant.exchangeRate} 銀幣/家園幣</p>
-                        {merchant.totalAmount && (
-                          <p className="total-amount">總交易額度: {merchant.totalAmount} 家園幣</p>
-                        )}
-                      </div>
-                    )}
+                    {/* Removed special merchant info section with location, exchangeRate, and totalAmount */}
                     
                     <div className="items-list">
                       <h4>販售物品:</h4>

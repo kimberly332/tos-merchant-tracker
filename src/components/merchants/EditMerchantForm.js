@@ -14,10 +14,8 @@ function EditMerchantForm() {
   const [formData, setFormData] = useState({
     playerId: '',
     discount: '',
-    items: [],
-    location: '',
-    exchangeRate: '',
-    totalAmount: ''
+    items: []
+    // Removed: location, exchangeRate, totalAmount
   });
   
   const [isSpecialMerchant, setIsSpecialMerchant] = useState(false);
@@ -266,7 +264,7 @@ function EditMerchantForm() {
         
         // Set form data from the merchant data
         setFormData({
-          playerId: merchantData.playerId,
+          playerId: merchantData.playerId || '未知玩家',
           discount: merchantData.discount || '',
           items: merchantData.items.map(item => ({
             category: item.category || (item.itemName === '家園幣' ? '家園幣' : '其他'),
@@ -278,10 +276,7 @@ function EditMerchantForm() {
             exchangeItemName: item.exchangeItemName || '',
             customExchangeItem: item.exchangeItemName === '其他' ? item.exchangeItemName : '',
             exchangeQuantity: item.exchangeQuantity ? item.exchangeQuantity.toString() : '1'
-          })),
-          location: merchantData.location || '',
-          exchangeRate: merchantData.exchangeRate ? merchantData.exchangeRate.toString() : '',
-          totalAmount: merchantData.totalAmount ? merchantData.totalAmount.toString() : ''
+          }))
         });
         
         setIsSpecialMerchant(merchantData.isSpecialMerchant || false);
@@ -406,12 +401,6 @@ function EditMerchantForm() {
       }))
     };
     
-    // Convert special merchant fields if needed
-    if (isSpecialMerchant) {
-      processedData.exchangeRate = Number(formData.exchangeRate);
-      processedData.totalAmount = formData.totalAmount ? Number(formData.totalAmount) : null;
-    }
-    
     try {
       // Preserve original timestamp and expiresAt
       if (originalData) {
@@ -499,52 +488,7 @@ function EditMerchantForm() {
           <small>不可更改遊戲ID</small>
         </div>
         
-        {/* Five merchant fields - only when selling family tokens */}
-        {isSpecialMerchant && (
-          <>
-            <div className="form-group">
-              <label htmlFor="location">五商位置</label>
-              <input
-                type="text"
-                id="location"
-                name="location"
-                value={formData.location}
-                onChange={handleChange}
-                required
-                placeholder="例如：克雷亞城 東北區"
-              />
-            </div>
-            
-            <div className="form-group">
-              <label htmlFor="exchangeRate">兌換比率</label>
-              <input
-                type="number"
-                id="exchangeRate"
-                name="exchangeRate"
-                value={formData.exchangeRate}
-                onChange={handleChange}
-                required
-                min="1"
-                placeholder="例如：1.2"
-              />
-              <small>1 家園幣能兌換多少銀幣</small>
-            </div>
-            
-            <div className="form-group">
-              <label htmlFor="totalAmount">總交易額度</label>
-              <input
-                type="number"
-                id="totalAmount"
-                name="totalAmount"
-                value={formData.totalAmount}
-                onChange={handleChange}
-                min="1"
-                placeholder="可選填"
-              />
-              <small>此五商能兌換的家園幣總量</small>
-            </div>
-          </>
-        )}
+        {/* Removed five merchant fields (location, exchangeRate, totalAmount) */}
         
         <div className="form-group">
           <label htmlFor="discount">今日折扣</label>
@@ -767,8 +711,7 @@ function EditMerchantForm() {
             disabled={submitting || formData.items.some(item => 
               (!item.allowsCoinExchange && !item.allowsBarterExchange) || 
               (item.allowsCoinExchange && item.price === '') ||
-              (item.allowsBarterExchange && item.exchangeItemName === '') ||
-              (isSpecialMerchant && (!formData.location || !formData.exchangeRate))
+              (item.allowsBarterExchange && item.exchangeItemName === '')
             )}
           >
             {submitting ? '更新中...' : '更新商人資訊'}
