@@ -61,7 +61,6 @@ export const searchItems = async (searchTerm) => {
           playerId: data.playerId,
           serverName: data.serverName,
           guildName: data.guildName,
-          merchantName: data.merchantName,
           items: matchingItems,
           timestamp: data.timestamp?.toDate() || new Date()
         });

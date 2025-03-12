@@ -122,7 +122,6 @@ function ItemSearch() {
                 return (
                   <div key={index} className="merchant-item">
                     <div className="merchant-header">
-                      <h3>{merchant.merchantName}</h3>
                       <p className="server-info">{merchant.serverName} 伺服器</p>
                       {merchant.guildName && (
                         <p className="guild-info">公會: {merchant.guildName}</p>

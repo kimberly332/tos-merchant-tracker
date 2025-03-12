@@ -36,9 +36,7 @@ function ItemCategoryFilter({ onCategorySelect, selectedCategory }) {
     '紅橡木圍欄',
     '淺灰尖頭圍欄',
     '淺藍尖頭圍欄',
-    '家園幣 $1000', 
-    '家園幣 $1200', 
-    '家園幣 $1500', 
+    '家園幣', 
   ];
 
   return (
