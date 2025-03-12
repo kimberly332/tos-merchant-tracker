@@ -8,6 +8,23 @@ function ItemSearch() {
   const [searching, setSearching] = useState(false);
   const [searchPerformed, setSearchPerformed] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState('全部');
+  const [copyMessage, setCopyMessage] = useState(null);
+
+  // 複製到剪貼板的函數
+const copyToClipboard = (text) => {
+    navigator.clipboard.writeText(text)
+      .then(() => {
+        // 顯示提示訊息
+        setCopyMessage(`已複製: ${text}`);
+        // 3秒後清除訊息
+        setTimeout(() => setCopyMessage(null), 3000);
+      })
+      .catch(err => {
+        console.error('無法複製文本: ', err);
+        setCopyMessage('複製失敗，請手動複製');
+        setTimeout(() => setCopyMessage(null), 3000);
+      });
+  };
 
   const handleSearchChange = (e) => {
     setSearchTerm(e.target.value);
@@ -63,28 +80,13 @@ function ItemSearch() {
     });
   };
 
-  const calculateExpiration = (timestamp) => {
-    if (!timestamp) return null;
-    
-    const createdDate = new Date(timestamp);
-    const expirationDate = new Date(createdDate);
-    expirationDate.setHours(expirationDate.getHours() + 24);
-    
-    const now = new Date();
-    
-    // If expired, return null
-    if (now > expirationDate) return null;
-    
-    // Calculate remaining time
-    const timeRemaining = expirationDate - now;
-    const hoursRemaining = Math.floor(timeRemaining / (1000 * 60 * 60));
-    const minutesRemaining = Math.floor((timeRemaining % (1000 * 60 * 60)) / (1000 * 60));
-    
-    return `${hoursRemaining}小時 ${minutesRemaining}分鐘`;
-  };
-
   return (
     <div className="item-search-container">
+        {copyMessage && (
+  <div className="copy-message">
+    {copyMessage}
+  </div>
+)}
       <form onSubmit={handleSubmit} className="search-form">
         <div className="search-input-container">
           <input
@@ -115,18 +117,21 @@ function ItemSearch() {
           ) : (
             <div className="results-list">
               {filteredResults.map((merchant, index) => {
-                const remainingTime = calculateExpiration(merchant.timestamp);
+                const remainingTime = true; // 保留這個變數但改變其用途，僅用於檢查項目是否已過期
                 
                 // Skip if expired
-                if (!remainingTime) return null;
+                if (!merchant.expiresAt || new Date() > new Date(merchant.expiresAt)) return null;
                 
                 return (
                   <div key={index} className={`merchant-item ${merchant.isSpecialMerchant ? 'special-merchant' : ''}`}>
                     <div className="merchant-header">
-                      <p className="server-info">{merchant.serverName} 伺服器</p>
-                      {merchant.guildName && (
-                        <p className="guild-info">公會: {merchant.guildName}</p>
-                      )}
+                    <p 
+  className="player-info-copy" 
+  onClick={() => copyToClipboard(merchant.playerId)}
+  title="點擊複製玩家ID"
+>
+  {merchant.playerId} 提供 <span className="copy-icon">📋</span>
+</p>
                       {merchant.discount && (
                         <p className="discount-info">今日折扣: {merchant.discount}</p>
                       )}
@@ -173,14 +178,9 @@ function ItemSearch() {
                     </div>
                     
                     <div className="merchant-footer">
-                      <p className="player-id">
-                        <small>提供資訊的玩家: {merchant.playerId}</small>
-                      </p>
                       <p className="timestamp">
                         <small>
                           提交時間: {formatTimestamp(merchant.timestamp)}
-                          <br />
-                          剩餘時間: {remainingTime}
                         </small>
                       </p>
                     </div>

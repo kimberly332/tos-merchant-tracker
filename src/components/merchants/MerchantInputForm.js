@@ -4,8 +4,8 @@ import { addMerchant } from '../../firebase/firestore';
 function MerchantInputForm() {
   const [formData, setFormData] = useState({
     playerId: '',
-    serverName: '',
-    guildName: '',
+    // serverName: '',
+    // guildName: '',
     discount: '',
     items: [{ 
       category: '其他', 
@@ -448,7 +448,7 @@ function MerchantInputForm() {
           />
         </div>
         
-        <div className="form-group">
+        {/* <div className="form-group">
           <label htmlFor="serverName">伺服器名稱</label>
           <input
             type="text"
@@ -469,7 +469,7 @@ function MerchantInputForm() {
             value={formData.guildName}
             onChange={handleChange}
           />
-        </div>
+        </div> */}
         
         {/* 五商專用欄位 - 只有當販售家園幣時出現 */}
         {isSpecialMerchant && (

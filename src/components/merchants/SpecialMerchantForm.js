@@ -4,7 +4,7 @@ import { addSpecialMerchant } from '../../firebase/firestore';
 function SpecialMerchantForm() {
   const [formData, setFormData] = useState({
     playerId: '',
-    serverName: '',
+    // serverName: '',
     location: '',
     exchangeRate: '',
     totalAmount: '',
@@ -88,7 +88,7 @@ function SpecialMerchantForm() {
           />
         </div>
         
-        <div className="form-group">
+        {/* <div className="form-group">
           <label htmlFor="serverName">伺服器名稱</label>
           <input
             type="text"
@@ -98,7 +98,7 @@ function SpecialMerchantForm() {
             onChange={handleChange}
             required
           />
-        </div>
+        </div> */}
         
         <div className="form-group">
           <label htmlFor="location">五商位置</label>

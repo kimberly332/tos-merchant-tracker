@@ -9,6 +9,7 @@ function MerchantList() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('全部');
   const [error, setError] = useState(null);
+  const [copyMessage, setCopyMessage] = useState(null);
   
   // 排序選項 - 默認為五商優先
   const [sortOption, setSortOption] = useState('specialMerchantFirst');
@@ -16,6 +17,20 @@ function MerchantList() {
   // 篩選選項
   const [showRegularMerchants, setShowRegularMerchants] = useState(true);
   const [showSpecialMerchants, setShowSpecialMerchants] = useState(true);
+
+  // Add the copyToClipboard function here, after all state variables
+  const copyToClipboard = (text) => {
+    navigator.clipboard.writeText(text)
+      .then(() => {
+        setCopyMessage(`已複製: ${text}`);
+        setTimeout(() => setCopyMessage(null), 3000);
+      })
+      .catch(err => {
+        console.error('無法複製文本: ', err);
+        setCopyMessage('複製失敗，請手動複製');
+        setTimeout(() => setCopyMessage(null), 3000);
+      });
+  };
   
   // 獲取所有商人數據
   useEffect(() => {
@@ -175,32 +190,17 @@ function MerchantList() {
     });
   };
 
-  const calculateExpiration = (timestamp) => {
-    if (!timestamp) return null;
-    
-    const createdDate = new Date(timestamp);
-    const expirationDate = new Date(createdDate);
-    expirationDate.setHours(expirationDate.getHours() + 24);
-    
-    const now = new Date();
-    
-    // If expired, return null
-    if (now > expirationDate) return null;
-    
-    // Calculate remaining time
-    const timeRemaining = expirationDate - now;
-    const hoursRemaining = Math.floor(timeRemaining / (1000 * 60 * 60));
-    const minutesRemaining = Math.floor((timeRemaining % (1000 * 60 * 60)) / (1000 * 60));
-    
-    return `${hoursRemaining}小時 ${minutesRemaining}分鐘`;
-  };
-
   // 計算五商數量和普通商人數量
   const specialMerchantCount = filteredMerchants.filter(m => m.isSpecialMerchant).length;
   const regularMerchantCount = filteredMerchants.filter(m => !m.isSpecialMerchant).length;
 
   return (
     <div className="merchant-list-container">
+        {copyMessage && (
+  <div className="copy-message">
+    {copyMessage}
+  </div>
+)}
       <div className="search-filter-section">
         <div className="search-input-container">
           <input
@@ -268,23 +268,26 @@ function MerchantList() {
       ) : (
         <div className="merchants-grid">
           {filteredMerchants.map((merchant, index) => {
-            const remainingTime = calculateExpiration(merchant.timestamp);
+            const remainingTime = true; // 保留這個變數但改變其用途，僅用於檢查項目是否已過期
             
             // Skip if expired
-            if (!remainingTime) return null;
+            if (!merchant.expiresAt || new Date() > new Date(merchant.expiresAt)) return null;
             
             return (
               <div key={index} className={`merchant-card ${merchant.isSpecialMerchant ? 'special-merchant-card' : ''}`}>
                 <div className="merchant-header">
-                  <div className="merchant-title">
-                    <h3>{merchant.serverName} 伺服器</h3>
-                    {merchant.isSpecialMerchant && (
-                      <span className="special-merchant-badge">五商</span>
-                    )}
-                  </div>
-                  {merchant.guildName && (
-                    <p className="guild-info">公會: {merchant.guildName}</p>
-                  )}
+                <div className="merchant-title">
+                <h3 
+                    className="player-id-copy" 
+                    onClick={() => copyToClipboard(merchant.playerId)}
+                    title="點擊複製玩家ID"
+                >
+                    {merchant.playerId} 提供 <span className="copy-icon">📋</span>
+                </h3>
+                {merchant.isSpecialMerchant && (
+                    <span className="special-merchant-badge">五商</span>
+                )}
+                </div>
                   {merchant.discount && (
                     <p className="discount-info">折扣: {merchant.discount}</p>
                   )}
@@ -344,18 +347,10 @@ function MerchantList() {
                 )}
                 
                 <div className="merchant-footer">
-                  <p className="merchant-info">
-                    <span className="player-label">提供者:</span>
-                    <span className="player-id">{merchant.playerId}</span>
-                  </p>
                   <div className="time-info">
                     <p className="submission-time">
                       <span className="time-label">提交時間:</span>
                       <span>{formatTimestamp(merchant.timestamp)}</span>
-                    </p>
-                    <p className="expiration-time">
-                      <span className="time-label">剩餘時間:</span>
-                      <span className="time-remaining">{remainingTime}</span>
                     </p>
                   </div>
                 </div>

@@ -1,12 +1,58 @@
 import { collection, addDoc, query, where, getDocs, serverTimestamp, orderBy, limit } from 'firebase/firestore';
 import { db } from './config';
 
+// Helper function to get Taiwan time end of day (midnight)
+const getTaiwanEndOfDay = () => {
+  // Create date object for current time in local timezone
+  const now = new Date();
+  
+  // Convert to Taiwan time (UTC+8)
+  const taiwanOffset = 8 * 60; // Taiwan UTC+8 in minutes
+  const localOffset = now.getTimezoneOffset(); // Local offset in minutes
+  const totalOffsetMinutes = taiwanOffset + localOffset;
+  
+  // Adjust the date to Taiwan time
+  const taiwanDate = new Date(now.getTime() + totalOffsetMinutes * 60 * 1000);
+  
+  // Set to next midnight in Taiwan time (5 AM to midnight rule)
+  const taiwanReset = new Date(taiwanDate);
+  taiwanReset.setHours(24, 0, 0, 0); // Set to midnight
+  
+  // Convert back to local time for storage/comparison
+  return new Date(taiwanReset.getTime() - totalOffsetMinutes * 60 * 1000);
+};
+
+// Helper to get Taiwan time start of day (5 AM)
+const getTaiwanStartOfDay = () => {
+  // Create date object for current time in local timezone
+  const now = new Date();
+  
+  // Convert to Taiwan time (UTC+8)
+  const taiwanOffset = 8 * 60; // Taiwan UTC+8 in minutes
+  const localOffset = now.getTimezoneOffset(); // Local offset in minutes
+  const totalOffsetMinutes = taiwanOffset + localOffset;
+  
+  // Adjust the date to Taiwan time
+  const taiwanDate = new Date(now.getTime() + totalOffsetMinutes * 60 * 1000);
+  
+  // Set to 5 AM in Taiwan time
+  const taiwanReset = new Date(taiwanDate);
+  taiwanReset.setHours(5, 0, 0, 0); // Set to 5 AM
+  
+  // If current Taiwan time is before 5 AM, use previous day's 5 AM
+  if (taiwanDate.getHours() < 5) {
+    taiwanReset.setDate(taiwanReset.getDate() - 1);
+  }
+  
+  // Convert back to local time for storage/comparison
+  return new Date(taiwanReset.getTime() - totalOffsetMinutes * 60 * 1000);
+};
+
 // Add merchant data (handles both regular and special merchants)
 export const addMerchant = async (merchantData) => {
   try {
-    // Calculate expiration time (24 hours)
-    const expiresAt = new Date();
-    expiresAt.setHours(expiresAt.getHours() + 24);
+    // Set expiration time to Taiwan midnight
+    const expiresAt = getTaiwanEndOfDay();
     
     const docRef = await addDoc(collection(db, 'merchants'), {
       ...merchantData,
@@ -21,12 +67,36 @@ export const addMerchant = async (merchantData) => {
   }
 };
 
+// Add special merchant data (for family token merchants)
+export const addSpecialMerchant = async (merchantData) => {
+  try {
+    // Set expiration time to Taiwan midnight
+    const expiresAt = getTaiwanEndOfDay();
+    
+    // Mark as special merchant
+    const processedData = {
+      ...merchantData,
+      isSpecialMerchant: true,
+      timestamp: serverTimestamp(),
+      expiresAt
+    };
+    
+    const docRef = await addDoc(collection(db, 'merchants'), processedData);
+    
+    return { success: true, id: docRef.id };
+  } catch (error) {
+    console.error('Error adding special merchant:', error);
+    return { success: false, error };
+  }
+};
+
 // Get all merchant data (with optional limit)
 export const getAllMerchants = async (maxResults = 100) => {
   try {
     const now = new Date();
     const merchantsRef = collection(db, 'merchants');
-    // 只獲取未過期的商人資訊，並按時間戳降序排序
+    
+    // Only get merchants that haven't expired (before Taiwan midnight)
     const merchantQuery = query(
       merchantsRef,
       where('expiresAt', '>', now),
@@ -41,20 +111,21 @@ export const getAllMerchants = async (maxResults = 100) => {
       const data = doc.data();
       const merchantData = {
         id: doc.id,
-        playerId: data.playerId,
-        serverName: data.serverName,
-        guildName: data.guildName,
+        playerId: data.playerId || '未知玩家',
+        // Removed serverName and guildName
         items: data.items || [],
         timestamp: data.timestamp?.toDate() || new Date(),
-        discount: data.discount || null
+        discount: data.discount || null,
+        expiresAt: data.expiresAt?.toDate() || getTaiwanEndOfDay()
       };
       
-      // 添加五商特有資訊
+      // Add special merchant info
       if (data.isSpecialMerchant) {
         merchantData.isSpecialMerchant = true;
         merchantData.location = data.location;
         merchantData.exchangeRate = data.exchangeRate;
         merchantData.totalAmount = data.totalAmount;
+        merchantData.notes = data.notes;
       }
       
       merchants.push(merchantData);
@@ -72,24 +143,31 @@ export const searchItems = async (searchTerm) => {
   try {
     // Search in merchants collection
     const results = [];
-    const merchantQuery = query(collection(db, 'merchants'));
+    const now = new Date();
+    
+    // Only search merchants that haven't expired
+    const merchantQuery = query(
+      collection(db, 'merchants'),
+      where('expiresAt', '>', now)
+    );
+    
     const merchantSnapshot = await getDocs(merchantQuery);
     
     merchantSnapshot.forEach(doc => {
       const data = doc.data();
-      const matchingItems = data.items.filter(item => 
-        item.itemName.toLowerCase().includes(searchTerm.toLowerCase())
-      );
+      const matchingItems = data.items ? data.items.filter(item => 
+        item.itemName && item.itemName.toLowerCase().includes(searchTerm.toLowerCase())
+      ) : [];
       
       if (matchingItems.length > 0) {
         const commonData = {
           id: doc.id,
-          playerId: data.playerId,
-          serverName: data.serverName,
-          guildName: data.guildName,
+          playerId: data.playerId || '未知玩家',
+          // Removed serverName and guildName
           items: matchingItems,
           timestamp: data.timestamp?.toDate() || new Date(),
-          discount: data.discount || null
+          discount: data.discount || null,
+          expiresAt: data.expiresAt?.toDate() || getTaiwanEndOfDay()
         };
         
         // Add special merchant data if available
@@ -98,6 +176,7 @@ export const searchItems = async (searchTerm) => {
           commonData.location = data.location;
           commonData.exchangeRate = data.exchangeRate;
           commonData.totalAmount = data.totalAmount;
+          commonData.notes = data.notes;
         }
         
         results.push(commonData);
