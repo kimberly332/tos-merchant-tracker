@@ -3,7 +3,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import NavigationBar from './components/layout/NavigationBar';
 import HomePage from './pages/HomePage';
 import AddMerchantPage from './pages/AddMerchantPage';
-import './styles/global.css';
+import './styles/main.css';
 
 function App() {
   return (
