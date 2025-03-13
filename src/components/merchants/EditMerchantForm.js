@@ -586,7 +586,7 @@ function EditMerchantForm() {
                     value={item.availableQuantity}
                     onChange={(e) => handleItemChange(index, e)}
                     min="1"
-                    max={item.quantity}
+                    // max={item.quantity}
                     placeholder="1"
                     required
                   />
@@ -742,7 +742,7 @@ function EditMerchantForm() {
               (!item.allowsCoinExchange && !item.allowsBarterExchange) || 
               (item.allowsCoinExchange && item.price === '') ||
               (item.allowsBarterExchange && item.exchangeItemName === '') ||
-              Number(item.availableQuantity) > Number(item.quantity) || // 確保可購數量不超過總數量
+              Number(item.quantity) < 1 || // 確保可購數量不超過總數量
               Number(item.availableQuantity) < 1 // 確保可購數量至少為1
             )}
           >
