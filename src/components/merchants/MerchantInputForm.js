@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { addMerchant } from '../../firebase/firestore';
 import SearchableSelect from '../common/SearchableSelect';
+import { checkUserAuth } from '../../firebase/userAuth';
 import '../common/SearchableSelect.css';
 
 function MerchantInputForm() {
@@ -20,6 +21,18 @@ function MerchantInputForm() {
       exchangeQuantity: '1'
     }]
   });
+
+  const [user, setUser] = useState(null);
+  useEffect(() => {
+    const currentUser = checkUserAuth();
+    if (currentUser) {
+      setUser(currentUser);
+      setFormData(prev => ({
+        ...prev,
+        playerId: currentUser.playerId
+      }));
+    }
+  }, []);
   
   // State to track if current item is 家園幣
   const [isSpecialMerchant, setIsSpecialMerchant] = useState(false);
@@ -426,17 +439,19 @@ function MerchantInputForm() {
       )}
       
       <form onSubmit={handleSubmit} className="merchant-form">
-        <div className="form-group">
-          <label htmlFor="playerId">您的遊戲ID</label>
-          <input
-            type="text"
-            id="playerId"
-            name="playerId"
-            value={formData.playerId}
-            onChange={handleChange}
-            required
-          />
-        </div>
+      <div className="form-group">
+        <label htmlFor="playerId">您的遊戲ID</label>
+        <input
+          type="text"
+          id="playerId"
+          name="playerId"
+          value={formData.playerId}
+          onChange={handleChange}
+          required
+          disabled
+        />
+        <small>遊戲ID已從登入資訊自動填入</small>
+      </div>
         
         <div className="form-group">
           <label htmlFor="discount">今日折扣</label>

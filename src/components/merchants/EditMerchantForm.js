@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { getMerchantById, updateMerchant } from '../../firebase/firestore';
+import { checkUserAuth } from '../../firebase/userAuth';
 
 function EditMerchantForm() {
   const { merchantId } = useParams();
@@ -255,11 +256,11 @@ function EditMerchantForm() {
         setOriginalData(merchantData);
         
         // Check if the current user is the author
-        const submitterPlayerId = localStorage.getItem('submitterPlayerId');
-        if (!submitterPlayerId || submitterPlayerId !== merchantData.playerId) {
-          setUnauthorized(true);
-          return;
-        }
+        const currentUser = checkUserAuth();
+      if (!currentUser || currentUser.playerId !== merchantData.playerId) {
+        setUnauthorized(true);
+        return;
+      }
         
         // Set form data from the merchant data
         setFormData({
