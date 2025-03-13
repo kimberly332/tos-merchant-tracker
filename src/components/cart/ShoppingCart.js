@@ -9,7 +9,7 @@ const ShoppingCart = () => {
   const [requiredMaterials, setRequiredMaterials] = useState({});
 
   // Load cart from localStorage on mount and listen for changes
-  useEffect(() => {
+useEffect(() => {
     // Load saved cart from localStorage
     try {
       const savedCart = localStorage.getItem('shoppingCart');
@@ -42,13 +42,28 @@ const ShoppingCart = () => {
         }
       });
     };
-
-    // Add event listener
+    
+    // Add the handleRemoveFromCart function here
+    const handleRemoveFromCart = (event) => {
+      const itemToRemove = event.detail;
+      
+      setCartItems(prevItems => {
+        // Find and remove the item from cart
+        return prevItems.filter(
+          item => !(item.itemName === itemToRemove.itemName && 
+                    item.playerId === itemToRemove.playerId)
+        );
+      });
+    };
+  
+    // Then update the event listeners
     window.addEventListener('addToCart', handleAddToCart);
+    window.addEventListener('removeFromCart', handleRemoveFromCart);
     
     // Clean up
     return () => {
       window.removeEventListener('addToCart', handleAddToCart);
+      window.removeEventListener('removeFromCart', handleRemoveFromCart);
     };
   }, []);
 

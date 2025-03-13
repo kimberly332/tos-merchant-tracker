@@ -39,40 +39,52 @@ const MerchantItem = ({ item, merchantInfo }) => {
     };
   }, [item.itemName, merchantInfo.playerId]);
 
-  const handleAddToCart = () => {
-    // Create the item data to be added to the cart
-    const cartItem = {
-      itemName: item.itemName || '未知物品',
-      playerId: merchantInfo.playerId,
-      quantity: 1,
-      availableQuantity: item.availableQuantity || item.quantity || 1,
-      allowsCoinExchange: item.allowsCoinExchange,
-      allowsBarterExchange: item.allowsBarterExchange,
-      price: item.price,
-      exchangeItemName: item.exchangeItemName,
-      exchangeQuantity: item.exchangeQuantity || 1
-    };
-
-    // Create and dispatch a custom event
-    const addToCartEvent = new CustomEvent('addToCart', {
-      detail: cartItem
-    });
-    window.dispatchEvent(addToCartEvent);
-
-    // Highlight the item briefly when first added
-    if (!isInCart) {
+  const handleToggleCart = () => {
+    if (isInCart) {
+      // If already in cart, remove it
+      const removeFromCartEvent = new CustomEvent('removeFromCart', {
+        detail: {
+          itemName: item.itemName || '未知物品',
+          playerId: merchantInfo.playerId
+        }
+      });
+      window.dispatchEvent(removeFromCartEvent);
+      
+      // Update local state
+      setIsInCart(false);
+    } else {
+      // If not in cart, add it
+      const cartItem = {
+        itemName: item.itemName || '未知物品',
+        playerId: merchantInfo.playerId,
+        quantity: 1,
+        availableQuantity: item.availableQuantity || item.quantity || 1,
+        allowsCoinExchange: item.allowsCoinExchange,
+        allowsBarterExchange: item.allowsBarterExchange,
+        price: item.price,
+        exchangeItemName: item.exchangeItemName,
+        exchangeQuantity: item.exchangeQuantity || 1
+      };
+  
+      // Create and dispatch a custom event
+      const addToCartEvent = new CustomEvent('addToCart', {
+        detail: cartItem
+      });
+      window.dispatchEvent(addToCartEvent);
+  
+      // Highlight the item briefly when first added
       setIsHighlighted(true);
       setTimeout(() => setIsHighlighted(false), 500);
+      
+      // Mark item as in cart
+      setIsInCart(true);
     }
-    
-    // Mark item as in cart
-    setIsInCart(true);
   };
 
   return (
     <li 
       className={`item ${isHighlighted ? 'highlight-item' : ''} ${isInCart ? 'in-cart' : ''}`}
-      onClick={handleAddToCart}
+      onClick={handleToggleCart}
     >
       <div className="item-name-container">
         <span className="item-name">{item.itemName || '未知物品'}</span>
@@ -108,17 +120,17 @@ const MerchantItem = ({ item, merchantInfo }) => {
       
       <div className="add-to-cart-hint">
         {isInCart ? (
-          <>
-            <i className="fas fa-check-circle"></i>
-            <span>已加入購物車</span>
-          </>
+            <>
+            <i className="fas fa-trash-alt"></i>
+            <span>移除商品</span>
+            </>
         ) : (
-          <>
+            <>
             <i className="fas fa-cart-plus"></i>
             <span>加入購物車</span>
-          </>
+            </>
         )}
-      </div>
+       </div>
       
       {/* 顯示在購物車中的標記 */}
       {isInCart && (
