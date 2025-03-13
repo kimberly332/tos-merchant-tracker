@@ -1,5 +1,13 @@
 /* src/components/cart/ShoppingCart.css */
 
+/* Add this at the top of your ShoppingCart.css file */
+:root {
+    --color-accent: #48727B;
+    --color-light-accent: #8ABAB3;
+    --color-primary-dark: #101823;
+    --color-special: #9C6C2C;
+}
+
 .shopping-cart-container {
     position: fixed;
     bottom: 1.5rem;
