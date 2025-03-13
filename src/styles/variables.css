@@ -1,0 +1,99 @@
+/* 
+ * variables.css
+ * Global CSS variables for the ToS Merchant Tracker app
+ */
+
+ :root {
+    /* Color Palette - Based on the stormy mountain theme */
+    --color-primary-dark: #101823;    /* Very dark navy blue - main background */
+    --color-secondary-dark: #0F3240;  /* Dark teal - card backgrounds */
+    --color-accent: #48727B;          /* Medium teal - interactive elements */
+    --color-light-accent: #8ABAB3;    /* Light teal - highlights, borders */
+    --color-neutral-light: #D6D8D9;   /* Light gray - text on dark backgrounds */
+    --color-text-dark: #2A2A2A;       /* Almost black - text on light backgrounds */
+    
+    /* Functional colors */
+    --color-warning: #FFA500;         /* Amber - for alerts */
+    --color-success: #4CAF50;         /* Green - for success messages */
+    --color-error: #F44336;           /* Red - for error messages */
+    --color-special: #9C6C2C;         /* Gold - for special merchants */
+    
+    /* Typography */
+    --font-primary: 'Open Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+    --font-heading: 'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    
+    /* Font sizes - using rem for better accessibility */
+    --font-size-xs: 0.75rem;    /* 12px */
+    --font-size-sm: 0.875rem;   /* 14px */
+    --font-size-base: 1rem;     /* 16px */
+    --font-size-md: 1.125rem;   /* 18px */
+    --font-size-lg: 1.25rem;    /* 20px */
+    --font-size-xl: 1.5rem;     /* 24px */
+    --font-size-2xl: 1.875rem;  /* 30px */
+    
+    /* Font weights */
+    --font-weight-light: 300;
+    --font-weight-normal: 400;
+    --font-weight-medium: 500;
+    --font-weight-bold: 700;
+    
+    /* Spacing */
+    --spacing-xs: 0.25rem;  /* 4px */
+    --spacing-sm: 0.5rem;   /* 8px */
+    --spacing-md: 1rem;     /* 16px */
+    --spacing-lg: 1.5rem;   /* 24px */
+    --spacing-xl: 2rem;     /* 32px */
+    --spacing-2xl: 3rem;    /* 48px */
+    
+    /* Border radius */
+    --border-radius-sm: 0.25rem;   /* 4px */
+    --border-radius-md: 0.5rem;    /* 8px */
+    --border-radius-lg: 1rem;      /* 16px */
+    
+    /* Box shadows */
+    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
+    --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.08);
+    --shadow-lg: 0 10px 20px rgba(0, 0, 0, 0.19), 0 6px 6px rgba(0, 0, 0, 0.23);
+    
+    /* Z-index layers */
+    --z-index-dropdown: 1000;
+    --z-index-sticky: 1020;
+    --z-index-fixed: 1030;
+    --z-index-modal-backdrop: 1040;
+    --z-index-modal: 1050;
+    --z-index-popover: 1060;
+    --z-index-tooltip: 1070;
+    
+    /* Transitions */
+    --transition-fast: 0.15s ease;
+    --transition-normal: 0.3s ease;
+    --transition-slow: 0.5s ease;
+    
+    /* Container widths */
+    --container-sm: 540px;
+    --container-md: 720px;
+    --container-lg: 960px;
+    --container-xl: 1140px;
+  }
+  
+  /* Dark theme is the default, based on the stormy mountain image */
+  :root {
+    --body-bg: var(--color-primary-dark);
+    --text-color: var(--color-neutral-light);
+    --card-bg: var(--color-secondary-dark);
+    --input-bg: rgba(255, 255, 255, 0.1);
+    --input-border: var(--color-light-accent);
+    --input-text: var(--color-neutral-light);
+    --button-primary-bg: var(--color-accent);
+    --button-primary-text: var(--color-neutral-light);
+    --nav-bg: rgba(16, 24, 35, 0.9);
+    --nav-text: var(--color-neutral-light);
+    --divider-color: rgba(255, 255, 255, 0.1);
+  }
+  
+  /* Media query breakpoints */
+  @custom-media --mobile-sm only screen and (min-width: 320px);  /* Small phones */
+  @custom-media --mobile only screen and (min-width: 480px);     /* Phones */
+  @custom-media --tablet only screen and (min-width: 768px);     /* Tablets */
+  @custom-media --desktop only screen and (min-width: 992px);    /* Desktops */
+  @custom-media --desktop-lg only screen and (min-width: 1200px); /* Large desktops */

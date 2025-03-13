@@ -1,16 +1,64 @@
-/* Main stylesheet that imports all component styles */
+/* 
+ * main.css
+ * Main stylesheet for the ToS Merchant Tracker app 
+ * This file imports all other CSS modules
+ */
 
-/* Base styles */
+/* Import base styles and variables */
+@import './variables.css';
 @import './base.css';
+@import './layout.css';
 
-/* Navigation styles */
-@import './navigation.css';
+/* Import component-specific styles */
+@import './components/navigation.css';
+@import './components/merchants.css';
+@import './components/forms.css';
+@import './components/search.css';
 
-/* Merchant cards styles */
-@import './merchant-cards.css';
+/* Import utility styles */
+@import './utilities.css';
 
-/* Form styles */
-@import './forms.css';
+/* 
+ * Add any additional global styles here that don't fit in the 
+ * above categories or that apply across multiple components 
+ */
 
-/* Search and filter styles */
-@import './search-filters.css';
+/* Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Specific page styles */
+.home-page {
+  animation: fadeIn 0.5s ease-out;
+}
+
+.add-merchant-page,
+.add-special-merchant-page,
+.edit-merchant-page {
+  animation: fadeIn 0.5s ease-out;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(15, 50, 64, 0.3);
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: var(--color-accent);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: var(--color-light-accent);
+}
