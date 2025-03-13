@@ -1,0 +1,360 @@
+/* 
+ * forms.css
+ * Styling for form elements and form containers
+ */
+
+/* Form containers */
+.form-container {
+    background-color: rgba(15, 50, 64, 0.7);
+    border-radius: var(--border-radius-md);
+    padding: var(--spacing-lg);
+    box-shadow: var(--shadow-md);
+    border: 1px solid rgba(138, 186, 179, 0.2);
+    backdrop-filter: blur(5px);
+    max-width: 600px;
+    margin: 0 auto;
+  }
+  
+  .merchant-form-container,
+  .special-merchant-form-container {
+    width: 100%;
+  }
+  
+  /* Form group - container for label and input */
+  .form-group {
+    margin-bottom: var(--spacing-md);
+    position: relative;
+  }
+  
+  .form-group label {
+    display: block;
+    margin-bottom: var(--spacing-xs);
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-medium);
+    color: var(--color-light-accent);
+  }
+  
+  .form-group small {
+    display: block;
+    font-size: var(--font-size-xs);
+    color: rgba(214, 216, 217, 0.7);
+    margin-top: calc(var(--spacing-xs) / 2);
+  }
+  
+  /* Input styling */
+  .form-group input[type="text"],
+  .form-group input[type="number"],
+  .form-group input[type="email"],
+  .form-group input[type="password"],
+  .form-group select,
+  .form-group textarea {
+    width: 100%;
+    padding: var(--spacing-sm);
+    background-color: var(--input-bg);
+    border: 1px solid var(--input-border);
+    border-radius: var(--border-radius-sm);
+    color: var(--input-text);
+    transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+  }
+  
+  .form-group input:focus,
+  .form-group select:focus,
+  .form-group textarea:focus {
+    border-color: var(--color-light-accent);
+    box-shadow: 0 0 0 2px rgba(138, 186, 179, 0.2);
+    outline: none;
+  }
+  
+  .form-group input:disabled,
+  .form-group select:disabled,
+  .form-group textarea:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+    background-color: rgba(0, 0, 0, 0.1);
+  }
+  
+  /* Select styling */
+  .form-group select {
+    appearance: none;
+    padding-right: var(--spacing-xl);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%238ABAB3' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right var(--spacing-sm) center;
+    background-size: 16px;
+  }
+  
+  /* Textarea styling */
+  .form-group textarea {
+    min-height: 100px;
+    resize: vertical;
+  }
+  
+  /* Form buttons */
+  .submit-btn,
+  .cancel-btn,
+  .back-btn,
+  .add-item-btn,
+  .remove-item-btn {
+    padding: var(--spacing-sm) var(--spacing-md);
+    border-radius: var(--border-radius-sm);
+    font-weight: var(--font-weight-medium);
+    cursor: pointer;
+    transition: background-color var(--transition-fast), transform var(--transition-fast);
+    text-align: center;
+    border: none;
+  }
+  
+  .submit-btn {
+    background-color: var(--color-accent);
+    color: white;
+    width: 100%;
+    padding: var(--spacing-md);
+    margin-top: var(--spacing-md);
+    font-size: var(--font-size-base);
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .submit-btn:hover {
+    background-color: var(--color-light-accent);
+    transform: translateY(-2px);
+  }
+  
+  .submit-btn:disabled {
+    background-color: rgba(72, 114, 123, 0.5);
+    cursor: not-allowed;
+    transform: none;
+  }
+  
+  /* Add a lightning effect on the submit button */
+  .submit-btn::after {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.3) 0%, transparent 60%);
+    opacity: 0;
+    transition: opacity var(--transition-normal);
+    pointer-events: none;
+  }
+  
+  .submit-btn:hover::after {
+    opacity: 0.3;
+  }
+  
+  /* Button with destructive action */
+  .cancel-btn,
+  .back-btn {
+    background-color: transparent;
+    color: var(--color-neutral-light);
+    border: 1px solid var(--divider-color);
+  }
+  
+  .cancel-btn:hover,
+  .back-btn:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+  }
+  
+  /* Form button groups */
+  .form-buttons {
+    display: flex;
+    gap: var(--spacing-md);
+    margin-top: var(--spacing-lg);
+  }
+  
+  .form-buttons button {
+    flex: 1;
+  }
+  
+  /* Item entry container for merchant forms */
+  .item-entry-container {
+    background-color: rgba(16, 24, 35, 0.6);
+    border-radius: var(--border-radius-md);
+    padding: var(--spacing-md);
+    margin-bottom: var(--spacing-md);
+    position: relative;
+    border: 1px solid rgba(138, 186, 179, 0.1);
+  }
+  
+  /* Item section and exchange section within item entry */
+  .item-section,
+  .exchange-section {
+    margin-bottom: var(--spacing-md);
+  }
+  
+  .item-section-title,
+  .exchange-section-title {
+    font-size: var(--font-size-sm);
+    color: var(--color-light-accent);
+    margin-bottom: var(--spacing-sm);
+    font-weight: var(--font-weight-medium);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  
+  /* Radio and checkbox styling */
+  .exchange-option {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+    margin-bottom: var(--spacing-sm);
+    cursor: pointer;
+  }
+  
+  .exchange-option input[type="radio"],
+  .exchange-option input[type="checkbox"] {
+    appearance: none;
+    width: 18px;
+    height: 18px;
+    border: 1px solid var(--color-light-accent);
+    border-radius: 50%;
+    display: grid;
+    place-content: center;
+    background-color: var(--input-bg);
+    cursor: pointer;
+  }
+  
+  .exchange-option input[type="checkbox"] {
+    border-radius: 4px;
+  }
+  
+  .exchange-option input[type="radio"]::before,
+  .exchange-option input[type="checkbox"]::before {
+    content: "";
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    transform: scale(0);
+    transition: transform var(--transition-fast);
+    box-shadow: inset 1em 1em var(--color-light-accent);
+    background-color: var(--color-light-accent);
+  }
+  
+  .exchange-option input[type="checkbox"]::before {
+    border-radius: 2px;
+  }
+  
+  .exchange-option input[type="radio"]:checked::before,
+  .exchange-option input[type="checkbox"]:checked::before {
+    transform: scale(1);
+  }
+  
+  .exchange-option input[type="radio"]:focus,
+  .exchange-option input[type="checkbox"]:focus {
+    outline: 2px solid rgba(138, 186, 179, 0.5);
+    outline-offset: 2px;
+  }
+  
+  .exchange-option input[type="radio"]:disabled,
+  .exchange-option input[type="checkbox"]:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+  
+  .exchange-option-spacing {
+    margin-left: var(--spacing-md);
+  }
+  
+  /* Required tag for form fields */
+  .required-tag {
+    display: inline-block;
+    background-color: var(--color-warning);
+    color: white;
+    font-size: 10px;
+    padding: 2px 4px;
+    border-radius: 2px;
+    margin-left: var(--spacing-xs);
+    text-transform: uppercase;
+    font-weight: var(--font-weight-bold);
+    vertical-align: middle;
+  }
+  
+  /* Remove item button */
+  .remove-item-btn {
+    position: absolute;
+    top: var(--spacing-sm);
+    right: var(--spacing-sm);
+    background-color: rgba(244, 67, 54, 0.1);
+    color: #F44336;
+    font-size: var(--font-size-xs);
+    padding: 2px var(--spacing-sm);
+    border-radius: var(--border-radius-sm);
+  }
+  
+  .remove-item-btn:hover {
+    background-color: rgba(244, 67, 54, 0.2);
+  }
+  
+  .remove-item-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+  
+  /* Add item button */
+  .add-item-btn {
+    background-color: rgba(72, 114, 123, 0.2);
+    color: var(--color-light-accent);
+    width: 100%;
+    padding: var(--spacing-sm);
+    margin-bottom: var(--spacing-lg);
+    border: 1px dashed var(--color-accent);
+  }
+  
+  .add-item-btn:hover {
+    background-color: rgba(72, 114, 123, 0.3);
+  }
+  
+  /* Form error message */
+  .error-message {
+    color: var(--color-error);
+    font-size: var(--font-size-xs);
+    margin-top: calc(var(--spacing-xs) / 2);
+  }
+  
+  /* Form success/error feedback */
+  .submit-result {
+    padding: var(--spacing-md);
+    border-radius: var(--border-radius-md);
+    margin-bottom: var(--spacing-lg);
+    text-align: center;
+    font-weight: var(--font-weight-medium);
+  }
+  
+  .submit-result.success {
+    background-color: rgba(76, 175, 80, 0.1);
+    border: 1px solid var(--color-success);
+    color: var(--color-success);
+  }
+  
+  .submit-result.error {
+    background-color: rgba(244, 67, 54, 0.1);
+    border: 1px solid var(--color-error);
+    color: var(--color-error);
+  }
+  
+  /* Responsive design for forms */
+  @media (min-width: 768px) {
+    .item-entry {
+      display: flex;
+      gap: var(--spacing-md);
+      align-items: flex-start;
+    }
+    
+    .form-group-spacing {
+      margin-left: auto;
+      width: 120px;
+    }
+    
+    .exchange-fields {
+      display: flex;
+      gap: var(--spacing-md);
+    }
+    
+    .barter-item-entry {
+      display: flex;
+      gap: var(--spacing-md);
+      flex-wrap: wrap;
+    }
+  }

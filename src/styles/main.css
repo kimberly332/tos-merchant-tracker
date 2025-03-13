@@ -1,64 +1,618 @@
 /* 
- * main.css
- * Main stylesheet for the ToS Merchant Tracker app 
- * This file imports all other CSS modules
+ * Enhanced main.css
+ * Improved styling for the ToS Merchant Tracker app 
  */
 
-/* Import base styles and variables */
-@import './variables.css';
-@import './base.css';
-@import './layout.css';
-
-/* Import component-specific styles */
-@import './components/navigation.css';
-@import './components/merchants.css';
-@import './components/forms.css';
-@import './components/search.css';
-
-/* Import utility styles */
-@import './utilities.css';
-
-/* 
- * Add any additional global styles here that don't fit in the 
- * above categories or that apply across multiple components 
- */
-
-/* Animations */
-@keyframes fadeIn {
-  from {
-    opacity: 0;
+/* Base Typography Improvements */
+body {
+    font-family: 'Open Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    line-height: 1.6;
+    color: #D6D8D9;
+    background-color: #101823;
+    background-image: linear-gradient(to bottom, rgba(16, 24, 35, 0.95), rgba(15, 50, 64, 0.9));
+    background-attachment: fixed;
   }
-  to {
+  
+  /* Enhanced Container Layout */
+  .main-content {
+    max-width: 1100px;
+    width: 100%;
+    margin: 0 auto;
+    padding: 1.5rem;
+  }
+  
+  /* Card Improvements */
+  .merchant-card, .merchant-item {
+    background-color: rgba(20, 59, 74, 0.85);
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(138, 186, 179, 0.2);
+    margin-bottom: 1.25rem;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    overflow: hidden;
+    position: relative;
+  }
+  
+  .merchant-card:hover, .merchant-item:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+  }
+  
+  /* Special Merchant Styling */
+  .special-merchant-card, .special-merchant {
+    background-color: rgba(29, 51, 67, 0.9);
+    border: 1px solid rgba(156, 128, 60, 0.6);
+    position: relative;
+  }
+  
+  .special-merchant-card::before, .special-merchant::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: radial-gradient(circle at top right, rgba(255, 215, 0, 0.1), transparent 70%);
+    pointer-events: none;
+  }
+  
+  .special-merchant-badge {
+    background-color: #b58c38;
+    color: white;
+    font-weight: bold;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    display: inline-block;
+    margin-left: 0.5rem;
+  }
+  
+  /* Card Header Improvements */
+  .merchant-header {
+    padding: 1rem;
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    align-items: center;
+    background-color: rgba(16, 24, 35, 0.3);
+    border-bottom: 1px solid rgba(138, 186, 179, 0.2);
+  }
+  
+  .merchant-title {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+  
+  .player-id-copy, .player-info-copy {
+    color: #8ABAB3;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    font-size: 1rem;
+    margin: 0;
+  }
+  
+  .player-id-copy:hover, .player-info-copy:hover {
+    color: white;
+  }
+  
+  .copy-icon {
+    opacity: 0.7;
+    transition: opacity 0.15s ease;
+  }
+  
+  .player-id-copy:hover .copy-icon, .player-info-copy:hover .copy-icon {
     opacity: 1;
   }
-}
+  
+  /* Items Display Improvements */
+  .items-section {
+    padding: 1rem;
+  }
+  
+  .items-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 0.75rem;
+    margin-top: 0.75rem;
+  }
+  
+  .item {
+    background-color: rgba(72, 114, 123, 0.15);
+    border-radius: 6px;
+    padding: 0.75rem;
+    border: 1px solid rgba(138, 186, 179, 0.15);
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+  
+  .item-name-container {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  
+  .item-name {
+    font-weight: 600;
+    font-size: 1rem;
+    color: #D6D8D9;
+  }
+  
+  .item-details {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 0.25rem;
+  }
+  
+  .item-category {
+    font-size: 0.8rem;
+    color: rgba(214, 216, 217, 0.7);
+    background-color: rgba(72, 114, 123, 0.2);
+    padding: 0.1rem 0.4rem;
+    border-radius: 4px;
+  }
+  
+  .price-tag, .exchange-tag {
+    font-size: 0.85rem;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.15rem 0.5rem;
+    border-radius: 4px;
+  }
+  
+  .price-tag {
+    background-color: rgba(156, 108, 44, 0.2);
+    color: #e3b96a;
+  }
+  
+  .exchange-tag {
+    background-color: rgba(72, 114, 123, 0.2);
+    color: #8ABAB3;
+  }
+  
+  /* Search and Filters */
+  .search-filter-section {
+    background-color: rgba(16, 24, 35, 0.7);
+    border-radius: 8px;
+    padding: 1.25rem;
+    margin-bottom: 1.5rem;
+    border: 1px solid rgba(138, 186, 179, 0.2);
+  }
+  
+  .search-input-container {
+    margin-bottom: 1rem;
+  }
+  
+  .search-input {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    background-color: rgba(255, 255, 255, 0.07);
+    border: 1px solid rgba(138, 186, 179, 0.3);
+    border-radius: 6px;
+    color: #D6D8D9;
+    font-size: 1rem;
+  }
+  
+  .search-input:focus {
+    outline: none;
+    border-color: #8ABAB3;
+    box-shadow: 0 0 0 2px rgba(138, 186, 179, 0.2);
+  }
+  
+  .filter-options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+  }
+  
+  .merchant-type-filter {
+    display: flex;
+    gap: 1rem;
+  }
+  
+  .filter-label {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    color: #D6D8D9;
+    font-size: 0.9rem;
+  }
+  
+  .filter-label input[type="checkbox"] {
+    appearance: none;
+    width: 16px;
+    height: 16px;
+    border: 1px solid rgba(138, 186, 179, 0.5);
+    border-radius: 3px;
+    background-color: rgba(255, 255, 255, 0.07);
+    display: grid;
+    place-content: center;
+    cursor: pointer;
+  }
+  
+  .filter-label input[type="checkbox"]::before {
+    content: "";
+    width: 10px;
+    height: 10px;
+    background-color: #8ABAB3;
+    transform: scale(0);
+    transition: transform 0.15s ease;
+    border-radius: 1px;
+  }
+  
+  .filter-label input[type="checkbox"]:checked::before {
+    transform: scale(1);
+  }
+  
+  .sort-options {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  
+  .sort-select {
+    background-color: rgba(72, 114, 123, 0.2);
+    border: 1px solid rgba(138, 186, 179, 0.3);
+    border-radius: 4px;
+    color: #D6D8D9;
+    padding: 0.3rem 1.75rem 0.3rem 0.5rem;
+    font-size: 0.85rem;
+    cursor: pointer;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%238ABAB3' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.5rem center;
+    background-size: 16px;
+    appearance: none;
+  }
+  
+  /* Category Buttons */
+  .category-filter {
+    background-color: rgba(16, 24, 35, 0.5);
+    border-radius: 6px;
+    padding: 1rem;
+    border: 1px solid rgba(138, 186, 179, 0.1);
+  }
+  
+  .category-filter h3 {
+    margin-bottom: 0.75rem;
+    color: #8ABAB3;
+    font-size: 0.9rem;
+    font-weight: 600;
+  }
+  
+  .category-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+  
+  .category-button {
+    background-color: rgba(72, 114, 123, 0.15);
+    border: 1px solid rgba(138, 186, 179, 0.25);
+    color: #D6D8D9;
+    border-radius: 4px;
+    padding: 0.35rem 0.5rem;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+  
+  .category-button:hover {
+    background-color: rgba(72, 114, 123, 0.3);
+    border-color: rgba(138, 186, 179, 0.5);
+  }
+  
+  .category-button.active {
+    background-color: rgba(72, 114, 123, 0.5);
+    border-color: #8ABAB3;
+    color: white;
+  }
+  
+  /* Copy Message */
+  .copy-message {
+    position: fixed;
+    bottom: 1rem;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: rgba(20, 59, 74, 0.9);
+    color: #D6D8D9;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    border: 1px solid #8ABAB3;
+    font-size: 0.9rem;
+    z-index: 1000;
+    animation: fadeIn 0.3s ease;
+  }
+  
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translate(-50%, 10px); }
+    to { opacity: 1; transform: translate(-50%, 0); }
+  }
+  
+  /* Form Styling Improvements */
+  .merchant-form-container, .special-merchant-form-container {
+    background-color: rgba(20, 59, 74, 0.8);
+    border-radius: 8px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(138, 186, 179, 0.2);
+  }
+  
+  .item-entry-container {
+    background-color: rgba(16, 24, 35, 0.5);
+    border-radius: 6px;
+    padding: 1.25rem;
+    margin-bottom: 1rem;
+    border: 1px solid rgba(138, 186, 179, 0.15);
+    position: relative;
+  }
+  
+  .form-group label {
+    color: #8ABAB3;
+    font-weight: 500;
+    margin-bottom: 0.35rem;
+    display: block;
+  }
+  
+  .form-group input, .form-group select, .form-group textarea {
+    width: 100%;
+    padding: 0.6rem;
+    background-color: rgba(255, 255, 255, 0.07);
+    border: 1px solid rgba(138, 186, 179, 0.3);
+    border-radius: 4px;
+    color: #D6D8D9;
+    font-size: 0.95rem;
+  }
+  
+  .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+    outline: none;
+    border-color: #8ABAB3;
+    box-shadow: 0 0 0 2px rgba(138, 186, 179, 0.2);
+  }
+  
+  .exchange-options {
+    display: flex;
+    gap: 1rem;
+    margin: 1rem 0;
+  }
+  
+  .exchange-option {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+  }
+  
+  .exchange-option input[type="radio"] {
+    appearance: none;
+    width: 18px;
+    height: 18px;
+    border: 1px solid rgba(138, 186, 179, 0.5);
+    border-radius: 50%;
+    background-color: rgba(255, 255, 255, 0.07);
+    display: grid;
+    place-content: center;
+    cursor: pointer;
+  }
+  
+  .exchange-option input[type="radio"]::before {
+    content: "";
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background-color: #8ABAB3;
+    transform: scale(0);
+    transition: transform 0.15s ease;
+  }
+  
+  .exchange-option input[type="radio"]:checked::before {
+    transform: scale(1);
+  }
+  
+  /* Button Styling */
+  .submit-btn, .add-item-btn, .remove-item-btn {
+    cursor: pointer;
+    transition: all 0.15s ease;
+    border: none;
+    border-radius: 4px;
+    font-weight: 500;
+  }
+  
+  .submit-btn {
+    background-color: #48727B;
+    color: white;
+    padding: 0.75rem 1rem;
+    width: 100%;
+    font-size: 1rem;
+    margin-top: 1rem;
+  }
+  
+  .submit-btn:hover {
+    background-color: #5a8691;
+    transform: translateY(-2px);
+  }
+  
+  .submit-btn:disabled {
+    background-color: rgba(72, 114, 123, 0.5);
+    cursor: not-allowed;
+    transform: none;
+  }
+  
+  .add-item-btn {
+    background-color: rgba(72, 114, 123, 0.2);
+    color: #8ABAB3;
+    padding: 0.5rem;
+    width: 100%;
+    margin-bottom: 1rem;
+    border: 1px dashed rgba(138, 186, 179, 0.4);
+  }
+  
+  .add-item-btn:hover {
+    background-color: rgba(72, 114, 123, 0.3);
+  }
+  
+  .remove-item-btn {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    background-color: rgba(244, 67, 54, 0.1);
+    color: #ff8a80;
+    font-size: 0.8rem;
+    padding: 0.2rem 0.5rem;
+  }
+  
+  .remove-item-btn:hover {
+    background-color: rgba(244, 67, 54, 0.2);
+  }
+  
+  /* Navigation Bar Improvements */
+  .navigation-bar {
+    background-color: rgba(16, 24, 35, 0.95);
+    backdrop-filter: blur(10px);
+    padding: 0.75rem 1.5rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    border-bottom: 1px solid rgba(138, 186, 179, 0.2);
+  }
+  
+  .logo a {
+    color: #8ABAB3;
+    font-weight: 700;
+    font-size: 1.25rem;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  
+  .logo a::before {
+    content: "⚡";
+    font-size: 1.2em;
+  }
+  
+  .nav-links {
+    display: flex;
+    gap: 1rem;
+  }
+  
+  .nav-links li a {
+    color: #D6D8D9;
+    text-decoration: none;
+    padding: 0.5rem 0.75rem;
+    border-radius: 4px;
+    transition: all 0.15s ease;
+  }
+  
+  .nav-links li a:hover {
+    background-color: rgba(138, 186, 179, 0.1);
+    color: #8ABAB3;
+  }
+  
+  /* Media Queries for Responsive Design */
+  @media (max-width: 768px) {
+    .items-list {
+      grid-template-columns: 1fr;
+    }
+    
+    .filter-options {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+    
+    .merchant-type-filter, .sort-options {
+      width: 100%;
+      margin-bottom: 0.5rem;
+    }
+    
+    .navigation-bar {
+      padding: 0.75rem 1rem;
+    }
+    
+    .nav-links {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      flex-direction: column;
+      background-color: rgba(16, 24, 35, 0.95);
+      padding: 0.5rem 0;
+      display: none;
+      border-bottom: 1px solid rgba(138, 186, 179, 0.2);
+    }
+    
+    .nav-links.show {
+      display: flex;
+    }
+    
+    .nav-links li {
+      width: 100%;
+    }
+    
+    .nav-links li a {
+      display: block;
+      padding: 0.75rem 1.5rem;
+      border-radius: 0;
+    }
+    
+    .menu-toggle {
+      display: block;
+    }
+  }
+  
+  @media (min-width: 769px) {
+    .menu-toggle {
+      display: none;
+    }
+    
+    .nav-links {
+      display: flex !important;
+      position: static;
+      padding: 0;
+      background: none;
+      border: none;
+    }
+    
+    .merchant-header {
+      padding: 1rem 1.25rem;
+    }
+    
+    .items-section {
+      padding: 1.25rem;
+    }
+  }
+  
+  /* Dark mode enhancements */
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --shadow-color: rgba(0, 0, 0, 0.3);
+    }
+    
+    .item-entry-container {
+      background-color: rgba(16, 24, 35, 0.7);
+    }
+    
+    .search-filter-section {
+      background-color: rgba(16, 24, 35, 0.8);
+    }
+  }
 
-/* Specific page styles */
-.home-page {
-  animation: fadeIn 0.5s ease-out;
-}
-
-.add-merchant-page,
-.add-special-merchant-page,
-.edit-merchant-page {
-  animation: fadeIn 0.5s ease-out;
-}
-
-/* Custom scrollbar */
-::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-}
-
-::-webkit-scrollbar-track {
-  background: rgba(15, 50, 64, 0.3);
-}
-
-::-webkit-scrollbar-thumb {
-  background-color: var(--color-accent);
-  border-radius: 4px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background-color: var(--color-light-accent);
-}
+  @import './animations.css';

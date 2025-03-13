@@ -1,0 +1,200 @@
+/* Custom Animations for ToS Merchant Tracker */
+
+/* Fade in animation for content */
+@keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  /* Subtle pulse animation for interactive elements */
+  @keyframes pulse {
+    0% {
+      box-shadow: 0 0 0 0 rgba(138, 186, 179, 0.4);
+    }
+    70% {
+      box-shadow: 0 0 0 6px rgba(138, 186, 179, 0);
+    }
+    100% {
+      box-shadow: 0 0 0 0 rgba(138, 186, 179, 0);
+    }
+  }
+  
+  /* Lightning effect for important UI elements */
+  @keyframes lightning {
+    0% {
+      box-shadow: 0 0 5px 0 rgba(138, 186, 179, 0);
+    }
+    5% {
+      box-shadow: 0 0 20px 2px rgba(138, 186, 179, 0.6);
+    }
+    10% {
+      box-shadow: 0 0 5px 0 rgba(138, 186, 179, 0);
+    }
+    20% {
+      box-shadow: 0 0 5px 0 rgba(138, 186, 179, 0);
+    }
+    30% {
+      box-shadow: 0 0 15px 1px rgba(138, 186, 179, 0.4);
+    }
+    35% {
+      box-shadow: 0 0 5px 0 rgba(138, 186, 179, 0);
+    }
+    100% {
+      box-shadow: 0 0 5px 0 rgba(138, 186, 179, 0);
+    }
+  }
+  
+  /* Staggered fade-in for merchant cards */
+  .merchants-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.25rem;
+  }
+  
+  .merchant-card {
+    animation: fadeIn 0.5s ease backwards;
+  }
+  
+  .merchant-card:nth-child(1) { animation-delay: 0.05s; }
+  .merchant-card:nth-child(2) { animation-delay: 0.1s; }
+  .merchant-card:nth-child(3) { animation-delay: 0.15s; }
+  .merchant-card:nth-child(4) { animation-delay: 0.2s; }
+  .merchant-card:nth-child(5) { animation-delay: 0.25s; }
+  .merchant-card:nth-child(6) { animation-delay: 0.3s; }
+  .merchant-card:nth-child(7) { animation-delay: 0.35s; }
+  .merchant-card:nth-child(8) { animation-delay: 0.4s; }
+  .merchant-card:nth-child(9) { animation-delay: 0.45s; }
+  
+  /* Content sections fade in */
+  .page h1,
+  .page .description,
+  .search-filter-section {
+    animation: fadeIn 0.6s ease;
+  }
+  
+  /* Button hover animations */
+  .submit-btn:hover,
+  .category-button.active,
+  .price-tag,
+  .special-merchant-badge {
+    animation: pulse 2s infinite;
+  }
+  
+  /* Nav links subtle animation */
+  .nav-links li a {
+    position: relative;
+  }
+  
+  .nav-links li a::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    width: 0;
+    height: 2px;
+    background-color: #8ABAB3;
+    transition: width 0.3s ease, left 0.3s ease;
+  }
+  
+  .nav-links li a:hover::after {
+    width: 100%;
+    left: 0;
+  }
+  
+  /* Special merchant card glowing effect */
+  .special-merchant-card {
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .special-merchant-card::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background-color: #b58c38;
+    animation: lightning 15s infinite;
+  }
+  
+  /* Page transitions */
+  .main-content {
+    animation: fadeIn 0.4s ease;
+  }
+  
+  /* Floating notification animation */
+  @keyframes float-notification {
+    0% { 
+      opacity: 0;
+      transform: translate(-50%, 20px);
+    }
+    10% { 
+      opacity: 1;
+      transform: translate(-50%, 0);
+    }
+    90% { 
+      opacity: 1;
+      transform: translate(-50%, 0);
+    }
+    100% { 
+      opacity: 0;
+      transform: translate(-50%, -10px);
+    }
+  }
+  
+  .copy-message {
+    animation: float-notification 3s forwards;
+  }
+  
+  /* Loading spinner animation */
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+  
+  .loading-indicator {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 2rem 0;
+  }
+  
+  .loading-indicator::before {
+    content: "";
+    width: 40px;
+    height: 40px;
+    border: 3px solid rgba(138, 186, 179, 0.2);
+    border-radius: 50%;
+    border-top-color: #8ABAB3;
+    animation: spin 1s infinite linear;
+  }
+  
+  /* Item hover effect */
+  .item {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+  
+  .item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+  
+  /* Button click animation */
+  @keyframes button-click {
+    0% { transform: scale(0.95); }
+    100% { transform: scale(1); }
+  }
+  
+  .submit-btn:active,
+  .add-item-btn:active,
+  .remove-item-btn:active,
+  .category-button:active {
+    animation: button-click 0.2s ease;
+  }
