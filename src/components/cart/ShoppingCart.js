@@ -39,14 +39,8 @@ const ShoppingCart = () => {
             const savedCart = localStorage.getItem('shoppingCart');
             const cart = savedCart ? JSON.parse(savedCart) : [];
             
-            // 更寬鬆的篩選條件
-            const validCart = cart.filter(item => 
-                item && 
-                item.itemName && 
-                item.playerId && 
-                (item.quantity || 0) > 0 && 
-                (item.availableQuantity || 0) > 0
-            );
+            // 篩選出有效的購物車商品（數量 > 0 且可購買數量 > 0）
+            const validCart = cart.filter(item => item.quantity > 0 && item.availableQuantity > 0);
             
             return validCart;
         } catch (error) {
@@ -77,26 +71,14 @@ const ShoppingCart = () => {
 
     // Handle cart persistence and synchronization
     useEffect(() => {
-        // 只要有用戶，就持久化購物車
-        if (user) {
+        // 只有在有效商品且有用戶時才持久化
+        const validCartItems = cartItems.filter(item => item.quantity > 0 && item.availableQuantity > 0);
+        
+        if (validCartItems.length > 0 && user) {
             try {
-                // 篩選出有效的購物車商品
-                const validCartItems = cartItems.filter(item => 
-                    item && 
-                    item.itemName && 
-                    item.playerId && 
-                    (item.quantity || 0) > 0 && 
-                    (item.availableQuantity || 0) > 0
-                );
-
-                // 儲存所有有效商品
-                if (validCartItems.length > 0) {
-                    localStorage.setItem('shoppingCart', JSON.stringify(validCartItems));
-                    updateUserCart(user.userId, validCartItems);
-                } else {
-                    // 如果沒有有效商品，也清除 localStorage
-                    localStorage.removeItem('shoppingCart');
-                }
+                // 只儲存有效商品
+                localStorage.setItem('shoppingCart', JSON.stringify(validCartItems));
+                updateUserCart(user.userId, validCartItems);
 
                 // 通知其他元件
                 const cartUpdatedEvent = new CustomEvent('cartUpdated', {
@@ -106,6 +88,9 @@ const ShoppingCart = () => {
             } catch (error) {
                 console.error('Error saving cart:', error);
             }
+        } else {
+            // 如果購物車為空，清除 localStorage
+            localStorage.removeItem('shoppingCart');
         }
     }, [cartItems, user]); 
 
