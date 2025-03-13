@@ -32,7 +32,7 @@ function NavigationBar() {
   return (
     <nav className="navigation-bar">
       <div className="logo">
-        <Link to="/">ToS Merchant Tracker</Link>
+        <Link to="/">Tree of Savior</Link>
       </div>
       
       {/* Keep your existing mobile menu toggle button */}

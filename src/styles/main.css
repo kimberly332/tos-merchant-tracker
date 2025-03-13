@@ -1,6 +1,6 @@
 /* 
  * Enhanced main.css
- * Improved styling for the ToS Merchant Tracker app 
+ * Improved styling for the Tree of Savior app 
  */
 
 /* Base Typography Improvements */
@@ -190,6 +190,7 @@ body {
   }
   
   .search-input-container {
+    display: flex;
     margin-bottom: 1rem;
   }
   
@@ -337,10 +338,37 @@ body {
     z-index: 1000;
     animation: fadeIn 0.3s ease;
   }
+
+  .home-page {
+    animation: fadeIn 1.2s ease-out; /* Changed from 0.5s to 1.2s for a slower animation */
+  }
   
   @keyframes fadeIn {
-    from { opacity: 0; transform: translate(-50%, 10px); }
-    to { opacity: 1; transform: translate(-50%, 0); }
+    from { 
+      opacity: 0; 
+      transform: translateY(10px); /* Only move vertically */
+    }
+    to { 
+      opacity: 1; 
+      transform: translateY(0); 
+    }
+  }
+
+  /* And for specific elements that need centered animations */
+@keyframes fadeInCentered {
+    from { 
+      opacity: 0; 
+      transform: translate(-50%, 10px); 
+    }
+    to { 
+      opacity: 1; 
+      transform: translate(-50%, 0); 
+    }
+  }
+  
+  /* Then use this for centered elements like notifications */
+  .copy-message {
+    animation: fadeInCentered 3s forwards;
   }
   
   /* Form Styling Improvements */
@@ -512,6 +540,10 @@ body {
   .nav-links {
     display: flex;
     gap: 1rem;
+  }
+
+  .nav-links li {
+    list-style-type: none;
   }
   
   .nav-links li a {
