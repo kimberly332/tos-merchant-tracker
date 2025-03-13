@@ -5,6 +5,7 @@ import HomePage from './pages/HomePage';
 import AddMerchantPage from './pages/AddMerchantPage';
 import EditMerchantPage from './pages/EditMerchantPage';
 import LoginPage from './pages/LoginPage';
+import UserGuidePage from './pages/UserGuidePage'; // 新增使用說明頁面
 import ShoppingCart from './components/cart/ShoppingCart';
 import { checkUserAuth } from './firebase/userAuth';
 import './styles/main.css';
@@ -44,6 +45,13 @@ function App() {
           <Routes>
             {/* 公開路由 */}
             <Route path="/login" element={<LoginPage />} />
+            
+            {/* 新增使用說明頁面 */}
+            <Route path="/guide" element={
+              <ProtectedRoute>
+                <UserGuidePage />
+              </ProtectedRoute>
+            } />
             
             {/* 受保護的路由 */}
             <Route path="/" element={

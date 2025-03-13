@@ -1,0 +1,159 @@
+/* 
+ * guide.css
+ * Styling for the user guide component - Dark Blue Theme
+ */
+
+ .guide-container {
+    background-color: rgba(16, 24, 35, 0.6);
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+    border: 1px solid rgba(72, 114, 123, 0.3);
+  }
+  
+  .guide-intro {
+    margin-bottom: 20px;
+    line-height: 1.6;
+    color: #D6D8D9;
+  }
+  
+  /* Guide menu styling */
+  .guide-menu {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+  
+  .guide-menu-item {
+    background-color: rgba(16, 24, 35, 0.6);
+    border: 1px solid rgba(72, 114, 123, 0.3);
+    border-radius: 4px;
+    padding: 8px 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #D6D8D9;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 14px;
+  }
+  
+  .guide-menu-item:hover {
+    background-color: rgba(72, 114, 123, 0.3);
+  }
+  
+  .guide-menu-item.active {
+    background-color: rgba(72, 114, 123, 0.4);
+    border-color: #8ABAB3;
+    color: #8ABAB3;
+  }
+  
+  .guide-menu-icon {
+    font-size: 16px;
+  }
+  
+  /* Guide content styling */
+  .guide-content {
+    background-color: rgba(16, 24, 35, 0.6);
+    border-radius: 8px;
+    border: 1px solid rgba(72, 114, 123, 0.3);
+    padding: 20px;
+    min-height: 300px;
+  }
+  
+  .guide-section {
+    animation: fadeIn 0.4s ease-out;
+  }
+  
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  .guide-section-title {
+    color: #8ABAB3;
+    font-size: 18px;
+    margin-bottom: 15px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid rgba(72, 114, 123, 0.3);
+  }
+  
+  .guide-section-content {
+    line-height: 1.6;
+    color: #D6D8D9;
+  }
+  
+  .guide-section-content p {
+    margin-bottom: 15px;
+  }
+  
+  .guide-section-content strong {
+    color: #8ABAB3;
+    font-weight: 500;
+  }
+  
+  /* Guide lists */
+  .guide-list {
+    margin: 15px 0;
+    padding-left: 25px;
+  }
+  
+  .guide-list li {
+    margin-bottom: 10px;
+    color: #D6D8D9;
+  }
+  
+  .guide-list.numbered {
+    list-style-type: decimal;
+  }
+  
+  .guide-list:not(.numbered) {
+    list-style-type: disc;
+  }
+  
+  /* Guide tip box */
+  .guide-tip {
+    background-color: rgba(16, 24, 35, 0.8);
+    border-left: 3px solid #8ABAB3;
+    padding: 12px;
+    margin: 15px 0;
+    font-size: 14px;
+    color: #8ABAB3;
+  }
+  
+  .guide-tip p {
+    margin: 0;
+  }
+  
+  /* Guide footer */
+  .guide-footer {
+    text-align: center;
+    padding: 15px;
+    border-top: 1px solid rgba(72, 114, 123, 0.3);
+    margin-top: 20px;
+    color: #8ABAB3;
+    font-size: 14px;
+  }
+  
+  /* Responsive adjustments */
+  @media (max-width: 768px) {
+    .guide-menu {
+      grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .guide-content {
+      padding: 15px;
+    }
+  }
+  
+  /* User guide page */
+  .user-guide-page {
+    animation: fadeIn 0.5s ease-out;
+  }

@@ -1,4 +1,5 @@
 // src/components/layout/NavigationBar.js
+// 更新：添加使用說明頁面的導航鏈接
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { checkUserAuth, logoutUser } from '../../firebase/userAuth';
@@ -35,7 +36,7 @@ function NavigationBar() {
 
   // 檢查是否在登入頁面
   const isLoginPage = location.pathname === '/login';
-
+  
   return (
     <nav className="navigation-bar">
       <div className="logo">
@@ -62,6 +63,9 @@ function NavigationBar() {
             </li>
             <li>
               <Link to="/add-merchant" onClick={closeMobileMenu}>新增商人</Link>
+            </li>
+            <li>
+              <Link to="/guide" onClick={closeMobileMenu}>使用說明</Link>
             </li>
             <li>
               <button

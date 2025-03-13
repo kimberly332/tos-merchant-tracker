@@ -718,6 +718,11 @@ body {
     .nav-links li {
       width: 100%;
     }
+
+    .nav-links li .logout-btn {
+      width: unset;
+      margin: 0 1.5rem 0.75rem 1.5rem;
+    }
     
     .nav-links li a,
     .nav-links li div.user-info {
@@ -979,8 +984,10 @@ body {
 }
 
   /* Import auth.css for user authentication styles */
-  @import './components/auth.css';
-  
+  @import './components/auth.css';  
   @import './components/merchants.css';
   @import './animations.css';
   @import './components/notifications.css';
+  @import './components/guide.css'; 
+
+  
