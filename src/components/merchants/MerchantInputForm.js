@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { addMerchant } from '../../firebase/firestore';
+import SearchableSelect from '../common/SearchableSelect';
+import '../common/SearchableSelect.css';
 
 function MerchantInputForm() {
   const [formData, setFormData] = useState({
@@ -461,24 +463,17 @@ function MerchantInputForm() {
               <div className="item-entry">
                 <div className="form-group">
                   <label htmlFor={`category-${index}`}>物品名稱</label>
-                  <select
-                    id={`category-${index}`}
-                    name="category"
-                    value={item.category}
-                    onChange={(e) => handleItemChange(index, e)}
-                    required
-                  >
-                    <option value="" disabled>請選擇物品</option>
-                    {categoryGroups.map((group) => (
-                      <optgroup key={group.name} label={group.name}>
-                        {group.items.map((categoryItem) => (
-                          <option key={categoryItem} value={categoryItem}>
-                            {categoryItem}
-                          </option>
-                        ))}
-                      </optgroup>
-                    ))}
-                  </select>
+                  <SearchableSelect
+    groups={categoryGroups}
+    value={item.category}
+    onChange={(value) => handleItemChange(index, { 
+      target: { name: 'category', value } 
+    })}
+    placeholder="請選擇物品"
+    id={`category-${index}`}
+    name="category"
+    required={true}
+  />
                 </div>
 
                 {/* 當選擇「其他」時顯示自定義輸入框 */}
@@ -585,27 +580,20 @@ function MerchantInputForm() {
               {item.allowsBarterExchange && (
                 <div className="exchange-fields">
                   <div className="barter-item-entry">
-                    <div className="form-group">
-                      <label htmlFor={`exchange-item-${index}`}>交換物品名稱</label>
-                      <select
-                        id={`exchange-item-${index}`}
-                        name="exchangeItemName"
-                        value={item.exchangeItemName}
-                        onChange={(e) => handleItemChange(index, e)}
-                        required={item.allowsBarterExchange}
-                      >
-                        <option value="" disabled>請選擇交換物品</option>
-                        {exchangeCategoryGroups.map((group) => (
-                          <optgroup key={group.name} label={group.name}>
-                            {group.items.map((exchangeItem) => (
-                              <option key={exchangeItem} value={exchangeItem}>
-                                {exchangeItem}
-                              </option>
-                            ))}
-                          </optgroup>
-                        ))}
-                      </select>
-                    </div>
+                  <div className="form-group">
+                    <label htmlFor={`exchange-item-${index}`}>交換物品名稱</label>
+                    <SearchableSelect
+                      groups={exchangeCategoryGroups}
+                      value={item.exchangeItemName}
+                      onChange={(value) => handleItemChange(index, { 
+                        target: { name: 'exchangeItemName', value } 
+                      })}
+                      placeholder="請選擇交換物品"
+                      id={`exchange-item-${index}`}
+                      name="exchangeItemName"
+                      required={item.allowsBarterExchange}
+                    />
+                  </div>
                     
                     {/* 當選擇「其他」作為交換物品時顯示自定義輸入框 */}
                     {item.exchangeItemName === '其他' && (
