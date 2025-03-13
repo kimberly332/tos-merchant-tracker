@@ -10,10 +10,19 @@ function UserProfile() {
   
   // 伺服器名稱映射
   const serverNames = {
-    'varena': 'Varena',
-    'saalfeld': 'Saalfeld',
-    'fedimian': 'Fedimian',
-    'klaipeda': 'Klaipeda'
+    'morning_harbor': '晨曦海港',
+    'endless_seas': '無盡海域',
+    'harbor_lights': '港灣燈火',
+    'whisper_beach': '輕語海灘',
+    'narrow_coast': '狹長海岸',
+    'sea_breeze_pier': '海風碼頭',
+    'summer_shallows': '盛夏淺灘',
+    'winter_warmth_snow_route': '冬日暖屋&覆雪之路',
+    'snow_traveler_winter_lake': '雪夜旅人&冬湖冰泉',
+    'cargo_bay_sunshine_orchard': '貨運海灣&陽光果叢',
+    'forest_hill_sunlit_path_dense_canyon': '林中山丘&沐光小徑&密林峽谷',
+    'valley_sunset_mountain_trail_canyon_spring': '谷間餘暉&山嶺古道&峽谷清泉',
+    'ancient_exploration_dark_cave_trial_path': '尋覓古跡&幽暗地洞&試煉之路'
   };
   
   // 檢查用戶登入狀態

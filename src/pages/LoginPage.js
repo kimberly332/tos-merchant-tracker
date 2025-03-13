@@ -15,10 +15,19 @@ function LoginPage() {
   
   // 伺服器選項
   const serverOptions = [
-    { id: 'varena', name: 'Varena' },
-    { id: 'saalfeld', name: 'Saalfeld' },
-    { id: 'fedimian', name: 'Fedimian' },
-    { id: 'klaipeda', name: 'Klaipeda' }
+    { id: 'morning_harbor', name: '晨曦海港' },
+    { id: 'endless_seas', name: '無盡海域' },
+    { id: 'harbor_lights', name: '港灣燈火' },
+    { id: 'whisper_beach', name: '輕語海灘' },
+    { id: 'narrow_coast', name: '狹長海岸' },
+    { id: 'sea_breeze_pier', name: '海風碼頭' },
+    { id: 'summer_shallows', name: '盛夏淺灘' },
+    { id: 'winter_warmth_snow_route', name: '冬日暖屋&覆雪之路' },
+    { id: 'snow_traveler_winter_lake', name: '雪夜旅人&冬湖冰泉' },
+    { id: 'cargo_bay_sunshine_orchard', name: '貨運海灣&陽光果叢' },
+    { id: 'forest_hill_sunlit_path_dense_canyon', name: '林中山丘&沐光小徑&密林峽谷' },
+    { id: 'valley_sunset_mountain_trail_canyon_spring', name: '谷間餘暉&山嶺古道&峽谷清泉' },
+    { id: 'ancient_exploration_dark_cave_trial_path', name: '尋覓古跡&幽暗地洞&試煉之路' }
   ];
   
   // 檢查用戶是否已登入
@@ -137,7 +146,6 @@ function LoginPage() {
               placeholder="輸入您的遊戲ID"
               required
             />
-            {/* <small>可以是英文/中文/包含各種符號</small> */}
           </div>
           
           <button 
