@@ -2,7 +2,6 @@
 import React, { useState, useEffect } from 'react';
 
 const MerchantItem = ({ item, merchantInfo }) => {
-  const [isHighlighted, setIsHighlighted] = useState(false);
   const [isInCart, setIsInCart] = useState(false);
   
   // Check if item is in cart when component mounts and when cart changes
@@ -71,10 +70,6 @@ const MerchantItem = ({ item, merchantInfo }) => {
         detail: cartItem
       });
       window.dispatchEvent(addToCartEvent);
-  
-      // Highlight the item briefly when first added
-      setIsHighlighted(true);
-      setTimeout(() => setIsHighlighted(false), 500);
       
       // Mark item as in cart
       setIsInCart(true);
@@ -83,7 +78,7 @@ const MerchantItem = ({ item, merchantInfo }) => {
 
   return (
     <li 
-      className={`item ${isHighlighted ? 'highlight-item' : ''} ${isInCart ? 'in-cart' : ''}`}
+      className={`item ${isInCart ? 'in-cart' : ''}`}
       onClick={handleToggleCart}
     >
       <div className="item-name-container">
@@ -118,26 +113,14 @@ const MerchantItem = ({ item, merchantInfo }) => {
         )}
       </div>
       
-      <div className="add-to-cart-hint">
+      {/* Show appropriate icon based on cart status */}
+      <div className="in-cart-badge">
         {isInCart ? (
-            <>
-            <i className="fas fa-trash-alt"></i>
-            <span>移除商品</span>
-            </>
-        ) : (
-            <>
-            <i className="fas fa-cart-plus"></i>
-            <span>加入購物車</span>
-            </>
-        )}
-       </div>
-      
-      {/* 顯示在購物車中的標記 */}
-      {isInCart && (
-        <div className="in-cart-badge">
           <i className="fas fa-shopping-cart"></i>
-        </div>
-      )}
+        ) : (
+          <i className="fas fa-plus"></i>
+        )}
+      </div>
     </li>
   );
 };

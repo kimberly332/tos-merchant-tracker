@@ -311,19 +311,30 @@ function MerchantInputForm() {
       ...updatedItems[index],
       [name]: value
     };
-
+    
     // Check if current item is 家園幣
     const isHomeToken = value === '家園幣';
     if (name === 'category' && isHomeToken) {
       setIsSpecialMerchant(true);
-
+      
       // For 家園幣, force barter exchange and disable coin exchange
       updatedItems[index].allowsCoinExchange = false;
       updatedItems[index].allowsBarterExchange = true;
     } else if (name === 'category' && !isHomeToken && updatedItems.every(item => item.category !== '家園幣')) {
       setIsSpecialMerchant(false);
     }
-
+    
+    // 修改這部分：當編輯物品總數量時，不再自動更新可購買數量
+    // 只有當可購買數量大於新的總數量時，才進行調整
+    if (name === 'quantity') {
+      const totalQuantity = Number(value);
+      const availableQuantity = Number(updatedItems[index].availableQuantity);
+      
+      if (availableQuantity > totalQuantity && totalQuantity > 0) {
+        updatedItems[index].availableQuantity = value;
+      }
+    }
+    
     setFormData(prev => ({
       ...prev,
       items: updatedItems
@@ -370,21 +381,23 @@ function MerchantInputForm() {
     }));
   };
 
+  // 在handleSubmit函數中，修改處理數據的邏輯
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSubmitting(true);
     setSubmitResult(null);
 
-    // 處理數據
+    // 處理數據，增加數量預設值處理
     const processedData = {
       ...formData,
       isSpecialMerchant,
       items: formData.items.map(item => ({
         ...item,
-        price: Number(item.price),
-        quantity: Number(item.quantity),
-        availableQuantity: Number(item.availableQuantity), // 處理可購買數量
-        exchangeQuantity: Number(item.exchangeQuantity),
+        // 設置預設值為1，如果用戶沒有填寫或填寫為空
+        price: Number(item.price || 0),
+        quantity: Number(item.quantity || 1),  // 如果未填寫則預設為1
+        availableQuantity: Number(item.availableQuantity || 1), // 如果未填寫則預設為1
+        exchangeQuantity: Number(item.exchangeQuantity || 1),
         itemName: item.category === '其他' ? item.customItem : item.category,
         exchangeItemName: item.exchangeItemName === '其他' ? item.customExchangeItem : item.exchangeItemName
       }))
@@ -401,10 +414,6 @@ function MerchantInputForm() {
           message: '商人資訊已成功提交！謝謝您的分享。'
         });
 
-        // 顯示成功通知
-        setNotificationMessage('商人資訊已成功提交！');
-        setShowNotification(true);
-
         // Reset form
         setFormData({
           playerId: '',
@@ -412,14 +421,14 @@ function MerchantInputForm() {
           items: [{
             category: '',
             customItem: '',
-            quantity: '1',
-            availableQuantity: '1', // 添加可購買數量欄位
+            quantity: '',  // 變更為空字串，讓預設機制生效
+            availableQuantity: '', // 變更為空字串，讓預設機制生效
             price: '',
             allowsCoinExchange: true,
             allowsBarterExchange: false,
             exchangeItemName: '',
             customExchangeItem: '',
-            exchangeQuantity: '1'
+            exchangeQuantity: ''  // 變更為空字串，讓預設機制生效
           }]
         });
         setIsSpecialMerchant(false);
@@ -526,12 +535,12 @@ function MerchantInputForm() {
                     value={item.quantity}
                     onChange={(e) => handleItemChange(index, e)}
                     min="1"
-                    placeholder="1"
-                    required
+                    placeholder="預設為1"
                   />
+                  <small>如未填寫則預設為1</small>
                 </div>
 
-                {/* 新增: 可購買數量欄位 */}
+                {/* 可購買數量欄位的更新 */}
                 <div className="form-group form-group-spacing">
                   <label htmlFor={`availableQuantity-${index}`}>本攤位可購入次數</label>
                   <input
@@ -541,11 +550,9 @@ function MerchantInputForm() {
                     value={item.availableQuantity}
                     onChange={(e) => handleItemChange(index, e)}
                     min="1"
-                    // max={item.quantity}
-                    placeholder="1"
-                    required
+                    placeholder="預設為1"
                   />
-                  {/* <small>此攤位可購買的總數量 (不可超過物品總數量)</small> */}
+                  <small>如未填寫則預設為1</small>
                 </div>
               </div>
             </div>
@@ -636,6 +643,7 @@ function MerchantInputForm() {
                       </div>
                     )}
 
+                    {/* 交換數量輸入欄位的更新 */}
                     <div className="form-group">
                       <label htmlFor={`exchange-quantity-${index}`}>交換數量</label>
                       <input
@@ -645,10 +653,10 @@ function MerchantInputForm() {
                         value={item.exchangeQuantity}
                         onChange={(e) => handleItemChange(index, e)}
                         min="1"
-                        placeholder="1"
+                        placeholder="預設為1"
                         required={item.allowsBarterExchange}
                       />
-                      <small>交換所需的數量</small>
+                      <small>如未填寫則預設為1</small>
                     </div>
                   </div>
                 </div>
@@ -673,28 +681,27 @@ function MerchantInputForm() {
         >
           添加更多商品
         </button>
+        <button 
+  type="submit" 
+  className="submit-btn" 
+  disabled={submitting || formData.items.some(item => 
+    (!item.allowsCoinExchange && !item.allowsBarterExchange) || 
+    (item.allowsCoinExchange && item.price === '') ||
+    (item.allowsBarterExchange && item.exchangeItemName === '') 
+    // 移除了對數量欄位的必填檢查
+  )}
+>
+  {submitting ? '提交中...' : '提交商人資訊'}
+</button>
 
-        <button
-          type="submit"
-          className="submit-btn"
-          disabled={submitting || formData.items.some(item =>
-            (!item.allowsCoinExchange && !item.allowsBarterExchange) ||
-            (item.allowsCoinExchange && item.price === '') ||
-            (item.allowsBarterExchange && item.exchangeItemName === '') ||
-            Number(item.quantity) < 1 || // 確保可購數量不超過總數量
-            Number(item.availableQuantity) < 1 // 確保可購數量至少為1
-          )}
-        >
-          {submitting ? '提交中...' : '提交商人資訊'}
-        </button>
       </form>
       {/* 成功通知 */}
-    {showNotification && (
-      <SuccessNotification 
-        message={notificationMessage}
-        onClose={() => setShowNotification(false)}
-      />
-    )}
+      {showNotification && (
+        <SuccessNotification
+          message={notificationMessage}
+          onClose={() => setShowNotification(false)}
+        />
+      )}
     </div>
   );
 }

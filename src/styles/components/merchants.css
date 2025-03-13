@@ -273,3 +273,14 @@
   font-size: 0.8rem;
   margin-right: 0.25rem;
 }
+
+/* Remove the hover overlay */
+.add-to-cart-hint {
+  display: none;
+}
+
+/* Make sure the item styling still works for mobile touch */
+.item:active {
+  background-color: rgba(72, 114, 123, 0.3);
+  transition: background-color 0.1s ease;
+}
