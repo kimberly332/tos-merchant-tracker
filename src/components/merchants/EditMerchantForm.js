@@ -15,7 +15,6 @@ function EditMerchantForm() {
     playerId: '',
     discount: '',
     items: []
-    // Removed: location, exchangeRate, totalAmount
   });
   
   const [isSpecialMerchant, setIsSpecialMerchant] = useState(false);
@@ -270,6 +269,8 @@ function EditMerchantForm() {
             category: item.category || (item.itemName === '家園幣' ? '家園幣' : '其他'),
             customItem: item.category === '其他' ? item.itemName : '',
             quantity: item.quantity?.toString() || '1',
+            // 添加可購買數量欄位，如果存在則使用，否則默認為物品總數量
+            availableQuantity: item.availableQuantity?.toString() || item.quantity?.toString() || '1',
             price: item.price ? item.price.toString() : '',
             allowsCoinExchange: item.allowsCoinExchange || false,
             allowsBarterExchange: item.allowsBarterExchange || false,
@@ -345,6 +346,16 @@ function EditMerchantForm() {
       setIsSpecialMerchant(false);
     }
     
+    // 確保可購買數量不超過總數量
+    if (name === 'quantity') {
+      const totalQuantity = Number(value);
+      const availableQuantity = Number(updatedItems[index].availableQuantity);
+      
+      if (availableQuantity > totalQuantity) {
+        updatedItems[index].availableQuantity = value;
+      }
+    }
+    
     setFormData(prev => ({
       ...prev,
       items: updatedItems
@@ -355,9 +366,10 @@ function EditMerchantForm() {
     setFormData(prev => ({
       ...prev,
       items: [...prev.items, { 
-        category: '其他', 
+        category: '', 
         customItem: '',
-        quantity: '1', 
+        quantity: '1',
+        availableQuantity: '1', // 添加可購買數量欄位 
         price: '', 
         allowsCoinExchange: true,
         allowsBarterExchange: false,
@@ -395,6 +407,7 @@ function EditMerchantForm() {
         ...item,
         price: Number(item.price),
         quantity: Number(item.quantity),
+        availableQuantity: Number(item.availableQuantity), // 處理可購買數量
         exchangeQuantity: Number(item.exchangeQuantity),
         itemName: item.category === '其他' ? item.customItem : item.category,
         exchangeItemName: item.exchangeItemName === '其他' ? item.customExchangeItem : item.exchangeItemName
@@ -488,8 +501,6 @@ function EditMerchantForm() {
           <small>不可更改遊戲ID</small>
         </div>
         
-        {/* Removed five merchant fields (location, exchangeRate, totalAmount) */}
-        
         <div className="form-group">
           <label htmlFor="discount">今日折扣</label>
           <input
@@ -552,7 +563,7 @@ function EditMerchantForm() {
                 )}
               
                 <div className="form-group form-group-spacing">
-                  <label htmlFor={`quantity-${index}`}>數量</label>
+                  <label htmlFor={`quantity-${index}`}>物品總數量</label>
                   <input
                     type="number"
                     id={`quantity-${index}`}
@@ -563,6 +574,23 @@ function EditMerchantForm() {
                     placeholder="1"
                     required
                   />
+                </div>
+                
+                {/* 新增: 可購買數量欄位 */}
+                <div className="form-group form-group-spacing">
+                  <label htmlFor={`availableQuantity-${index}`}>本攤位可購入次數</label>
+                  <input
+                    type="number"
+                    id={`availableQuantity-${index}`}
+                    name="availableQuantity"
+                    value={item.availableQuantity}
+                    onChange={(e) => handleItemChange(index, e)}
+                    min="1"
+                    max={item.quantity}
+                    placeholder="1"
+                    required
+                  />
+                  {/* <small>此攤位可購買的總數量 (不可超過物品總數量)</small> */}
                 </div>
               </div>
             </div>
@@ -602,7 +630,7 @@ function EditMerchantForm() {
               {item.allowsCoinExchange && (
                 <div className="exchange-fields">
                   <div className="form-group">
-                    <label htmlFor={`price-${index}`}>價格 (家園幣)</label>
+                    <label htmlFor={`price-${index}`}>單價 (家園幣)</label>
                     <input
                       type="number"
                       id={`price-${index}`}
@@ -613,6 +641,7 @@ function EditMerchantForm() {
                       min="1"
                       placeholder=""
                     />
+                    <small>每個物品的單價</small>
                   </div>
                 </div>
               )}
@@ -671,6 +700,7 @@ function EditMerchantForm() {
                         placeholder="1"
                         required={item.allowsBarterExchange}
                       />
+                      <small>交換所需的數量</small>
                     </div>
                   </div>
                 </div>
@@ -711,7 +741,9 @@ function EditMerchantForm() {
             disabled={submitting || formData.items.some(item => 
               (!item.allowsCoinExchange && !item.allowsBarterExchange) || 
               (item.allowsCoinExchange && item.price === '') ||
-              (item.allowsBarterExchange && item.exchangeItemName === '')
+              (item.allowsBarterExchange && item.exchangeItemName === '') ||
+              Number(item.availableQuantity) > Number(item.quantity) || // 確保可購數量不超過總數量
+              Number(item.availableQuantity) < 1 // 確保可購數量至少為1
             )}
           >
             {submitting ? '更新中...' : '更新商人資訊'}

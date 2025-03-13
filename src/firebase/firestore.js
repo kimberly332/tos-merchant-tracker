@@ -48,41 +48,113 @@ const getTaiwanStartOfDay = () => {
   return new Date(taiwanReset.getTime() - totalOffsetMinutes * 60 * 1000);
 };
 
-// Add merchant data (handles both regular and special merchants)
+// 添加商人資料 (處理一般商人和特殊商人)
 export const addMerchant = async (merchantData) => {
-  try {
-    // Set expiration time to Taiwan midnight
-    const expiresAt = getTaiwanEndOfDay();
-    
-    const docRef = await addDoc(collection(db, 'merchants'), {
-      ...merchantData,
-      timestamp: serverTimestamp(),
-      expiresAt
-    });
-    
-    return { success: true, id: docRef.id };
-  } catch (error) {
-    console.error('Error adding merchant:', error);
-    return { success: false, error };
-  }
-};
-
-// Update an existing merchant
-export const updateMerchant = async (merchantId, updatedData) => {
     try {
-      // Import needed functions
+      // 設定過期時間為台灣午夜
+      const expiresAt = getTaiwanEndOfDay();
+      
+      // 確保每個物品有 availableQuantity 屬性
+      const processedItems = merchantData.items.map(item => {
+        // 如果沒有提供 availableQuantity，或 availableQuantity 大於 quantity，則設置為 quantity
+        if (!item.availableQuantity || Number(item.availableQuantity) > Number(item.quantity)) {
+          return {
+            ...item,
+            availableQuantity: Number(item.quantity)
+          };
+        }
+        return item;
+      });
+      
+      const docRef = await addDoc(collection(db, 'merchants'), {
+        ...merchantData,
+        items: processedItems,
+        timestamp: serverTimestamp(),
+        expiresAt
+      });
+      
+      return { success: true, id: docRef.id };
+    } catch (error) {
+      console.error('Error adding merchant:', error);
+      return { success: false, error };
+    }
+  };
+  
+  // 更新現有商人資料
+  export const updateMerchant = async (merchantId, updatedData) => {
+    try {
+      // 導入需要的函數
       const { doc, updateDoc } = await import('firebase/firestore');
       
-      // Reference to the merchant document
+      // 確保每個物品有 availableQuantity 屬性
+      const processedItems = updatedData.items.map(item => {
+        // 如果沒有提供 availableQuantity，或 availableQuantity 大於 quantity，則設置為 quantity
+        if (!item.availableQuantity || Number(item.availableQuantity) > Number(item.quantity)) {
+          return {
+            ...item,
+            availableQuantity: Number(item.quantity)
+          };
+        }
+        return item;
+      });
+      
+      // 參考商人文檔
       const merchantRef = doc(db, 'merchants', merchantId);
       
-      // Update the document
-      await updateDoc(merchantRef, updatedData);
+      // 更新文檔
+      await updateDoc(merchantRef, {
+        ...updatedData,
+        items: processedItems
+      });
       
       return { success: true };
     } catch (error) {
       console.error('Error updating merchant:', error);
       return { success: false, error };
+    }
+  };
+  
+  // 獲取所有商人資料 (有選擇性地限制結果數量)
+  export const getAllMerchants = async (maxResults = 100) => {
+    try {
+      const now = new Date();
+      const merchantsRef = collection(db, 'merchants');
+      
+      // 只獲取尚未過期的商人 (台灣午夜之前)
+      const merchantQuery = query(
+        merchantsRef,
+        where('expiresAt', '>', now),
+        orderBy('expiresAt', 'desc'),
+        limit(maxResults)
+      );
+      
+      const merchantSnapshot = await getDocs(merchantQuery);
+      const merchants = [];
+      
+      merchantSnapshot.forEach(doc => {
+        const data = doc.data();
+        const merchantData = {
+          id: doc.id,
+          playerId: data.playerId || '未知玩家',
+          items: data.items || [],
+          timestamp: data.timestamp?.toDate() || new Date(),
+          discount: data.discount || null,
+          expiresAt: data.expiresAt?.toDate() || getTaiwanEndOfDay()
+        };
+        
+        // 添加特殊商人資訊
+        if (data.isSpecialMerchant) {
+          merchantData.isSpecialMerchant = true;
+          merchantData.notes = data.notes;
+        }
+        
+        merchants.push(merchantData);
+      });
+      
+      return merchants;
+    } catch (error) {
+      console.error('Error fetching merchants:', error);
+      throw error;
     }
   };
   
@@ -148,52 +220,6 @@ export const addSpecialMerchant = async (merchantData) => {
   } catch (error) {
     console.error('Error adding special merchant:', error);
     return { success: false, error };
-  }
-};
-
-// Get all merchant data (with optional limit)
-export const getAllMerchants = async (maxResults = 100) => {
-  try {
-    const now = new Date();
-    const merchantsRef = collection(db, 'merchants');
-    
-    // Only get merchants that haven't expired (before Taiwan midnight)
-    const merchantQuery = query(
-      merchantsRef,
-      where('expiresAt', '>', now),
-      orderBy('expiresAt', 'desc'),
-      limit(maxResults)
-    );
-    
-    const merchantSnapshot = await getDocs(merchantQuery);
-    const merchants = [];
-    
-    merchantSnapshot.forEach(doc => {
-      const data = doc.data();
-      const merchantData = {
-        id: doc.id,
-        playerId: data.playerId || '未知玩家',
-        // Removed serverName and guildName
-        items: data.items || [],
-        timestamp: data.timestamp?.toDate() || new Date(),
-        discount: data.discount || null,
-        expiresAt: data.expiresAt?.toDate() || getTaiwanEndOfDay()
-      };
-      
-      // Add special merchant info
-      if (data.isSpecialMerchant) {
-        merchantData.isSpecialMerchant = true;
-        // Removed the fields: location, exchangeRate, and totalAmount
-        merchantData.notes = data.notes;
-      }
-      
-      merchants.push(merchantData);
-    });
-    
-    return merchants;
-  } catch (error) {
-    console.error('Error fetching merchants:', error);
-    throw error;
   }
 };
 

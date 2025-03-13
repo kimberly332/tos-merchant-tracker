@@ -4,13 +4,12 @@ import { addMerchant } from '../../firebase/firestore';
 function MerchantInputForm() {
   const [formData, setFormData] = useState({
     playerId: '',
-    // serverName: '',
-    // guildName: '',
     discount: '',
     items: [{ 
-      category: '其他', 
+      category: '', 
       customItem: '', 
-      quantity: '1', 
+      quantity: '1',  // 物品總數量
+      availableQuantity: '1', // 添加可購買數量欄位
       price: '', 
       allowsCoinExchange: true,
       allowsBarterExchange: false,
@@ -18,14 +17,12 @@ function MerchantInputForm() {
       customExchangeItem: '',
       exchangeQuantity: '1'
     }]
-    // Removed: location, exchangeRate, totalAmount
   });
   
   // State to track if current item is 家園幣
   const [isSpecialMerchant, setIsSpecialMerchant] = useState(false);
   
   // 定義分類和物品
-  // 物品名稱與交換物品將分別使用這些分類數據
   const categoryGroups = [
     {
       name: '食品原料',
@@ -166,7 +163,7 @@ function MerchantInputForm() {
     }
   ];
   
-  // 定義交換物品分類（不包含裝飾類別）
+  // 定義交換物品分類
   const exchangeCategoryGroups = [
     {
       name: '食品原料',
@@ -264,7 +261,6 @@ function MerchantInputForm() {
   const handleExchangeToggle = (index, exchangeType, isChecked) => {
     const updatedItems = [...formData.items];
     
-    // 如果選取新的交易方式，取消另一種交易方式
     if (isChecked) {
       if (exchangeType === 'coin') {
         updatedItems[index].allowsCoinExchange = true;
@@ -274,7 +270,6 @@ function MerchantInputForm() {
         updatedItems[index].allowsCoinExchange = false;
       }
     } else {
-      // 取消勾選時，直接設為 false
       if (exchangeType === 'coin') {
         updatedItems[index].allowsCoinExchange = false;
       } else if (exchangeType === 'barter') {
@@ -326,9 +321,10 @@ function MerchantInputForm() {
     setFormData(prev => ({
       ...prev,
       items: [...prev.items, { 
-        category: '其他', 
+        category: '', 
         customItem: '',
-        quantity: '1', 
+        quantity: '1',
+        availableQuantity: '1', // 添加可購買數量欄位
         price: '', 
         allowsCoinExchange: true,
         allowsBarterExchange: false,
@@ -366,6 +362,7 @@ function MerchantInputForm() {
         ...item,
         price: Number(item.price),
         quantity: Number(item.quantity),
+        availableQuantity: Number(item.availableQuantity), // 處理可購買數量
         exchangeQuantity: Number(item.exchangeQuantity),
         itemName: item.category === '其他' ? item.customItem : item.category,
         exchangeItemName: item.exchangeItemName === '其他' ? item.customExchangeItem : item.exchangeItemName
@@ -388,9 +385,10 @@ function MerchantInputForm() {
           playerId: '',
           discount: '',
           items: [{ 
-            category: '其他', 
+            category: '', 
             customItem: '',
-            quantity: '1', 
+            quantity: '1',
+            availableQuantity: '1', // 添加可購買數量欄位
             price: '', 
             allowsCoinExchange: true,
             allowsBarterExchange: false,
@@ -437,8 +435,6 @@ function MerchantInputForm() {
             required
           />
         </div>
-        
-        {/* Removed the five merchant specific fields (location, exchangeRate, totalAmount) */}
         
         <div className="form-group">
           <label htmlFor="discount">今日折扣</label>
@@ -502,7 +498,7 @@ function MerchantInputForm() {
                 )}
               
                 <div className="form-group form-group-spacing">
-                  <label htmlFor={`quantity-${index}`}>數量</label>
+                  <label htmlFor={`quantity-${index}`}>物品總數量</label>
                   <input
                     type="number"
                     id={`quantity-${index}`}
@@ -513,6 +509,23 @@ function MerchantInputForm() {
                     placeholder="1"
                     required
                   />
+                </div>
+                
+                {/* 新增: 可購買數量欄位 */}
+                <div className="form-group form-group-spacing">
+                  <label htmlFor={`availableQuantity-${index}`}>本攤位可購入次數</label>
+                  <input
+                    type="number"
+                    id={`availableQuantity-${index}`}
+                    name="availableQuantity"
+                    value={item.availableQuantity}
+                    onChange={(e) => handleItemChange(index, e)}
+                    min="1"
+                    max={item.quantity}
+                    placeholder="1"
+                    required
+                  />
+                  {/* <small>此攤位可購買的總數量 (不可超過物品總數量)</small> */}
                 </div>
               </div>
             </div>
@@ -552,7 +565,7 @@ function MerchantInputForm() {
               {item.allowsCoinExchange && (
                 <div className="exchange-fields">
                   <div className="form-group">
-                    <label htmlFor={`price-${index}`}>價格 (家園幣)</label>
+                    <label htmlFor={`price-${index}`}>單價 (家園幣)</label>
                     <input
                       type="number"
                       id={`price-${index}`}
@@ -563,6 +576,7 @@ function MerchantInputForm() {
                       min="1"
                       placeholder=""
                     />
+                    <small>每個物品的單價</small>
                   </div>
                 </div>
               )}
@@ -621,6 +635,7 @@ function MerchantInputForm() {
                         placeholder="1"
                         required={item.allowsBarterExchange}
                       />
+                      <small>交換所需的數量</small>
                     </div>
                   </div>
                 </div>
@@ -652,7 +667,8 @@ function MerchantInputForm() {
           disabled={submitting || formData.items.some(item => 
             (!item.allowsCoinExchange && !item.allowsBarterExchange) || 
             (item.allowsCoinExchange && item.price === '') ||
-            (item.allowsBarterExchange && item.exchangeItemName === '')
+            (item.allowsBarterExchange && item.exchangeItemName === '') ||
+            Number(item.availableQuantity) > Number(item.quantity) // 確保可購數量不超過總數量
           )}
         >
           {submitting ? '提交中...' : '提交商人資訊'}

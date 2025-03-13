@@ -154,8 +154,6 @@ function ItemSearch() {
                       )}
                     </div>
                     
-                    {/* Removed special merchant info section with location, exchangeRate, and totalAmount */}
-                    
                     <div className="items-list">
                       <h4>販售物品:</h4>
                       <ul>
@@ -164,18 +162,22 @@ function ItemSearch() {
                             <span className="item-name">{item.itemName}</span>
                             <span className="item-category">類別: {item.category || '其他'}</span>
                             
+                            {/* 數量顯示 */}
+                            <div className="item-quantities">
+                              <span className="item-quantity">總數量: {item.quantity || 1}</span>
+                              {item.availableQuantity && (
+                                <span className="item-available-quantity">本攤位可購: {item.availableQuantity}</span>
+                              )}
+                            </div>
+                            
                             {item.allowsCoinExchange && (
-                              <span className="item-price">價格: {item.price} 銀幣</span>
+                              <span className="item-price">單價: {item.price} 銀幣</span>
                             )}
                             
                             {item.allowsBarterExchange && (
                               <span className="item-exchange">
                                 交換: {item.exchangeQuantity} {item.exchangeItemName}
                               </span>
-                            )}
-                            
-                            {item.quantity > 1 && (
-                              <span className="item-quantity">數量: {item.quantity}</span>
                             )}
                           </li>
                         ))}

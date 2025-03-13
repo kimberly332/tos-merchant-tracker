@@ -661,4 +661,100 @@ body {
     }
   }
 
+  /* 添加到 main.css 的新樣式 */
+
+/* 物品數量顯示樣式 */
+.item-quantities {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  margin-top: 0.25rem;
+}
+
+.item-quantity {
+  font-size: 0.85rem;
+  color: rgba(214, 216, 217, 0.8);
+}
+
+.item-available-quantity {
+  font-size: 0.85rem;
+  color: #8ABAB3;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.item-available-quantity::before {
+  content: "🛒";
+  font-size: 0.9rem;
+}
+
+/* 價格標籤樣式優化 */
+.price-tag {
+  background-color: rgba(156, 108, 44, 0.2);
+  color: #e3b96a;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+/* 商品卡片中的數量顯示 */
+.item-name-container {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.merchant-card .item-quantity,
+.merchant-card .item-available-quantity {
+  font-size: 0.8rem;
+  background-color: rgba(72, 114, 123, 0.15);
+  padding: 0.1rem 0.35rem;
+  border-radius: 4px;
+  white-space: nowrap;
+}
+
+.merchant-card .item-available-quantity {
+  background-color: rgba(138, 186, 179, 0.15);
+  color: #8ABAB3;
+}
+
+/* 搜索結果中商品項目樣式優化 */
+.search-results .item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  background-color: rgba(16, 24, 35, 0.5);
+  padding: 0.75rem;
+  border-radius: 6px;
+  border: 1px solid rgba(138, 186, 179, 0.1);
+}
+
+.search-results .item-name {
+  font-weight: 600;
+  font-size: 1rem;
+}
+
+/* 表單中的新欄位樣式 */
+.form-group-spacing.quantity-field {
+  flex-basis: 120px;
+  flex-grow: 0;
+}
+
+/* 添加響應式調整 */
+@media (min-width: 768px) {
+  .item-quantities {
+    flex-direction: row;
+    gap: 1rem;
+  }
+  
+  .search-results .item-quantities {
+    flex-direction: row;
+  }
+}
+
   @import './animations.css';
