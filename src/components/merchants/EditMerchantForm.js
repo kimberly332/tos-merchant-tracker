@@ -2,26 +2,30 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { getMerchantById, updateMerchant } from '../../firebase/firestore';
 import { checkUserAuth } from '../../firebase/userAuth';
+import SuccessNotification from '../common/SuccessNotification';
 
 function EditMerchantForm() {
   const { merchantId } = useParams();
   const navigate = useNavigate();
-  
+
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [unauthorized, setUnauthorized] = useState(false);
   const [originalData, setOriginalData] = useState(null);
-  
+
   const [formData, setFormData] = useState({
     playerId: '',
     discount: '',
     items: []
   });
-  
+
   const [isSpecialMerchant, setIsSpecialMerchant] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [submitResult, setSubmitResult] = useState(null);
-  
+
+  const [showNotification, setShowNotification] = useState(false);
+  const [notificationMessage, setNotificationMessage] = useState('');
+
   // 定義分類和物品
   const categoryGroups = [
     {
@@ -89,7 +93,8 @@ function EditMerchantForm() {
       items: [
         '田園披薩',
         '起司披薩',
-        '水果披薩'
+        '水果披薩',
+        '海鮮披薩'
       ]
     },
     {
@@ -162,7 +167,7 @@ function EditMerchantForm() {
       ]
     }
   ];
-  
+
   // 定義交換物品分類
   const exchangeCategoryGroups = [
     {
@@ -230,7 +235,8 @@ function EditMerchantForm() {
       items: [
         '田園披薩',
         '起司披薩',
-        '水果披薩'
+        '水果披薩',
+        '海鮮披薩'
       ]
     },
     {
@@ -246,7 +252,7 @@ function EditMerchantForm() {
       ]
     }
   ];
-  
+
   // Fetch merchant data
   useEffect(() => {
     const fetchMerchant = async () => {
@@ -254,14 +260,14 @@ function EditMerchantForm() {
       try {
         const merchantData = await getMerchantById(merchantId);
         setOriginalData(merchantData);
-        
+
         // Check if the current user is the author
         const currentUser = checkUserAuth();
-      if (!currentUser || currentUser.playerId !== merchantData.playerId) {
-        setUnauthorized(true);
-        return;
-      }
-        
+        if (!currentUser || currentUser.playerId !== merchantData.playerId) {
+          setUnauthorized(true);
+          return;
+        }
+
         // Set form data from the merchant data
         setFormData({
           playerId: merchantData.playerId || '未知玩家',
@@ -280,7 +286,7 @@ function EditMerchantForm() {
             exchangeQuantity: item.exchangeQuantity ? item.exchangeQuantity.toString() : '1'
           }))
         });
-        
+
         setIsSpecialMerchant(merchantData.isSpecialMerchant || false);
       } catch (err) {
         console.error('Error fetching merchant:', err);
@@ -289,10 +295,10 @@ function EditMerchantForm() {
         setLoading(false);
       }
     };
-    
+
     fetchMerchant();
   }, [merchantId]);
-  
+
   // Form handling functions - similar to MerchantInputForm
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -301,10 +307,10 @@ function EditMerchantForm() {
       [name]: value
     }));
   };
-  
+
   const handleExchangeToggle = (index, exchangeType, isChecked) => {
     const updatedItems = [...formData.items];
-    
+
     if (isChecked) {
       if (exchangeType === 'coin') {
         updatedItems[index].allowsCoinExchange = true;
@@ -320,13 +326,13 @@ function EditMerchantForm() {
         updatedItems[index].allowsBarterExchange = false;
       }
     }
-    
+
     setFormData(prev => ({
       ...prev,
       items: updatedItems
     }));
   };
-  
+
   const handleItemChange = (index, e) => {
     const { name, value } = e.target;
     const updatedItems = [...formData.items];
@@ -334,44 +340,44 @@ function EditMerchantForm() {
       ...updatedItems[index],
       [name]: value
     };
-    
+
     // Check if current item is 家園幣
     const isHomeToken = value === '家園幣';
     if (name === 'category' && isHomeToken) {
       setIsSpecialMerchant(true);
-      
+
       // For 家園幣, force barter exchange and disable coin exchange
       updatedItems[index].allowsCoinExchange = false;
       updatedItems[index].allowsBarterExchange = true;
     } else if (name === 'category' && !isHomeToken && updatedItems.every(item => item.category !== '家園幣')) {
       setIsSpecialMerchant(false);
     }
-    
+
     // 確保可購買數量不超過總數量
     if (name === 'quantity') {
       const totalQuantity = Number(value);
       const availableQuantity = Number(updatedItems[index].availableQuantity);
-      
+
       if (availableQuantity > totalQuantity) {
         updatedItems[index].availableQuantity = value;
       }
     }
-    
+
     setFormData(prev => ({
       ...prev,
       items: updatedItems
     }));
   };
-  
+
   const addItemField = () => {
     setFormData(prev => ({
       ...prev,
-      items: [...prev.items, { 
-        category: '', 
+      items: [...prev.items, {
+        category: '',
         customItem: '',
         quantity: '1',
         availableQuantity: '1', // 添加可購買數量欄位 
-        price: '', 
+        price: '',
         allowsCoinExchange: true,
         allowsBarterExchange: false,
         exchangeItemName: '',
@@ -379,27 +385,27 @@ function EditMerchantForm() {
       }]
     }));
   };
-  
+
   const removeItemField = (index) => {
     if (formData.items.length === 1) return;
-    
+
     const updatedItems = formData.items.filter((_, i) => i !== index);
-    
+
     // Check if any remaining items are 家園幣
     const hasHomeToken = updatedItems.some(item => item.category === '家園幣');
     setIsSpecialMerchant(hasHomeToken);
-    
+
     setFormData(prev => ({
       ...prev,
       items: updatedItems
     }));
   };
-  
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSubmitting(true);
     setSubmitResult(null);
-    
+
     // Process data for submission
     const processedData = {
       ...formData,
@@ -414,57 +420,61 @@ function EditMerchantForm() {
         exchangeItemName: item.exchangeItemName === '其他' ? item.customExchangeItem : item.exchangeItemName
       }))
     };
-    
+
     try {
       // Preserve original timestamp and expiresAt
       if (originalData) {
         processedData.timestamp = originalData.timestamp;
         processedData.expiresAt = originalData.expiresAt;
       }
-      
+
       const result = await updateMerchant(merchantId, processedData);
-      
+
       if (result.success) {
-        setSubmitResult({ 
-          success: true, 
-          message: '商人資訊已成功更新！' 
+        setSubmitResult({
+          success: true,
+          message: '商人資訊已成功更新！'
         });
-        
+
+        // Show success notification
+        setNotificationMessage('商人資訊已成功更新！');
+        setShowNotification(true);
+
         // Navigate back to the list after 2 seconds
         setTimeout(() => {
           navigate('/');
         }, 2000);
       } else {
-        setSubmitResult({ 
-          success: false, 
-          message: '更新時發生錯誤，請稍後再試。' 
+        setSubmitResult({
+          success: false,
+          message: '更新時發生錯誤，請稍後再試。'
         });
       }
     } catch (error) {
       console.error('Error updating merchant data:', error);
-      setSubmitResult({ 
-        success: false, 
-        message: '更新時發生錯誤，請稍後再試。' 
+      setSubmitResult({
+        success: false,
+        message: '更新時發生錯誤，請稍後再試。'
       });
     } finally {
       setSubmitting(false);
     }
   };
-  
+
   if (loading) {
     return <div className="loading-indicator">載入中...</div>;
   }
-  
+
   if (error) {
     return <div className="error-message">{error}</div>;
   }
-  
+
   if (unauthorized) {
     return (
       <div className="unauthorized-message">
         <h2>無權限編輯</h2>
         <p>您只能編輯自己提交的商人資訊。</p>
-        <button 
+        <button
           className="back-btn"
           onClick={() => navigate('/')}
         >
@@ -473,20 +483,20 @@ function EditMerchantForm() {
       </div>
     );
   }
-  
+
   return (
     <div className="merchant-form-container">
       <h2>編輯商人資訊</h2>
       <p className="edit-description">
         您正在編輯商人資訊。修改完成後點擊「更新商人資訊」按鈕保存變更。
       </p>
-      
+
       {submitResult && (
         <div className={`submit-result ${submitResult.success ? 'success' : 'error'}`}>
           {submitResult.message}
         </div>
       )}
-      
+
       <form onSubmit={handleSubmit} className="merchant-form">
         <div className="form-group">
           <label htmlFor="playerId">您的遊戲ID</label>
@@ -501,7 +511,7 @@ function EditMerchantForm() {
           />
           <small>不可更改遊戲ID</small>
         </div>
-        
+
         <div className="form-group">
           <label htmlFor="discount">今日折扣</label>
           <input
@@ -514,12 +524,12 @@ function EditMerchantForm() {
           />
           <small>商人提供的折扣或特殊活動</small>
         </div>
-        
+
         <h3>商人販售的商品</h3>
         <p className="description">
           請填寫商人販售的商品及交易方式（選擇家園幣或以物易物其中一種）
         </p>
-        
+
         {formData.items.map((item, index) => (
           <div key={index} className="item-entry-container">
             <div className="item-section">
@@ -562,7 +572,7 @@ function EditMerchantForm() {
                     />
                   </div>
                 )}
-              
+
                 <div className="form-group form-group-spacing">
                   <label htmlFor={`quantity-${index}`}>物品總數量</label>
                   <input
@@ -576,7 +586,7 @@ function EditMerchantForm() {
                     required
                   />
                 </div>
-                
+
                 {/* 新增: 可購買數量欄位 */}
                 <div className="form-group form-group-spacing">
                   <label htmlFor={`availableQuantity-${index}`}>本攤位可購入次數</label>
@@ -595,7 +605,7 @@ function EditMerchantForm() {
                 </div>
               </div>
             </div>
-            
+
             <div className="exchange-section">
               <div className="exchange-options">
                 <label className="exchange-option">
@@ -619,14 +629,14 @@ function EditMerchantForm() {
                   {item.category === '家園幣' && <span className="required-tag">必選</span>}
                 </label>
               </div>
-            
+
               {/* 至少需要選擇一種交換方式的錯誤提示 */}
               {!item.allowsCoinExchange && !item.allowsBarterExchange && (
                 <div className="error-message">
                   請選擇一種交易方式（家園幣或物品）
                 </div>
               )}
-              
+
               {/* 家園幣價格輸入 (當啟用家園幣交易時顯示) */}
               {item.allowsCoinExchange && (
                 <div className="exchange-fields">
@@ -646,7 +656,7 @@ function EditMerchantForm() {
                   </div>
                 </div>
               )}
-              
+
               {/* 物品交換輸入 (當啟用以物易物時顯示) */}
               {item.allowsBarterExchange && (
                 <div className="exchange-fields">
@@ -672,7 +682,7 @@ function EditMerchantForm() {
                         ))}
                       </select>
                     </div>
-                    
+
                     {/* 當選擇「其他」作為交換物品時顯示自定義輸入框 */}
                     {item.exchangeItemName === '其他' && (
                       <div className="form-group">
@@ -688,7 +698,7 @@ function EditMerchantForm() {
                         />
                       </div>
                     )}
-                    
+
                     <div className="form-group">
                       <label htmlFor={`exchange-quantity-${index}`}>交換數量</label>
                       <input
@@ -707,9 +717,9 @@ function EditMerchantForm() {
                 </div>
               )}
             </div>
-            
-            <button 
-              type="button" 
+
+            <button
+              type="button"
               className="remove-item-btn"
               onClick={() => removeItemField(index)}
               disabled={formData.items.length === 1}
@@ -718,29 +728,29 @@ function EditMerchantForm() {
             </button>
           </div>
         ))}
-        
-        <button 
-          type="button" 
+
+        <button
+          type="button"
           className="add-item-btn"
           onClick={addItemField}
         >
           添加更多商品
         </button>
-        
+
         <div className="form-buttons">
-          <button 
-            type="button" 
+          <button
+            type="button"
             className="cancel-btn"
             onClick={() => navigate('/')}
           >
             取消編輯
           </button>
-          
-          <button 
-            type="submit" 
-            className="submit-btn" 
-            disabled={submitting || formData.items.some(item => 
-              (!item.allowsCoinExchange && !item.allowsBarterExchange) || 
+
+          <button
+            type="submit"
+            className="submit-btn"
+            disabled={submitting || formData.items.some(item =>
+              (!item.allowsCoinExchange && !item.allowsBarterExchange) ||
               (item.allowsCoinExchange && item.price === '') ||
               (item.allowsBarterExchange && item.exchangeItemName === '') ||
               Number(item.quantity) < 1 || // 確保可購數量不超過總數量
@@ -751,6 +761,12 @@ function EditMerchantForm() {
           </button>
         </div>
       </form>
+      {showNotification && (
+        <SuccessNotification
+          message={notificationMessage}
+          onClose={() => setShowNotification(false)}
+        />
+      )}
     </div>
   );
 }

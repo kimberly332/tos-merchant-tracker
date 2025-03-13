@@ -950,8 +950,37 @@ body {
   }
 }
 
+.redirect-message {
+  background-color: rgba(72, 114, 123, 0.2);
+  border: 1px solid rgba(138, 186, 179, 0.4);
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin: 1.5rem 0;
+  text-align: center;
+  animation: pulse 2s infinite;
+}
+
+.redirect-message p {
+  color: #8ABAB3;
+  font-weight: 500;
+  margin: 0;
+}
+
+@keyframes pulse {
+  0% {
+    background-color: rgba(72, 114, 123, 0.2);
+  }
+  50% {
+    background-color: rgba(72, 114, 123, 0.3);
+  }
+  100% {
+    background-color: rgba(72, 114, 123, 0.2);
+  }
+}
+
   /* Import auth.css for user authentication styles */
   @import './components/auth.css';
   
   @import './components/merchants.css';
   @import './animations.css';
+  @import './components/notifications.css';

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { addMerchant } from '../../firebase/firestore';
+import SuccessNotification from '../common/SuccessNotification';
 import SearchableSelect from '../common/SearchableSelect';
 import { checkUserAuth } from '../../firebase/userAuth';
 import '../common/SearchableSelect.css';
@@ -8,12 +9,12 @@ function MerchantInputForm() {
   const [formData, setFormData] = useState({
     playerId: '',
     discount: '',
-    items: [{ 
-      category: '', 
-      customItem: '', 
+    items: [{
+      category: '',
+      customItem: '',
       quantity: '1',  // 物品總數量
       availableQuantity: '1', // 添加可購買數量欄位
-      price: '', 
+      price: '',
       allowsCoinExchange: true,
       allowsBarterExchange: false,
       exchangeItemName: '',
@@ -33,10 +34,10 @@ function MerchantInputForm() {
       }));
     }
   }, []);
-  
+
   // State to track if current item is 家園幣
   const [isSpecialMerchant, setIsSpecialMerchant] = useState(false);
-  
+
   // 定義分類和物品
   const categoryGroups = [
     {
@@ -104,7 +105,8 @@ function MerchantInputForm() {
       items: [
         '田園披薩',
         '起司披薩',
-        '水果披薩'
+        '水果披薩',
+        '海鮮披薩'
       ]
     },
     {
@@ -177,7 +179,7 @@ function MerchantInputForm() {
       ]
     }
   ];
-  
+
   // 定義交換物品分類
   const exchangeCategoryGroups = [
     {
@@ -245,7 +247,8 @@ function MerchantInputForm() {
       items: [
         '田園披薩',
         '起司披薩',
-        '水果披薩'
+        '水果披薩',
+        '海鮮披薩'
       ]
     },
     {
@@ -261,9 +264,12 @@ function MerchantInputForm() {
       ]
     }
   ];
-  
+
   const [submitting, setSubmitting] = useState(false);
   const [submitResult, setSubmitResult] = useState(null);
+
+  const [showNotification, setShowNotification] = useState(false);
+  const [notificationMessage, setNotificationMessage] = useState('');
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -272,10 +278,10 @@ function MerchantInputForm() {
       [name]: value
     }));
   };
-  
+
   const handleExchangeToggle = (index, exchangeType, isChecked) => {
     const updatedItems = [...formData.items];
-    
+
     if (isChecked) {
       if (exchangeType === 'coin') {
         updatedItems[index].allowsCoinExchange = true;
@@ -291,7 +297,7 @@ function MerchantInputForm() {
         updatedItems[index].allowsBarterExchange = false;
       }
     }
-    
+
     setFormData(prev => ({
       ...prev,
       items: updatedItems
@@ -305,25 +311,25 @@ function MerchantInputForm() {
       ...updatedItems[index],
       [name]: value
     };
-    
+
     // Check if current item is 家園幣
     const isHomeToken = value === '家園幣';
     if (name === 'category' && isHomeToken) {
       setIsSpecialMerchant(true);
-      
+
       // For 家園幣, force barter exchange and disable coin exchange
       updatedItems[index].allowsCoinExchange = false;
       updatedItems[index].allowsBarterExchange = true;
     } else if (name === 'category' && !isHomeToken && updatedItems.every(item => item.category !== '家園幣')) {
       setIsSpecialMerchant(false);
     }
-    
+
     setFormData(prev => ({
       ...prev,
       items: updatedItems
     }));
   };
-  
+
   const handleDiscountChange = (e) => {
     const { value } = e.target;
     setFormData(prev => ({
@@ -335,12 +341,12 @@ function MerchantInputForm() {
   const addItemField = () => {
     setFormData(prev => ({
       ...prev,
-      items: [...prev.items, { 
-        category: '', 
+      items: [...prev.items, {
+        category: '',
         customItem: '',
         quantity: '1',
         availableQuantity: '1', // 添加可購買數量欄位
-        price: '', 
+        price: '',
         allowsCoinExchange: true,
         allowsBarterExchange: false,
         exchangeItemName: '',
@@ -351,13 +357,13 @@ function MerchantInputForm() {
 
   const removeItemField = (index) => {
     if (formData.items.length === 1) return;
-    
+
     const updatedItems = formData.items.filter((_, i) => i !== index);
-    
+
     // Check if any remaining items are 家園幣
     const hasHomeToken = updatedItems.some(item => item.category === '家園幣');
     setIsSpecialMerchant(hasHomeToken);
-    
+
     setFormData(prev => ({
       ...prev,
       items: updatedItems
@@ -368,7 +374,7 @@ function MerchantInputForm() {
     e.preventDefault();
     setSubmitting(true);
     setSubmitResult(null);
-  
+
     // 處理數據
     const processedData = {
       ...formData,
@@ -383,28 +389,32 @@ function MerchantInputForm() {
         exchangeItemName: item.exchangeItemName === '其他' ? item.customExchangeItem : item.exchangeItemName
       }))
     };
-  
+
     try {
       const result = await addMerchant(processedData);
       if (result.success) {
         // Store the player ID in localStorage for later authentication
         localStorage.setItem('submitterPlayerId', formData.playerId);
-        
-        setSubmitResult({ 
-          success: true, 
-          message: '商人資訊已成功提交！謝謝您的分享。' 
+
+        setSubmitResult({
+          success: true,
+          message: '商人資訊已成功提交！謝謝您的分享。'
         });
-        
+
+        // 顯示成功通知
+        setNotificationMessage('商人資訊已成功提交！');
+        setShowNotification(true);
+
         // Reset form
         setFormData({
           playerId: '',
           discount: '',
-          items: [{ 
-            category: '', 
+          items: [{
+            category: '',
             customItem: '',
             quantity: '1',
             availableQuantity: '1', // 添加可購買數量欄位
-            price: '', 
+            price: '',
             allowsCoinExchange: true,
             allowsBarterExchange: false,
             exchangeItemName: '',
@@ -414,16 +424,16 @@ function MerchantInputForm() {
         });
         setIsSpecialMerchant(false);
       } else {
-        setSubmitResult({ 
-          success: false, 
-          message: '提交時發生錯誤，請稍後再試。' 
+        setSubmitResult({
+          success: false,
+          message: '提交時發生錯誤，請稍後再試。'
         });
       }
     } catch (error) {
       console.error('Error submitting merchant data:', error);
-      setSubmitResult({ 
-        success: false, 
-        message: '提交時發生錯誤，請稍後再試。' 
+      setSubmitResult({
+        success: false,
+        message: '提交時發生錯誤，請稍後再試。'
       });
     } finally {
       setSubmitting(false);
@@ -437,22 +447,22 @@ function MerchantInputForm() {
           {submitResult.message}
         </div>
       )}
-      
+
       <form onSubmit={handleSubmit} className="merchant-form">
-      <div className="form-group">
-        <label htmlFor="playerId">您的遊戲ID</label>
-        <input
-          type="text"
-          id="playerId"
-          name="playerId"
-          value={formData.playerId}
-          onChange={handleChange}
-          required
-          disabled
-        />
-        <small>遊戲ID已從登入資訊自動填入</small>
-      </div>
-        
+        <div className="form-group">
+          <label htmlFor="playerId">您的遊戲ID</label>
+          <input
+            type="text"
+            id="playerId"
+            name="playerId"
+            value={formData.playerId}
+            onChange={handleChange}
+            required
+            disabled
+          />
+          <small>遊戲ID已從登入資訊自動填入</small>
+        </div>
+
         <div className="form-group">
           <label htmlFor="discount">今日折扣</label>
           <input
@@ -465,12 +475,12 @@ function MerchantInputForm() {
           />
           <small>商人提供的折扣或特殊活動</small>
         </div>
-        
+
         <h3>商人販售的商品</h3>
         <p className="description">
           請填寫商人販售的商品及交易方式（選擇家園幣或以物易物其中一種）
         </p>
-        
+
         {formData.items.map((item, index) => (
           <div key={index} className="item-entry-container">
             <div className="item-section">
@@ -479,16 +489,16 @@ function MerchantInputForm() {
                 <div className="form-group">
                   <label htmlFor={`category-${index}`}>物品名稱</label>
                   <SearchableSelect
-    groups={categoryGroups}
-    value={item.category}
-    onChange={(value) => handleItemChange(index, { 
-      target: { name: 'category', value } 
-    })}
-    placeholder="請選擇物品"
-    id={`category-${index}`}
-    name="category"
-    required={true}
-  />
+                    groups={categoryGroups}
+                    value={item.category}
+                    onChange={(value) => handleItemChange(index, {
+                      target: { name: 'category', value }
+                    })}
+                    placeholder="請選擇物品"
+                    id={`category-${index}`}
+                    name="category"
+                    required={true}
+                  />
                 </div>
 
                 {/* 當選擇「其他」時顯示自定義輸入框 */}
@@ -506,7 +516,7 @@ function MerchantInputForm() {
                     />
                   </div>
                 )}
-              
+
                 <div className="form-group form-group-spacing">
                   <label htmlFor={`quantity-${index}`}>物品總數量</label>
                   <input
@@ -520,7 +530,7 @@ function MerchantInputForm() {
                     required
                   />
                 </div>
-                
+
                 {/* 新增: 可購買數量欄位 */}
                 <div className="form-group form-group-spacing">
                   <label htmlFor={`availableQuantity-${index}`}>本攤位可購入次數</label>
@@ -539,7 +549,7 @@ function MerchantInputForm() {
                 </div>
               </div>
             </div>
-            
+
             <div className="exchange-section">
               <div className="exchange-options">
                 <label className="exchange-option">
@@ -563,14 +573,14 @@ function MerchantInputForm() {
                   {item.category === '家園幣' && <span className="required-tag">必選</span>}
                 </label>
               </div>
-            
+
               {/* 至少需要選擇一種交換方式的錯誤提示 */}
               {!item.allowsCoinExchange && !item.allowsBarterExchange && (
                 <div className="error-message">
                   請選擇一種交易方式（家園幣或物品）
                 </div>
               )}
-              
+
               {/* 家園幣價格輸入 (當啟用家園幣交易時顯示) */}
               {item.allowsCoinExchange && (
                 <div className="exchange-fields">
@@ -590,26 +600,26 @@ function MerchantInputForm() {
                   </div>
                 </div>
               )}
-              
+
               {/* 物品交換輸入 (當啟用以物易物時顯示) */}
               {item.allowsBarterExchange && (
                 <div className="exchange-fields">
                   <div className="barter-item-entry">
-                  <div className="form-group">
-                    <label htmlFor={`exchange-item-${index}`}>交換物品名稱</label>
-                    <SearchableSelect
-                      groups={exchangeCategoryGroups}
-                      value={item.exchangeItemName}
-                      onChange={(value) => handleItemChange(index, { 
-                        target: { name: 'exchangeItemName', value } 
-                      })}
-                      placeholder="請選擇交換物品"
-                      id={`exchange-item-${index}`}
-                      name="exchangeItemName"
-                      required={item.allowsBarterExchange}
-                    />
-                  </div>
-                    
+                    <div className="form-group">
+                      <label htmlFor={`exchange-item-${index}`}>交換物品名稱</label>
+                      <SearchableSelect
+                        groups={exchangeCategoryGroups}
+                        value={item.exchangeItemName}
+                        onChange={(value) => handleItemChange(index, {
+                          target: { name: 'exchangeItemName', value }
+                        })}
+                        placeholder="請選擇交換物品"
+                        id={`exchange-item-${index}`}
+                        name="exchangeItemName"
+                        required={item.allowsBarterExchange}
+                      />
+                    </div>
+
                     {/* 當選擇「其他」作為交換物品時顯示自定義輸入框 */}
                     {item.exchangeItemName === '其他' && (
                       <div className="form-group">
@@ -625,7 +635,7 @@ function MerchantInputForm() {
                         />
                       </div>
                     )}
-                    
+
                     <div className="form-group">
                       <label htmlFor={`exchange-quantity-${index}`}>交換數量</label>
                       <input
@@ -644,9 +654,9 @@ function MerchantInputForm() {
                 </div>
               )}
             </div>
-            
-            <button 
-              type="button" 
+
+            <button
+              type="button"
               className="remove-item-btn"
               onClick={() => removeItemField(index)}
               disabled={formData.items.length === 1}
@@ -655,20 +665,20 @@ function MerchantInputForm() {
             </button>
           </div>
         ))}
-        
-        <button 
-          type="button" 
+
+        <button
+          type="button"
           className="add-item-btn"
           onClick={addItemField}
         >
           添加更多商品
         </button>
-        
-        <button 
-          type="submit" 
-          className="submit-btn" 
-          disabled={submitting || formData.items.some(item => 
-            (!item.allowsCoinExchange && !item.allowsBarterExchange) || 
+
+        <button
+          type="submit"
+          className="submit-btn"
+          disabled={submitting || formData.items.some(item =>
+            (!item.allowsCoinExchange && !item.allowsBarterExchange) ||
             (item.allowsCoinExchange && item.price === '') ||
             (item.allowsBarterExchange && item.exchangeItemName === '') ||
             Number(item.quantity) < 1 || // 確保可購數量不超過總數量
@@ -678,6 +688,13 @@ function MerchantInputForm() {
           {submitting ? '提交中...' : '提交商人資訊'}
         </button>
       </form>
+      {/* 成功通知 */}
+    {showNotification && (
+      <SuccessNotification 
+        message={notificationMessage}
+        onClose={() => setShowNotification(false)}
+      />
+    )}
     </div>
   );
 }

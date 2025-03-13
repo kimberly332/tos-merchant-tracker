@@ -321,3 +321,51 @@ export const searchItems = async (searchTerm) => {
     throw error;
   }
 };
+
+// 檢查用戶今天是否已提交過商人資訊
+export const checkUserHasSubmittedToday = async (playerId) => {
+  try {
+    if (!playerId) {
+      return { hasSubmitted: false };
+    }
+    
+    // 獲取當前用戶伺服器
+    const serverId = getCurrentServerId();
+    if (!serverId) {
+      return { hasSubmitted: false };
+    }
+    
+    // 獲取台灣時間的今天開始時間（凌晨5點）
+    const startOfToday = getTaiwanStartOfDay();
+    const now = new Date();
+    
+    // 引用伺服器商人集合
+    const merchantsRef = collection(db, `servers/${serverId}/merchants`);
+    
+    // 查詢今天該用戶提交的商人資訊
+    const merchantQuery = query(
+      merchantsRef,
+      where('playerId', '==', playerId),
+      where('timestamp', '>=', startOfToday),
+      where('timestamp', '<=', now),
+      limit(1) // 只需要找到一個
+    );
+    
+    const querySnapshot = await getDocs(merchantQuery);
+    
+    if (!querySnapshot.empty) {
+      // 找到至少一個匹配的文檔
+      const merchantDoc = querySnapshot.docs[0];
+      return { 
+        hasSubmitted: true,
+        merchantId: merchantDoc.id
+      };
+    }
+    
+    // 未找到匹配的商人資訊
+    return { hasSubmitted: false };
+  } catch (error) {
+    console.error('檢查用戶提交記錄時發生錯誤:', error);
+    return { hasSubmitted: false };
+  }
+};
