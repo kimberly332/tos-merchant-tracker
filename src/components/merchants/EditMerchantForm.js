@@ -340,30 +340,30 @@ function EditMerchantForm() {
       ...updatedItems[index],
       [name]: value
     };
-    
+
     // Check if current item is 家園幣
     const isHomeToken = value === '家園幣';
     if (name === 'category' && isHomeToken) {
       setIsSpecialMerchant(true);
-      
+
       // For 家園幣, force barter exchange and disable coin exchange
       updatedItems[index].allowsCoinExchange = false;
       updatedItems[index].allowsBarterExchange = true;
     } else if (name === 'category' && !isHomeToken && updatedItems.every(item => item.category !== '家園幣')) {
       setIsSpecialMerchant(false);
     }
-    
+
     // 修改這部分：當編輯物品總數量時，不再自動更新可購買數量
     // 只有當可購買數量大於新的總數量時，才進行調整
     if (name === 'quantity') {
       const totalQuantity = Number(value);
       const availableQuantity = Number(updatedItems[index].availableQuantity);
-      
+
       if (availableQuantity > totalQuantity && totalQuantity > 0) {
         updatedItems[index].availableQuantity = value;
       }
     }
-    
+
     setFormData(prev => ({
       ...prev,
       items: updatedItems
@@ -431,6 +431,9 @@ function EditMerchantForm() {
       }
 
       const result = await updateMerchant(merchantId, processedData);
+
+      setNotificationMessage('商人資訊已成功更新！');
+      setShowNotification(true);
 
       if (result.success) {
         setSubmitResult({
@@ -744,24 +747,29 @@ function EditMerchantForm() {
             取消編輯
           </button>
 
-          <button 
-  type="submit" 
-  className="submit-btn" 
-  disabled={submitting || formData.items.some(item => 
-    (!item.allowsCoinExchange && !item.allowsBarterExchange) || 
-    (item.allowsCoinExchange && item.price === '') ||
-    (item.allowsBarterExchange && item.exchangeItemName === '')
-    // 移除了對數量欄位的必填檢查
-  )}
->
-  {submitting ? '更新中...' : '更新商人資訊'}
-</button>
+          <button
+            type="submit"
+            className="submit-btn"
+            disabled={submitting || formData.items.some(item =>
+              (!item.allowsCoinExchange && !item.allowsBarterExchange) ||
+              (item.allowsCoinExchange && item.price === '') ||
+              (item.allowsBarterExchange && item.exchangeItemName === '')
+              // 移除了對數量欄位的必填檢查
+            )}
+          >
+            {submitting ? '更新中...' : '更新商人資訊'}
+          </button>
         </div>
       </form>
       {showNotification && (
         <SuccessNotification
           message={notificationMessage}
-          onClose={() => setShowNotification(false)}
+          duration={3000}
+          onClose={() => {
+            setShowNotification(false);
+            // Clear the message after notification is closed
+            setTimeout(() => setNotificationMessage(''), 300);
+          }}
         />
       )}
     </div>

@@ -6,13 +6,16 @@ const SuccessNotification = ({ message, duration = 3000, onClose }) => {
   const [isAutoDismiss, setIsAutoDismiss] = useState(true);
   
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsVisible(false);
-      if (onClose) onClose();
-    }, duration);
-    
-    return () => clearTimeout(timer);
-  }, [duration, onClose]);
+    // Only set timer if notification is visible
+    if (isVisible) {
+      const timer = setTimeout(() => {
+        setIsVisible(false);
+        if (onClose) onClose();
+      }, duration);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [isVisible, duration, onClose]);
   
   // Disable auto-dismiss animation when manually closing
   const handleClose = () => {
