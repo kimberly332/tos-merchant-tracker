@@ -1,5 +1,7 @@
 // src/components/cart/ShoppingCart.js
 import React, { useState, useEffect } from 'react';
+import { checkUserAuth } from '../../firebase/userAuth';
+import { updateUserCart } from '../../firebase/userAuth';
 import './ShoppingCart.css';
 
 const ShoppingCart = () => {
@@ -7,10 +9,14 @@ const ShoppingCart = () => {
   const [cartItems, setCartItems] = useState([]);
   const [totalCoins, setTotalCoins] = useState(0);
   const [requiredMaterials, setRequiredMaterials] = useState({});
+  const [user, setUser] = useState(null);
 
-  // Load cart from localStorage on mount and listen for changes
+  // 加載用戶資料和購物車
   useEffect(() => {
-    // Load saved cart from localStorage
+    const currentUser = checkUserAuth();
+    setUser(currentUser);
+
+    // 加載購物車資料
     try {
       const savedCart = localStorage.getItem('shoppingCart');
       if (savedCart) {
@@ -18,28 +24,36 @@ const ShoppingCart = () => {
         setCartItems(parsedCart);
       }
     } catch (error) {
-      console.error('Error loading cart from localStorage:', error);
+      console.error('加載購物車時發生錯誤:', error);
     }
     
+    // 監聽購物車事件
     const handleAddToCart = (event) => {
       const newItem = event.detail;
       
       setCartItems(prevItems => {
-        // Check if item already exists in cart
+        // 檢查商品是否已存在
         const existingItemIndex = prevItems.findIndex(item => 
           item.itemName === newItem.itemName && 
           item.playerId === newItem.playerId
         );
         
+        let updatedItems;
         if (existingItemIndex >= 0) {
-          // Update quantity if item exists
-          const updatedItems = [...prevItems];
+          // 更新數量
+          updatedItems = [...prevItems];
           updatedItems[existingItemIndex].quantity += 1;
-          return updatedItems;
         } else {
-          // Add new item with quantity 1
-          return [...prevItems, { ...newItem, quantity: 1 }];
+          // 添加新商品
+          updatedItems = [...prevItems, { ...newItem, quantity: 1 }];
         }
+        
+        // 如果用戶已登入，同步到雲端
+        if (user) {
+          updateUserCart(user.userId, updatedItems);
+        }
+        
+        return updatedItems;
       });
     };
     
@@ -47,42 +61,49 @@ const ShoppingCart = () => {
       const itemToRemove = event.detail;
       
       setCartItems(prevItems => {
-        // Find and remove the item from cart
-        return prevItems.filter(
+        // 移除商品
+        const updatedItems = prevItems.filter(
           item => !(item.itemName === itemToRemove.itemName && 
                     item.playerId === itemToRemove.playerId)
         );
+        
+        // 如果用戶已登入，同步到雲端
+        if (user) {
+          updateUserCart(user.userId, updatedItems);
+        }
+        
+        return updatedItems;
       });
     };
 
-    // Add event listeners
+    // 添加事件監聽
     window.addEventListener('addToCart', handleAddToCart);
     window.addEventListener('removeFromCart', handleRemoveFromCart);
     
-    // Clean up
+    // 清理
     return () => {
       window.removeEventListener('addToCart', handleAddToCart);
       window.removeEventListener('removeFromCart', handleRemoveFromCart);
     };
-  }, []);
+  }, [user]);
 
-  // Calculate totals when cart items change
+  // 當購物車項目變化時計算總數
   useEffect(() => {
     let coins = 0;
     let materials = {};
     
     cartItems.forEach(item => {
       if (item.allowsCoinExchange && item.price) {
-        // Calculate total cost in garden coins
+        // 計算家園幣總數
         coins += item.price * item.quantity;
       }
       
       if (item.allowsBarterExchange && item.exchangeItemName) {
         const materialName = item.exchangeItemName;
-        // Calculate required material quantity based on exchange rate and item quantity
+        // 計算所需材料數量
         const materialQty = (item.exchangeQuantity || 1) * item.quantity;
         
-        // Add to total materials needed
+        // 添加到總材料需求
         materials[materialName] = (materials[materialName] || 0) + materialQty;
       }
     });
@@ -90,19 +111,24 @@ const ShoppingCart = () => {
     setTotalCoins(coins);
     setRequiredMaterials(materials);
     
-    // Save to localStorage
+    // 保存到 localStorage
     try {
       localStorage.setItem('shoppingCart', JSON.stringify(cartItems));
+      
+      // 如果用戶已登入，同步到雲端
+      if (user && cartItems.length > 0) {
+        updateUserCart(user.userId, cartItems);
+      }
     } catch (error) {
-      console.error('Error saving cart to localStorage:', error);
+      console.error('保存購物車時發生錯誤:', error);
     }
     
-    // Dispatch cart updated event to notify MerchantItem components
+    // 發送購物車更新事件
     const cartUpdatedEvent = new CustomEvent('cartUpdated', {
       detail: { cart: cartItems }
     });
     window.dispatchEvent(cartUpdatedEvent);
-  }, [cartItems]);
+  }, [cartItems, user]);
 
   const toggleCart = () => {
     setIsOpen(!isOpen);
@@ -119,10 +145,10 @@ const ShoppingCart = () => {
   const updateQuantity = (index, newQuantity) => {
     if (newQuantity < 1) return;
     
-    // Get the current item's availableQuantity limit
+    // 獲取商品的可購買數量上限
     const availableQuantity = cartItems[index].availableQuantity || 1;
     
-    // Make sure new quantity doesn't exceed the available quantity
+    // 確保新數量不超過可購買數量
     const limitedQuantity = Math.min(newQuantity, availableQuantity);
     
     setCartItems(prevItems => {
@@ -134,15 +160,25 @@ const ShoppingCart = () => {
 
   const clearCart = () => {
     setCartItems([]);
+    
+    // 如果用戶已登入，同步空購物車到雲端
+    if (user) {
+      updateUserCart(user.userId, []);
+    }
   };
+
+  // 如果用戶未登入，不顯示購物車
+  if (!user) {
+    return null;
+  }
 
   return (
     <div className="shopping-cart-container">
-      {/* Cart Icon */}
+      {/* 購物車圖標 */}
       <button 
         className="cart-icon" 
         onClick={toggleCart}
-        aria-label="Shopping Cart"
+        aria-label="購物車"
       >
         <i className="fas fa-shopping-cart"></i>
         {cartItems.length > 0 && (
@@ -150,7 +186,7 @@ const ShoppingCart = () => {
         )}
       </button>
       
-      {/* Cart Panel */}
+      {/* 購物車面板 */}
       <div className={`cart-panel ${isOpen ? 'open' : ''}`}>
         <div className="cart-header">
           <h3>購物車</h3>
@@ -160,7 +196,7 @@ const ShoppingCart = () => {
         {cartItems.length === 0 ? (
           <div className="empty-cart">
             <p>購物車是空的</p>
-            <p className="empty-cart-help">點擊物品將其添加到購物車</p>
+            <p className="empty-cart-help">點擊商品將其添加到購物車</p>
           </div>
         ) : (
           <>
@@ -190,12 +226,12 @@ const ShoppingCart = () => {
                       <span>{item.quantity}</span>
                       <button 
                         onClick={() => updateQuantity(index, item.quantity + 1)}
-                        disabled={item.quantity >= item.availableQuantity}
-                        title={`最多可購買 ${item.availableQuantity} 個`}
+                        disabled={item.quantity >= (item.availableQuantity || 1)}
+                        title={`最多可購買 ${item.availableQuantity || 1} 個`}
                       >+</button>
                     </div>
                     <div className="quantity-limit">
-                      數量: {item.quantity}/{item.availableQuantity} 個
+                      數量: {item.quantity}/{item.availableQuantity || 1} 個
                     </div>
                     <button 
                       className="remove-item" 

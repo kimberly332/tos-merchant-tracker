@@ -1,0 +1,246 @@
+/* src/styles/components/auth.css */
+
+/* 登入頁面樣式 */
+.login-page {
+    animation: fadeIn 0.6s ease-out;
+  }
+  
+  .login-form-container {
+    background-color: rgba(20, 59, 74, 0.85);
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    padding: 2rem;
+    margin-bottom: 2rem;
+    border: 1px solid rgba(138, 186, 179, 0.25);
+    max-width: 500px;
+    margin: 0 auto 2rem;
+  }
+  
+  .login-form .form-group {
+    margin-bottom: 1.5rem;
+  }
+  
+  .login-form label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    color: #8ABAB3;
+    font-size: 1rem;
+  }
+  
+  .login-form input,
+  .login-form select {
+    width: 100%;
+    padding: 0.75rem;
+    background-color: rgba(255, 255, 255, 0.07);
+    border: 1px solid rgba(138, 186, 179, 0.3);
+    border-radius: 6px;
+    color: #D6D8D9;
+    font-size: 1rem;
+    transition: all 0.2s ease;
+  }
+  
+  .login-form input:focus,
+  .login-form select:focus {
+    outline: none;
+    border-color: #8ABAB3;
+    box-shadow: 0 0 0 2px rgba(138, 186, 179, 0.2);
+  }
+  
+  .login-form .submit-btn {
+    background-color: #48727B;
+    color: white;
+    padding: 0.85rem 1.5rem;
+    width: 100%;
+    border: none;
+    border-radius: 6px;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    margin-top: 1rem;
+  }
+  
+  .login-form .submit-btn:hover {
+    background-color: #5a8691;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+  
+  .login-form .submit-btn:disabled {
+    background-color: rgba(72, 114, 123, 0.5);
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+  }
+  
+  .login-info {
+    background-color: rgba(16, 24, 35, 0.6);
+    border-radius: 8px;
+    padding: 1.5rem;
+    max-width: 500px;
+    margin: 0 auto;
+    border: 1px solid rgba(138, 186, 179, 0.15);
+  }
+  
+  .login-info h3 {
+    color: #8ABAB3;
+    font-size: 1.1rem;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid rgba(138, 186, 179, 0.15);
+  }
+  
+  .login-info ul {
+    padding-left: 1.5rem;
+  }
+  
+  .login-info li {
+    margin-bottom: 0.5rem;
+    color: #D6D8D9;
+    font-size: 0.95rem;
+  }
+  
+  /* 用戶資料和個人資料樣式 */
+  .user-profile {
+    position: relative;
+  }
+  
+  .user-profile .login-btn {
+    background-color: rgba(72, 114, 123, 0.2);
+    color: #8ABAB3;
+    border: 1px solid rgba(138, 186, 179, 0.3);
+    padding: 0.35rem 0.75rem;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  
+  .user-profile .login-btn:hover {
+    background-color: rgba(72, 114, 123, 0.3);
+    color: white;
+  }
+  
+  .user-info {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background-color: rgba(72, 114, 123, 0.2);
+    border: 1px solid rgba(138, 186, 179, 0.2);
+    padding: 0.35rem 0.75rem;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+  
+  .user-info:hover {
+    background-color: rgba(72, 114, 123, 0.3);
+  }
+  
+  .server-badge {
+    background-color: rgba(156, 108, 44, 0.3);
+    color: #e3b96a;
+    padding: 0.15rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    font-weight: 500;
+  }
+  
+  .user-name {
+    color: #D6D8D9;
+    font-weight: 500;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    max-width: 120px;
+  }
+  
+  .user-dropdown {
+    position: absolute;
+    top: calc(100% + 5px);
+    right: 0;
+    background-color: rgba(16, 24, 35, 0.95);
+    border-radius: 6px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(138, 186, 179, 0.2);
+    min-width: 200px;
+    z-index: 100;
+    animation: fadeIn 0.2s ease;
+  }
+  
+  .dropdown-info {
+    padding: 0.75rem;
+    border-bottom: 1px solid rgba(138, 186, 179, 0.1);
+  }
+  
+  .dropdown-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.35rem 0;
+    color: #D6D8D9;
+    font-size: 0.9rem;
+  }
+  
+  .dropdown-item i {
+    color: #8ABAB3;
+    width: 16px;
+    text-align: center;
+  }
+  
+  .dropdown-actions {
+    padding: 0.75rem;
+  }
+  
+  .logout-btn {
+    background-color: rgba(244, 67, 54, 0.1);
+    color: #ff8a80;
+    border: 1px solid rgba(244, 67, 54, 0.3);
+    padding: 0.35rem 0.75rem;
+    border-radius: 4px;
+    width: 100%;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+  }
+  
+  .logout-btn:hover {
+    background-color: rgba(244, 67, 54, 0.2);
+  }
+  
+  /* 響應式調整 */
+  @media (max-width: 768px) {
+    .user-profile-container {
+      width: 100%;
+      margin-top: 0.5rem;
+    }
+    
+    .user-info {
+      justify-content: center;
+    }
+    
+    .user-dropdown {
+      width: 100%;
+    }
+  }
+  
+  /* 在導航欄中的樣式調整 */
+  .nav-links .user-profile-container {
+    margin-left: auto;
+  }
+  
+  /* 確保下拉選單在導航欄中顯示正確 */
+  @media (min-width: 768px) {
+    .nav-links .user-profile-container .user-dropdown {
+      right: 0;
+      left: auto;
+    }
+  }

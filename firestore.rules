@@ -1,11 +1,25 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Allow read for all merchant data
+    // 用戶文檔安全規則
+    match /users/{userId} {
+      allow read: if true;
+      allow create, update: if true; // 允許創建和更新用戶資料
+      allow delete: if false; // 禁止刪除用戶資料
+    }
+    
+    // 分伺服器的商人數據
+    match /servers/{serverId}/merchants/{document=**} {
+      allow read: if true; // 允許公開讀取
+      allow create, update: if true; // 允許創建和更新商人資料
+      allow delete: if false; // 禁止刪除商人資料
+    }
+    
+    // 舊版查詢兼容
     match /merchants/{document=**} {
       allow read: if true;
-      allow create, update: if request.auth != null || true; // Remove "|| true" for production
-      allow delete: if false; // Only allow deletion through admin functions
+      allow create, update: if true;
+      allow delete: if false;
     }
   }
 }

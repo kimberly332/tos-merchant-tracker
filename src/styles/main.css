@@ -653,17 +653,31 @@ body {
     color: #8ABAB3;
   }
   
-  .nav-links li div.user-info .user-greeting {
-    padding-right: 0.5em;
+  .user-profile-container {
+    margin-left: auto;
   }
-
-  .nav-links li div.user-info {
-    display: flex;
-    align-items: center;
+  
+  /* Success and Error Messages */
+  .success-message, .error-message {
+    padding: 1rem;
+    border-radius: 6px;
+    text-align: center;
+    margin-bottom: 1.5rem;
+    animation: fadeIn 0.3s ease-out;
   }
-
-
-
+  
+  .success-message {
+    background-color: rgba(76, 175, 80, 0.1);
+    border: 1px solid rgba(76, 175, 80, 0.3);
+    color: #81c784;
+  }
+  
+  .error-message {
+    background-color: rgba(244, 67, 54, 0.1);
+    border: 1px solid rgba(244, 67, 54, 0.3);
+    color: #ff8a80;
+  }
+  
   /* Media Queries for Responsive Design */
   @media (max-width: 768px) {
     .items-list {
@@ -935,5 +949,8 @@ body {
   }
 }
 
+  /* Import auth.css for user authentication styles */
+  @import './components/auth.css';
+  
   @import './components/merchants.css';
   @import './animations.css';
