@@ -21,7 +21,7 @@ const ProtectedRoute = ({ children }) => {
       setIsAuthenticated(!!user);
       setIsLoading(false);
     };
-    
+
     checkAuth();
   }, []);
 
@@ -45,14 +45,14 @@ function App() {
           <Routes>
             {/* 公開路由 */}
             <Route path="/login" element={<LoginPage />} />
-            
+
             {/* 新增使用說明頁面 */}
             <Route path="/guide" element={
               <ProtectedRoute>
                 <UserGuidePage />
               </ProtectedRoute>
             } />
-            
+
             {/* 受保護的路由 */}
             <Route path="/" element={
               <ProtectedRoute>
@@ -69,13 +69,13 @@ function App() {
                 <EditMerchantPage />
               </ProtectedRoute>
             } />
-            
+
             {/* 找不到頁面導向登入 */}
             <Route path="*" element={<Navigate to="/login" />} />
           </Routes>
         </main>
-        <ShoppingCart />
       </div>
+      <ShoppingCart />
     </Router>
   );
 }
