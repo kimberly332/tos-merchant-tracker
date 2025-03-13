@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { getAllMerchants } from '../../firebase/firestore';
 import ItemCategoryFilter from '../search/ItemCategoryFilter';
 import { useNavigate } from 'react-router-dom';
-import MerchantCardEnhanced from './MerchantCardEnhanced';
 
 function MerchantList() {
   const navigate = useNavigate();
@@ -283,24 +282,22 @@ function MerchantList() {
             return (
               <div key={index} className={`merchant-card ${merchant.isSpecialMerchant ? 'special-merchant-card' : ''}`}>
                 <div className="merchant-header">
-                <div className="merchant-title">
-                <h3 
-                    className="player-id-copy" 
-                    onClick={() => copyToClipboard(merchant.playerId)}
-                    title="點擊複製玩家ID"
-                >
-                    {merchant.playerId} 提供 <span className="copy-icon">📋</span>
-                </h3>
-                {merchant.isSpecialMerchant && (
-                    <span className="special-merchant-badge">五商</span>
-                )}
-                </div>
+                  <div className="merchant-title">
+                    <h3 
+                      className="player-id-copy" 
+                      onClick={() => copyToClipboard(merchant.playerId)}
+                      title="點擊複製玩家ID"
+                    >
+                      {merchant.playerId} 提供 <span className="copy-icon">📋</span>
+                    </h3>
+                    {merchant.isSpecialMerchant && (
+                      <span className="special-merchant-badge">五商</span>
+                    )}
+                  </div>
                   {merchant.discount && (
                     <p className="discount-info">折扣: {merchant.discount}</p>
                   )}
                 </div>
-                
-                {/* Removed special merchant info section with location, exchangeRate, and totalAmount */}
                 
                 {merchant.items && merchant.items.length > 0 ? (
                   <div className="items-section">
@@ -345,24 +342,27 @@ function MerchantList() {
                 )}
                 
                 <div className="merchant-footer">
-                  <div className="time-info">
-                    <p className="submission-time">
-                      <span className="time-label">提交時間:</span>
-                      <span>{formatTimestamp(merchant.timestamp)}</span>
-                    </p>
+                  <div className="footer-content">
+                    <div className="time-info">
+                      <p className="submission-time">
+                        <span className="time-label">提交時間:</span>
+                        <span>{formatTimestamp(merchant.timestamp)}</span>
+                      </p>
+                    </div>
+                    
+                    {localStorage.getItem('submitterPlayerId') === merchant.playerId && (
+                      <div className="edit-controls">
+                        <button 
+                          className="edit-btn"
+                          onClick={() => navigate(`/edit-merchant/${merchant.id}`)}
+                          title="編輯商人資訊"
+                        >
+                          <span className="edit-icon">✏️</span> 編輯
+                        </button>
+                      </div>
+                    )}
                   </div>
                 </div>
-                {localStorage.getItem('submitterPlayerId') === merchant.playerId && (
-                  <div className="edit-controls">
-                    <button 
-                      className="edit-btn"
-                      onClick={() => navigate(`/edit-merchant/${merchant.id}`)}
-                      title="編輯商人資訊"
-                    >
-                      <span className="edit-icon">✏️</span> 編輯
-                    </button>
-                  </div>
-                )}
               </div>
             );
           }).filter(Boolean)}

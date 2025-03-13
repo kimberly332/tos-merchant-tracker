@@ -546,6 +546,8 @@ body {
   .nav-links {
     display: flex;
     gap: 1rem;
+    align-items: center;
+    justify-content: center;
   }
 
   .nav-links li {
@@ -568,6 +570,13 @@ body {
   .nav-links li div.user-info .user-greeting {
     padding-right: 0.5em;
   }
+
+  .nav-links li div.user-info {
+    display: flex;
+    align-items: center;
+  }
+
+
 
   /* Media Queries for Responsive Design */
   @media (max-width: 768px) {
@@ -760,6 +769,82 @@ body {
   
   .search-results .item-quantities {
     flex-direction: row;
+  }
+}
+
+/* Merchant Footer Styles - Updated */
+.merchant-footer {
+  padding-top: 0.75rem;
+  border-top: 1px solid rgba(138, 186, 179, 0.2);
+  margin-top: 1rem;
+  padding: 0.75rem 1rem;
+  font-size: 0.85rem;
+  color: rgba(214, 216, 217, 0.7);
+  background-color: rgba(16, 24, 35, 0.4);
+}
+
+.footer-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.time-info {
+  display: flex;
+  align-items: center;
+}
+
+.submission-time {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0;
+}
+
+.time-label {
+  color: #8ABAB3;
+  font-weight: 500;
+}
+
+/* Edit Controls Styles */
+.edit-controls {
+  display: flex;
+  align-items: center;
+}
+
+.edit-btn, .cancel-btn, .logout-btn {
+  background-color: rgba(72, 114, 123, 0.2);
+  color: #8ABAB3;
+  border: 1px solid rgba(138, 186, 179, 0.3);
+  border-radius: 4px;
+  padding: 0.35rem 0.75rem;
+  font-size: 0.85rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  transition: all 0.15s ease;
+}
+
+.edit-btn:hover, .cancel-btn:hover, .logout-btn:hover {
+  background-color: rgba(72, 114, 123, 0.3);
+  color: white;
+  transform: translateY(-1px);
+}
+
+.edit-icon {
+  font-size: 1em;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .footer-content {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+  
+  .time-info, .edit-controls {
+    flex: 0 0 auto;
   }
 }
 
