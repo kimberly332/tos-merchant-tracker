@@ -126,6 +126,7 @@ body {
     grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
     gap: 0.75rem;
     margin-top: 0.75rem;
+    padding: 0;
   }
   
   .item {
@@ -564,6 +565,10 @@ body {
     color: #8ABAB3;
   }
   
+  .nav-links li div.user-info .user-greeting {
+    padding-right: 0.5em;
+  }
+
   /* Media Queries for Responsive Design */
   @media (max-width: 768px) {
     .items-list {
@@ -605,7 +610,8 @@ body {
       width: 100%;
     }
     
-    .nav-links li a {
+    .nav-links li a,
+    .nav-links li div.user-info {
       display: block;
       padding: 0.75rem 1.5rem;
       border-radius: 0;
