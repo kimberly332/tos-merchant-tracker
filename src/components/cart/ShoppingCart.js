@@ -1,5 +1,5 @@
 // src/components/cart/ShoppingCart.js
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { checkUserAuth } from '../../firebase/userAuth';
 import { updateUserCart } from '../../firebase/userAuth';
 import './ShoppingCart.css';
@@ -7,133 +7,133 @@ import './ShoppingCart.css';
 const ShoppingCart = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [cartItems, setCartItems] = useState([]);
-  const [totalCoins, setTotalCoins] = useState(0);
-  const [requiredMaterials, setRequiredMaterials] = useState({});
   const [user, setUser] = useState(null);
 
-  // 加載用戶資料和購物車
-  useEffect(() => {
-    const currentUser = checkUserAuth();
-    setUser(currentUser);
-
-    // 加載購物車資料
-    try {
-      const savedCart = localStorage.getItem('shoppingCart');
-      if (savedCart) {
-        const parsedCart = JSON.parse(savedCart);
-        setCartItems(parsedCart);
-      }
-    } catch (error) {
-      console.error('加載購物車時發生錯誤:', error);
-    }
-    
-    // 監聽購物車事件
-    const handleAddToCart = (event) => {
-      const newItem = event.detail;
-      
-      setCartItems(prevItems => {
-        // 檢查商品是否已存在
-        const existingItemIndex = prevItems.findIndex(item => 
-          item.itemName === newItem.itemName && 
-          item.playerId === newItem.playerId
-        );
-        
-        let updatedItems;
-        if (existingItemIndex >= 0) {
-          // 更新數量
-          updatedItems = [...prevItems];
-          updatedItems[existingItemIndex].quantity += 1;
-        } else {
-          // 添加新商品
-          updatedItems = [...prevItems, { ...newItem, quantity: 1 }];
-        }
-        
-        // 如果用戶已登入，同步到雲端
-        if (user) {
-          updateUserCart(user.userId, updatedItems);
-        }
-        
-        return updatedItems;
-      });
-    };
-    
-    const handleRemoveFromCart = (event) => {
-      const itemToRemove = event.detail;
-      
-      setCartItems(prevItems => {
-        // 移除商品
-        const updatedItems = prevItems.filter(
-          item => !(item.itemName === itemToRemove.itemName && 
-                    item.playerId === itemToRemove.playerId)
-        );
-        
-        // 如果用戶已登入，同步到雲端
-        if (user) {
-          updateUserCart(user.userId, updatedItems);
-        }
-        
-        return updatedItems;
-      });
-    };
-
-    // 添加事件監聽
-    window.addEventListener('addToCart', handleAddToCart);
-    window.addEventListener('removeFromCart', handleRemoveFromCart);
-    
-    // 清理
-    return () => {
-      window.removeEventListener('addToCart', handleAddToCart);
-      window.removeEventListener('removeFromCart', handleRemoveFromCart);
-    };
-  }, [user]);
-
-  // 當購物車項目變化時計算總數
-  useEffect(() => {
+  // Memoized calculation of total coins and required materials
+  const { totalCoins, requiredMaterials } = useMemo(() => {
     let coins = 0;
     let materials = {};
     
     cartItems.forEach(item => {
       if (item.allowsCoinExchange && item.price) {
-        // 計算家園幣總數
         coins += item.price * item.quantity;
       }
       
       if (item.allowsBarterExchange && item.exchangeItemName) {
         const materialName = item.exchangeItemName;
-        // 計算所需材料數量
         const materialQty = (item.exchangeQuantity || 1) * item.quantity;
         
-        // 添加到總材料需求
         materials[materialName] = (materials[materialName] || 0) + materialQty;
       }
     });
     
-    setTotalCoins(coins);
-    setRequiredMaterials(materials);
-    
-    // 保存到 localStorage
+    return { totalCoins: coins, requiredMaterials: materials };
+  }, [cartItems]);
+
+  // Stable function to load cart from localStorage
+  const loadCartFromLocalStorage = useCallback(() => {
     try {
+      const savedCart = localStorage.getItem('shoppingCart');
+      return savedCart ? JSON.parse(savedCart) : [];
+    } catch (error) {
+      console.error('Error loading cart from localStorage:', error);
+      return [];
+    }
+  }, []);
+
+  // Initialize user and cart
+  useEffect(() => {
+    const currentUser = checkUserAuth();
+    setUser(currentUser);
+
+    // Load cart only once when component mounts
+    const initialCart = loadCartFromLocalStorage();
+    setCartItems(initialCart);
+  }, []); // Empty dependency array prevents re-renders
+
+  // Handle cart persistence and synchronization
+  useEffect(() => {
+    // Skip if no items or no user
+    if (cartItems.length === 0) return;
+
+    try {
+      // Save to localStorage
       localStorage.setItem('shoppingCart', JSON.stringify(cartItems));
       
-      // 如果用戶已登入，同步到雲端
-      if (user && cartItems.length > 0) {
+      // Sync with cloud if user is logged in
+      if (user) {
         updateUserCart(user.userId, cartItems);
       }
     } catch (error) {
-      console.error('保存購物車時發生錯誤:', error);
+      console.error('Error saving cart:', error);
     }
-    
-    // 發送購物車更新事件
+
+    // Notify other components about cart update
     const cartUpdatedEvent = new CustomEvent('cartUpdated', {
       detail: { cart: cartItems }
     });
     window.dispatchEvent(cartUpdatedEvent);
-  }, [cartItems, user]);
+  }, [cartItems, user]); // Only run when cart or user changes
 
+  // Stable event handlers
+  const handleAddToCart = useCallback((event) => {
+    const newItem = event.detail;
+    
+    setCartItems(prevItems => {
+      // Check if item already exists
+      const existingItemIndex = prevItems.findIndex(item => 
+        item.itemName === newItem.itemName && 
+        item.playerId === newItem.playerId
+      );
+      
+      if (existingItemIndex >= 0) {
+        // Update quantity of existing item
+        const updatedItems = [...prevItems];
+        const currentItem = updatedItems[existingItemIndex];
+        
+        // Respect available quantity limit
+        const maxQuantity = currentItem.availableQuantity || 1;
+        updatedItems[existingItemIndex] = {
+          ...currentItem,
+          quantity: Math.min(currentItem.quantity + 1, maxQuantity)
+        };
+        
+        return updatedItems;
+      } else {
+        // Add new item
+        return [...prevItems, { ...newItem, quantity: 1 }];
+      }
+    });
+  }, []);
+
+  const handleRemoveFromCart = useCallback((event) => {
+    const itemToRemove = event.detail;
+    
+    setCartItems(prevItems => 
+      prevItems.filter(
+        item => !(item.itemName === itemToRemove.itemName && 
+                  item.playerId === itemToRemove.playerId)
+      )
+    );
+  }, []);
+
+  // Add and remove event listeners
+  useEffect(() => {
+    window.addEventListener('addToCart', handleAddToCart);
+    window.addEventListener('removeFromCart', handleRemoveFromCart);
+    
+    return () => {
+      window.removeEventListener('addToCart', handleAddToCart);
+      window.removeEventListener('removeFromCart', handleRemoveFromCart);
+    };
+  }, [handleAddToCart, handleRemoveFromCart]);
+
+  // Toggle cart
   const toggleCart = () => {
     setIsOpen(!isOpen);
   };
 
+  // Remove item from cart
   const removeFromCart = (index) => {
     setCartItems(prevItems => {
       const updatedItems = [...prevItems];
@@ -142,39 +142,37 @@ const ShoppingCart = () => {
     });
   };
 
+  // Update item quantity
   const updateQuantity = (index, newQuantity) => {
     if (newQuantity < 1) return;
     
-    // 獲取商品的可購買數量上限
-    const availableQuantity = cartItems[index].availableQuantity || 1;
-    
-    // 確保新數量不超過可購買數量
-    const limitedQuantity = Math.min(newQuantity, availableQuantity);
-    
     setCartItems(prevItems => {
       const updatedItems = [...prevItems];
-      updatedItems[index].quantity = limitedQuantity;
+      const item = updatedItems[index];
+      
+      // Respect available quantity limit
+      const availableQuantity = item.availableQuantity || 1;
+      updatedItems[index] = {
+        ...item,
+        quantity: Math.min(newQuantity, availableQuantity)
+      };
+      
       return updatedItems;
     });
   };
 
+  // Clear entire cart
   const clearCart = () => {
     setCartItems([]);
-    
-    // 如果用戶已登入，同步空購物車到雲端
-    if (user) {
-      updateUserCart(user.userId, []);
-    }
   };
 
-  // 如果用戶未登入，不顯示購物車
+  // If no user, don't render cart
   if (!user) {
     return null;
   }
 
   return (
     <div className="shopping-cart-container">
-      {/* 購物車圖標 */}
       <button 
         className="cart-icon" 
         onClick={toggleCart}
@@ -182,11 +180,12 @@ const ShoppingCart = () => {
       >
         <i className="fas fa-shopping-cart"></i>
         {cartItems.length > 0 && (
-          <span className="cart-badge">{cartItems.reduce((total, item) => total + item.quantity, 0)}</span>
+          <span className="cart-badge">
+            {cartItems.reduce((total, item) => total + item.quantity, 0)}
+          </span>
         )}
       </button>
       
-      {/* 購物車面板 */}
       <div className={`cart-panel ${isOpen ? 'open' : ''}`}>
         <div className="cart-header">
           <h3>購物車</h3>

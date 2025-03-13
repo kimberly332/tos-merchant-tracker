@@ -13,7 +13,7 @@ function NavigationBar() {
   useEffect(() => {
     const currentUser = checkUserAuth();
     setUser(currentUser);
-  }, []);
+  }, [location.pathname]); // 重新檢查用戶狀態，特別是在路由變化時
 
   // 切換手機選單
   const toggleMobileMenu = () => {
@@ -33,6 +33,9 @@ function NavigationBar() {
     navigate('/login');
   };
 
+  // 檢查是否在登入頁面
+  const isLoginPage = location.pathname === '/login';
+
   return (
     <nav className="navigation-bar">
       <div className="logo">
@@ -51,20 +54,30 @@ function NavigationBar() {
       
       {/* 導航連結 */}
       <ul className={`nav-links ${mobileMenuOpen ? "show" : ""}`}>
-        <li>
-          <Link to="/" onClick={closeMobileMenu}>搜尋商品</Link>
-        </li>
-        <li>
-          <Link to="/add-merchant" onClick={closeMobileMenu}>新增商人</Link>
-        </li>
+        {/* 只有在登入後才顯示的連結 */}
         {user && (
+          <>
+            <li>
+              <Link to="/" onClick={closeMobileMenu}>搜尋商品</Link>
+            </li>
+            <li>
+              <Link to="/add-merchant" onClick={closeMobileMenu}>新增商人</Link>
+            </li>
+            <li>
+              <button
+                className="logout-btn"
+                onClick={handleLogout}
+              >
+                <i className="fas fa-sign-out-alt"></i> 登出 ({user.playerId})
+              </button>
+            </li>
+          </>
+        )}
+        
+        {/* 未登入且不在登入頁面時顯示登入按鈕 */}
+        {!user && !isLoginPage && (
           <li>
-            <button
-              className="logout-btn"
-              onClick={handleLogout}
-            >
-              <i className="fas fa-sign-out-alt"></i> 登出
-            </button>
+            <Link to="/login" onClick={closeMobileMenu}>登入</Link>
           </li>
         )}
       </ul>
