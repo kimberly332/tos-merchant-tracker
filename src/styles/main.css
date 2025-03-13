@@ -613,8 +613,12 @@ body {
     
     .menu-toggle {
       display: block;
+      background: none;
+      border: none;
+      color: white;
+      font-size: 1.2em;
     }
-    
+
     .exchange-options {
       flex-direction: column;
     }

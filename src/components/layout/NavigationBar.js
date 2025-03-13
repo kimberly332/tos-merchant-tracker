@@ -1,16 +1,14 @@
-// Open src/components/layout/NavigationBar.js
-// Update the imports (if needed)
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 
 function NavigationBar() {
-  // Keep your existing mobile menu state
+  // State for menu toggle
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   
-  // Add new state for user ID
+  // State for user ID
   const [playerId, setPlayerId] = useState('');
   
-  // Add useEffect to load player ID from localStorage
+  // Load player ID from localStorage on component mount
   useEffect(() => {
     const storedPlayerId = localStorage.getItem('submitterPlayerId');
     if (storedPlayerId) {
@@ -18,13 +16,15 @@ function NavigationBar() {
     }
   }, []);
   
-  // Add logout handler
+  // Handle user logout
   const handleLogout = () => {
     localStorage.removeItem('submitterPlayerId');
     setPlayerId('');
+    // Close mobile menu after logout
+    setMobileMenuOpen(false);
   };
 
-  // Keep your existing mobile menu toggle function
+  // Toggle mobile menu
   const toggleMobileMenu = () => {
     setMobileMenuOpen(!mobileMenuOpen);
   };
@@ -32,26 +32,40 @@ function NavigationBar() {
   return (
     <nav className="navigation-bar">
       <div className="logo">
-        <Link to="/">Tree of Savior</Link>
+        <Link to="/">救世者之樹M</Link>
       </div>
       
-      {/* Keep your existing mobile menu toggle button */}
-      <button className="menu-toggle" onClick={toggleMobileMenu}>
-        <span className={mobileMenuOpen ? "rotate-down" : ""}></span>
-        <span className={mobileMenuOpen ? "fade-out" : ""}></span>
-        <span className={mobileMenuOpen ? "rotate-up" : ""}></span>
+      {/* Font Awesome Hamburger Menu */}
+      <button 
+        className="menu-toggle" 
+        onClick={toggleMobileMenu}
+        aria-label="Toggle menu"
+        aria-expanded={mobileMenuOpen}
+      >
+        <i className={mobileMenuOpen ? "fas fa-times" : "fas fa-bars"}></i>
       </button>
       
-      {/* Update your navigation links */}
+      {/* Navigation links */}
       <ul className={`nav-links ${mobileMenuOpen ? "show" : ""}`}>
-        <li><Link to="/" onClick={() => setMobileMenuOpen(false)}>搜尋商品</Link></li>
-        <li><Link to="/add-merchant" onClick={() => setMobileMenuOpen(false)}>新增商人</Link></li>
+        <li>
+          <Link to="/" onClick={() => setMobileMenuOpen(false)}>搜尋商品</Link>
+        </li>
+        <li>
+          <Link to="/add-merchant" onClick={() => setMobileMenuOpen(false)}>新增商人</Link>
+        </li>
         
-        {/* Add user information display */}
+        {/* User information */}
         {playerId && (
-          <li className="user-info">
-            <span className="user-greeting">您好，{playerId}</span>
-            <button className="logout-btn" onClick={handleLogout}>登出</button>
+          <li className="user-info-container">
+            <div className="user-info">
+              <span className="user-greeting">您好，{playerId}</span>
+              <button 
+                className="logout-btn" 
+                onClick={handleLogout}
+              >
+                登出
+              </button>
+            </div>
           </li>
         )}
       </ul>

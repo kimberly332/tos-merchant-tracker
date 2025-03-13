@@ -290,8 +290,4 @@
       flex-wrap: wrap;
       width: 100%;
     }
-
-    .exchange-options {
-        flex-direction: column;
-    }
   }
