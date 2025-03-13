@@ -278,6 +278,13 @@
     padding-top: 0.75rem;
     border-top: 1px solid rgba(138, 186, 179, 0.1);
   }
+
+  .cart-item-count {
+    margin-top: 0.75rem;
+    font-size: 0.9rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid rgba(138, 186, 179, 0.1);
+  }
   
   .materials-list h5 {
     margin-top: 0;
@@ -360,3 +367,10 @@
       font-size: 1.1rem;
     }
   }
+
+  .quantity-limit {
+    font-size: 0.8rem;
+    color: rgba(214, 216, 217, 0.7);
+    margin-top: -0.25rem;
+  }
+

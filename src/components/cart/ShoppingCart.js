@@ -9,7 +9,7 @@ const ShoppingCart = () => {
   const [requiredMaterials, setRequiredMaterials] = useState({});
 
   // Load cart from localStorage on mount and listen for changes
-useEffect(() => {
+  useEffect(() => {
     // Load saved cart from localStorage
     try {
       const savedCart = localStorage.getItem('shoppingCart');
@@ -43,7 +43,6 @@ useEffect(() => {
       });
     };
     
-    // Add the handleRemoveFromCart function here
     const handleRemoveFromCart = (event) => {
       const itemToRemove = event.detail;
       
@@ -55,8 +54,8 @@ useEffect(() => {
         );
       });
     };
-  
-    // Then update the event listeners
+
+    // Add event listeners
     window.addEventListener('addToCart', handleAddToCart);
     window.addEventListener('removeFromCart', handleRemoveFromCart);
     
@@ -74,13 +73,16 @@ useEffect(() => {
     
     cartItems.forEach(item => {
       if (item.allowsCoinExchange && item.price) {
+        // Calculate total cost in garden coins
         coins += item.price * item.quantity;
       }
       
       if (item.allowsBarterExchange && item.exchangeItemName) {
         const materialName = item.exchangeItemName;
+        // Calculate required material quantity based on exchange rate and item quantity
         const materialQty = (item.exchangeQuantity || 1) * item.quantity;
         
+        // Add to total materials needed
         materials[materialName] = (materials[materialName] || 0) + materialQty;
       }
     });
@@ -117,9 +119,15 @@ useEffect(() => {
   const updateQuantity = (index, newQuantity) => {
     if (newQuantity < 1) return;
     
+    // Get the current item's availableQuantity limit
+    const availableQuantity = cartItems[index].availableQuantity || 1;
+    
+    // Make sure new quantity doesn't exceed the available quantity
+    const limitedQuantity = Math.min(newQuantity, availableQuantity);
+    
     setCartItems(prevItems => {
       const updatedItems = [...prevItems];
-      updatedItems[index].quantity = newQuantity;
+      updatedItems[index].quantity = limitedQuantity;
       return updatedItems;
     });
   };
@@ -164,11 +172,11 @@ useEffect(() => {
                     <div className="cart-item-seller">賣家: {item.playerId}</div>
                     <div className="cart-item-exchange">
                       {item.allowsCoinExchange && (
-                        <span className="cart-item-price">💰 {item.price} 家園幣</span>
+                        <span className="cart-item-price">💰 {item.price} 枚</span>
                       )}
                       {item.allowsBarterExchange && (
                         <span className="cart-item-exchange-material">
-                          🔄 {item.exchangeQuantity || 1} {item.exchangeItemName}
+                          🔄 {item.exchangeQuantity || 1} 個 {item.exchangeItemName}
                         </span>
                       )}
                     </div>
@@ -182,8 +190,12 @@ useEffect(() => {
                       <span>{item.quantity}</span>
                       <button 
                         onClick={() => updateQuantity(index, item.quantity + 1)}
-                        disabled={item.quantity >= (item.availableQuantity || item.quantity)}
+                        disabled={item.quantity >= item.availableQuantity}
+                        title={`最多可購買 ${item.availableQuantity} 個`}
                       >+</button>
+                    </div>
+                    <div className="quantity-limit">
+                      數量: {item.quantity}/{item.availableQuantity} 個
                     </div>
                     <button 
                       className="remove-item" 
@@ -200,22 +212,27 @@ useEffect(() => {
               <h4>總計:</h4>
               {totalCoins > 0 && (
                 <div className="summary-item">
-                  <span className="summary-label">家園幣:</span>
-                  <span className="summary-value">💰 {totalCoins}</span>
+                  <span className="summary-label">需要家園幣:</span>
+                  <span className="summary-value">💰 {totalCoins.toLocaleString()} 枚</span>
                 </div>
               )}
               
               {Object.keys(requiredMaterials).length > 0 && (
                 <div className="materials-list">
-                  <h5>需要材料:</h5>
+                  <h5>需要交換材料:</h5>
                   {Object.entries(requiredMaterials).map(([material, quantity]) => (
                     <div key={material} className="summary-item">
                       <span className="summary-label">{material}:</span>
-                      <span className="summary-value">{quantity}</span>
+                      <span className="summary-value">{quantity.toLocaleString()} 個</span>
                     </div>
                   ))}
                 </div>
               )}
+              
+              <div className="cart-item-count">
+                <span className="summary-label">購物車商品總數:</span>
+                <span className="summary-value">{cartItems.reduce((total, item) => total + item.quantity, 0)} 件</span>
+              </div>
               
               <button className="clear-cart" onClick={clearCart}>
                 清空購物車
