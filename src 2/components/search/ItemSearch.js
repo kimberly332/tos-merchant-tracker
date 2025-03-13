@@ -1,21 +1,23 @@
 import React, { useState } from 'react';
 import { searchItems } from '../../firebase/firestore';
 import ItemCategoryFilter from './ItemCategoryFilter';
-import MerchantItem from '../merchants/MerchantItem';
 
 function ItemSearch() {
   const [searchTerm, setSearchTerm] = useState('');
   const [searchResults, setSearchResults] = useState([]);
   const [searching, setSearching] = useState(false);
   const [searchPerformed, setSearchPerformed] = useState(false);
+  // 修改為數組以支持多選
   const [selectedCategories, setSelectedCategories] = useState(['全部']);
   const [copyMessage, setCopyMessage] = useState(null);
 
-  // Copy to clipboard function
+  // 複製到剪貼板的函數
   const copyToClipboard = (text) => {
     navigator.clipboard.writeText(text)
       .then(() => {
+        // 顯示提示訊息
         setCopyMessage(`已複製: ${text}`);
+        // 3秒後清除訊息
         setTimeout(() => setCopyMessage(null), 3000);
       })
       .catch(err => {
@@ -48,19 +50,19 @@ function ItemSearch() {
     }
   };
   
-  // Update category selection to support multi-select
+  // 更新類別選擇處理函數以支持多選
   const handleCategorySelect = (categories) => {
     setSelectedCategories(categories);
   };
   
   // Filter results by categories if needed
   const filteredResults = searchResults.filter(merchant => {
-    // If '全部' category is selected or no categories selected, don't filter by category
+    // 如果選擇了「全部」類別或沒有選擇任何類別，則不進行類別篩選
     if (selectedCategories.includes('全部') || selectedCategories.length === 0) {
       return true;
     }
     
-    // Check if any merchant items match the selected categories
+    // 檢查商人是否有任何項目匹配已選擇的類別
     return merchant.items.some(item => 
       selectedCategories.some(selectedCategory => 
         item.category === selectedCategory || 
@@ -88,11 +90,11 @@ function ItemSearch() {
 
   return (
     <div className="item-search-container">
-      {copyMessage && (
-        <div className="copy-message">
-          {copyMessage}
-        </div>
-      )}
+        {copyMessage && (
+          <div className="copy-message">
+            {copyMessage}
+          </div>
+        )}
       <form onSubmit={handleSubmit} className="search-form">
         <div className="search-input-container">
           <input
@@ -129,6 +131,8 @@ function ItemSearch() {
           ) : (
             <div className="results-list">
               {filteredResults.map((merchant, index) => {
+                const remainingTime = true; // 保留這個變數但改變其用途，僅用於檢查項目是否已過期
+                
                 // Skip if expired
                 if (!merchant.expiresAt || new Date() > new Date(merchant.expiresAt)) return null;
                 
@@ -154,11 +158,28 @@ function ItemSearch() {
                       <h4>販售物品:</h4>
                       <ul>
                         {merchant.items.map((item, itemIndex) => (
-                          <MerchantItem 
-                            key={itemIndex} 
-                            item={item} 
-                            merchantInfo={merchant}
-                          />
+                          <li key={itemIndex} className="item">
+                            <span className="item-name">{item.itemName}</span>
+                            <span className="item-category">類別: {item.category || '其他'}</span>
+                            
+                            {/* 數量顯示 */}
+                            <div className="item-quantities">
+                              <span className="item-quantity">總數量: {item.quantity || 1}</span>
+                              {item.availableQuantity && (
+                                <span className="item-available-quantity">本攤位可購: {item.availableQuantity}</span>
+                              )}
+                            </div>
+                            
+                            {item.allowsCoinExchange && (
+                              <span className="item-price">單價: {item.price} 銀幣</span>
+                            )}
+                            
+                            {item.allowsBarterExchange && (
+                              <span className="item-exchange">
+                                交換: {item.exchangeQuantity} {item.exchangeItemName}
+                              </span>
+                            )}
+                          </li>
                         ))}
                       </ul>
                     </div>

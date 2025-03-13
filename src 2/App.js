@@ -4,7 +4,6 @@ import NavigationBar from './components/layout/NavigationBar';
 import HomePage from './pages/HomePage';
 import AddMerchantPage from './pages/AddMerchantPage';
 import EditMerchantPage from './pages/EditMerchantPage';
-import ShoppingCart from './components/cart/ShoppingCart';
 import './styles/main.css';
 
 function App() {
@@ -19,7 +18,6 @@ function App() {
             <Route path="/edit-merchant/:merchantId" element={<EditMerchantPage />} />
           </Routes>
         </main>
-        <ShoppingCart /> {/* Add the shopping cart component */}
       </div>
     </Router>
   );

@@ -269,7 +269,7 @@
     justify-content: center;
     font-size: var(--font-size-lg);
     box-shadow: var(--shadow-md);
-    z-index: 1000;
+    z-index: var(--z-index-fixed);
     transition: background-color var(--transition-fast), transform var(--transition-fast);
   }
   
