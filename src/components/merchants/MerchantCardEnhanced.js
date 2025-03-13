@@ -15,7 +15,7 @@ const MerchantCardEnhanced = ({
             onClick={() => copyToClipboard(merchant.playerId)}
             title="點擊複製玩家ID"
           >
-            {merchant.playerId} <span className="copy-icon">📋 (複製ID)</span>
+            {merchant.playerId} <span className="copy-icon">📋(點擊複製)</span>
           </h3>
           {merchant.isSpecialMerchant && (
             <span className="special-merchant-badge">五商</span>

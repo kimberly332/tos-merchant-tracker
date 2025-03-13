@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { getAllMerchants } from '../../firebase/firestore';
 import ItemCategoryFilter from '../search/ItemCategoryFilter';
 import { useNavigate } from 'react-router-dom';
+import MerchantItem from './MerchantItem';
 
 function MerchantList() {
   const navigate = useNavigate();
@@ -9,7 +10,6 @@ function MerchantList() {
   const [filteredMerchants, setFilteredMerchants] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
-  // 修改為數組以支持多選
   const [selectedCategories, setSelectedCategories] = useState(['全部']);
   const [error, setError] = useState(null);
   const [copyMessage, setCopyMessage] = useState(null);
@@ -21,7 +21,7 @@ function MerchantList() {
   const [showRegularMerchants, setShowRegularMerchants] = useState(true);
   const [showSpecialMerchants, setShowSpecialMerchants] = useState(true);
 
-  // Add the copyToClipboard function here, after all state variables
+  // Copy to clipboard function
   const copyToClipboard = (text) => {
     navigator.clipboard.writeText(text)
       .then(() => {
@@ -35,7 +35,7 @@ function MerchantList() {
       });
   };
   
-  // 獲取所有商人數據
+  // Fetch all merchants
   useEffect(() => {
     const fetchMerchants = async () => {
       setLoading(true);
@@ -54,23 +54,21 @@ function MerchantList() {
     fetchMerchants();
   }, []);
 
-  // 搜尋、篩選和排序
+  // Search, filter and sort
   useEffect(() => {
-    // 確保有商人數據才進行處理
+    // Ensure we have merchant data to process
     if (!merchants || merchants.length === 0) {
       setFilteredMerchants([]);
       return;
     }
     
-    // 創建商人數據的深拷貝
+    // Create a deep copy of merchant data
     let results = JSON.parse(JSON.stringify(merchants));
     
-    // 類別篩選
-    // 如果選擇了「全部」類別或沒有選擇任何類別，則不進行類別篩選
+    // Category filtering
     if (!selectedCategories.includes('全部') && selectedCategories.length > 0) {
       results = results.filter(merchant => 
         merchant.items && merchant.items.some(item => {
-          // 檢查項目是否匹配任何已選擇的類別
           return selectedCategories.some(selectedCategory => 
             (item.itemName && item.itemName.includes(selectedCategory)) || 
             (item.category && item.category.includes(selectedCategory))
@@ -79,15 +77,15 @@ function MerchantList() {
       );
     }
     
-    // 搜尋關鍵詞
+    // Keyword search
     if (searchTerm.trim()) {
       const term = searchTerm.toLowerCase();
       results = results.filter(merchant =>
-        // 搜尋商人基本信息
+        // Search merchant basic info
         (merchant.serverName && merchant.serverName.toLowerCase().includes(term)) ||
         (merchant.playerId && merchant.playerId.toLowerCase().includes(term)) ||
         (merchant.guildName && merchant.guildName.toLowerCase().includes(term)) ||
-        // 搜尋物品相關信息
+        // Search item related info
         (merchant.items && merchant.items.some(item => 
           (item.itemName && item.itemName.toLowerCase().includes(term)) ||
           (item.category && item.category.toLowerCase().includes(term)) ||
@@ -96,40 +94,33 @@ function MerchantList() {
       );
     }
     
-    // 商人類型篩選
+    // Merchant type filtering
     results = results.filter(merchant => 
       (showRegularMerchants && !merchant.isSpecialMerchant) || 
       (showSpecialMerchants && merchant.isSpecialMerchant)
     );
     
-    // 排序
+    // Sorting
     switch (sortOption) {
       case 'newest':
-        // 先根據是否為五商排序，再根據時間
+        // Sort by special merchant first, then by time
         results.sort((a, b) => {
-          // 如果 a 是五商而 b 不是，a 應該在前面
           if (a.isSpecialMerchant && !b.isSpecialMerchant) return -1;
-          // 如果 b 是五商而 a 不是，b 應該在前面
           if (!a.isSpecialMerchant && b.isSpecialMerchant) return 1;
-          // 如果兩者都是五商或都不是五商，則按時間排序
           return new Date(b.timestamp) - new Date(a.timestamp);
         });
         break;
       case 'oldest':
         results.sort((a, b) => {
-          // 五商優先
           if (a.isSpecialMerchant && !b.isSpecialMerchant) return -1;
           if (!a.isSpecialMerchant && b.isSpecialMerchant) return 1;
-          // 時間排序
           return new Date(a.timestamp) - new Date(b.timestamp);
         });
         break;
       case 'priceAsc':
         results.sort((a, b) => {
-          // 五商優先
           if (a.isSpecialMerchant && !b.isSpecialMerchant) return -1;
           if (!a.isSpecialMerchant && b.isSpecialMerchant) return 1;
-          // 價格排序
           const aPrice = Math.min(...a.items.filter(i => i.price && i.price > 0).map(i => i.price) || [0]);
           const bPrice = Math.min(...b.items.filter(i => i.price && i.price > 0).map(i => i.price) || [0]);
           return aPrice - bPrice;
@@ -137,26 +128,23 @@ function MerchantList() {
         break;
       case 'priceDesc':
         results.sort((a, b) => {
-          // 五商優先
           if (a.isSpecialMerchant && !b.isSpecialMerchant) return -1;
           if (!a.isSpecialMerchant && b.isSpecialMerchant) return 1;
-          // 價格排序
           const aPrice = Math.max(...a.items.filter(i => i.price && i.price > 0).map(i => i.price) || [0]);
           const bPrice = Math.max(...b.items.filter(i => i.price && i.price > 0).map(i => i.price) || [0]);
           return bPrice - aPrice;
         });
         break;
       case 'specialMerchantFirst':
-        // 專門的五商優先排序選項
+        // Special merchant priority sort
         results.sort((a, b) => {
           if (a.isSpecialMerchant && !b.isSpecialMerchant) return -1;
           if (!a.isSpecialMerchant && b.isSpecialMerchant) return 1;
-          // 如果都是五商或都不是五商，則按時間排序
           return new Date(b.timestamp) - new Date(a.timestamp);
         });
         break;
       default:
-        // 默認也是五商優先
+        // Default is also special merchant first
         results.sort((a, b) => {
           if (a.isSpecialMerchant && !b.isSpecialMerchant) return -1;
           if (!a.isSpecialMerchant && b.isSpecialMerchant) return 1;
@@ -172,7 +160,6 @@ function MerchantList() {
     setSearchTerm(e.target.value);
   };
 
-  // 更新類別選擇處理函數以支持多選
   const handleCategorySelect = (categories) => {
     setSelectedCategories(categories);
   };
@@ -196,17 +183,17 @@ function MerchantList() {
     });
   };
 
-  // 計算五商數量和普通商人數量
+  // Count special and regular merchants
   const specialMerchantCount = filteredMerchants.filter(m => m.isSpecialMerchant).length;
   const regularMerchantCount = filteredMerchants.filter(m => !m.isSpecialMerchant).length;
 
   return (
     <div className="merchant-list-container">
-        {copyMessage && (
-          <div className="copy-message">
-            {copyMessage}
-          </div>
-        )}
+      {copyMessage && (
+        <div className="copy-message">
+          {copyMessage}
+        </div>
+      )}
       <div className="search-filter-section">
         <div className="search-input-container">
           <input
@@ -274,8 +261,6 @@ function MerchantList() {
       ) : (
         <div className="merchants-grid">
           {filteredMerchants.map((merchant, index) => {
-            const remainingTime = true; // 保留這個變數但改變其用途，僅用於檢查項目是否已過期
-            
             // Skip if expired
             if (!merchant.expiresAt || new Date() > new Date(merchant.expiresAt)) return null;
             
@@ -304,36 +289,11 @@ function MerchantList() {
                     <h4>販售物品:</h4>
                     <ul className="items-list">
                       {merchant.items.map((item, itemIndex) => (
-                        <li key={itemIndex} className="item">
-                          <div className="item-name-container">
-                            <span className="item-name">{item.itemName || '未知物品'}</span>
-                            {item.quantity > 1 && (
-                              <span className="item-quantity">x{item.quantity}</span>
-                            )}
-                          </div>
-                          
-                          <div className="item-details">
-                            {item.category && item.category !== '其他' && item.category !== item.itemName && (
-                              <span className="item-category">{item.category}</span>
-                            )}
-                            
-                            {/* 價格顯示，如果允許家園幣交易 */}
-                            {(item.allowsCoinExchange || typeof item.allowsCoinExchange === 'undefined') && item.price > 0 && (
-                              <div className="price-tag">
-                                <span className="coin-icon">💰</span>
-                                <span>{item.price}</span>
-                              </div>
-                            )}
-                            
-                            {/* 交換物品顯示，如果允許以物易物交易 */}
-                            {item.allowsBarterExchange && item.exchangeItemName && (
-                              <div className="exchange-tag">
-                                <span className="exchange-icon">🔄</span>
-                                <span>{item.exchangeQuantity || 1} {item.exchangeItemName}</span>
-                              </div>
-                            )}
-                          </div>
-                        </li>
+                        <MerchantItem 
+                          key={itemIndex} 
+                          item={item} 
+                          merchantInfo={merchant}
+                        />
                       ))}
                     </ul>
                   </div>

@@ -233,7 +233,7 @@
 /* Z-index utilities */
 .z-dropdown { z-index: var(--z-index-dropdown); }
 .z-sticky { z-index: var(--z-index-sticky); }
-.z-fixed { z-index: var(--z-index-fixed); }
+.z-fixed { z-index: 1000; }
 .z-modal-backdrop { z-index: var(--z-index-modal-backdrop); }
 .z-modal { z-index: var(--z-index-modal); }
 .z-popover { z-index: var(--z-index-popover); }

@@ -175,3 +175,113 @@
     border: 1px solid var(--color-accent);
     animation: fadeIn 0.3s ease-out;
   }
+
+/* 購物車相關樣式 */
+.item {
+    position: relative;
+    cursor: pointer;
+    overflow: hidden;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+  }
+  
+  .item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    background-color: rgba(72, 114, 123, 0.3);
+  }
+  
+  .item.highlight-item {
+    background-color: rgba(138, 186, 179, 0.3);
+    animation: highlightPulse 0.5s ease;
+  }
+  
+  /* 已加入購物車的商品樣式 - 使用更明顯的邊框而非背景色 */
+  .item.in-cart {
+    border: 2px solid rgba(138, 186, 179, 0.8);
+    box-shadow: 0 0 4px rgba(138, 186, 179, 0.4);
+  }
+  
+  /* 高亮動畫 */
+  @keyframes highlightPulse {
+    0% {
+      border-color: rgba(138, 186, 179, 0.4);
+    }
+    50% {
+      border-color: rgba(138, 186, 179, 1);
+    }
+    100% {
+      border-color: rgba(138, 186, 179, 0.8);
+    }
+  }
+  
+  .in-cart-badge {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background-color: var(--color-accent);
+    color: white;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.7rem;
+    z-index: 2;
+  }
+  
+  @keyframes highlightPulse {
+    0% {
+      background-color: rgba(138, 186, 179, 0.1);
+    }
+    50% {
+      background-color: rgba(138, 186, 179, 0.4);
+    }
+    100% {
+      background-color: rgba(138, 186, 179, 0.3);
+    }
+  }
+  
+  /* Add to cart hint */
+  .add-to-cart-hint {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    background-color: rgba(72, 114, 123, 0.8);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+    color: white;
+    pointer-events: none;
+  }
+  
+  .add-to-cart-hint i {
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+  }
+  
+  .item:hover .add-to-cart-hint {
+    opacity: 1;
+  }
+  
+  /* Enhanced item quantity display */
+  .item-available-quantity {
+    font-size: 0.8rem;
+    background-color: rgba(138, 186, 179, 0.2);
+    color: var(--color-light-accent);
+    padding: 0.1rem 0.35rem;
+    border-radius: 4px;
+    margin-left: 0.35rem;
+    white-space: nowrap;
+  }
+  
+  .item-available-quantity::before {
+    content: "🛒";
+    font-size: 0.8rem;
+    margin-right: 0.25rem;
+  }
