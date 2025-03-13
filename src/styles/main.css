@@ -935,4 +935,5 @@ body {
   }
 }
 
+  @import './components/merchants.css';
   @import './animations.css';
