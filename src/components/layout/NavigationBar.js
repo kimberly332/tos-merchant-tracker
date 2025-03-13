@@ -1,20 +1,36 @@
 // src/components/layout/NavigationBar.js
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
-import UserProfile from '../auth/UserProfile';
+import React, { useState, useEffect } from 'react';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { checkUserAuth, logoutUser } from '../../firebase/userAuth';
 
 function NavigationBar() {
-  // State for menu toggle
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [user, setUser] = useState(null);
+  const navigate = useNavigate();
+  const location = useLocation();
 
-  // Toggle mobile menu
+  // 檢查用戶登入狀態
+  useEffect(() => {
+    const currentUser = checkUserAuth();
+    setUser(currentUser);
+  }, []);
+
+  // 切換手機選單
   const toggleMobileMenu = () => {
     setMobileMenuOpen(!mobileMenuOpen);
   };
 
-  // Close mobile menu
+  // 關閉手機選單
   const closeMobileMenu = () => {
     setMobileMenuOpen(false);
+  };
+
+  // 處理登出
+  const handleLogout = () => {
+    logoutUser();
+    setUser(null);
+    setMobileMenuOpen(false);
+    navigate('/login');
   };
 
   return (
@@ -23,9 +39,9 @@ function NavigationBar() {
         <Link to="/">雨果商人追蹤系統</Link>
       </div>
       
-      {/* Font Awesome Hamburger Menu */}
-      <button 
-        className="menu-toggle" 
+      {/* 漢堡選單按鈕 */}
+      <button
+        className="menu-toggle"
         onClick={toggleMobileMenu}
         aria-label="Toggle menu"
         aria-expanded={mobileMenuOpen}
@@ -33,7 +49,7 @@ function NavigationBar() {
         <i className={mobileMenuOpen ? "fas fa-times" : "fas fa-bars"}></i>
       </button>
       
-      {/* Navigation links */}
+      {/* 導航連結 */}
       <ul className={`nav-links ${mobileMenuOpen ? "show" : ""}`}>
         <li>
           <Link to="/" onClick={closeMobileMenu}>搜尋商品</Link>
@@ -41,11 +57,16 @@ function NavigationBar() {
         <li>
           <Link to="/add-merchant" onClick={closeMobileMenu}>新增商人</Link>
         </li>
-        
-        {/* 使用者個人資料 */}
-        <li className="user-profile-container">
-          <UserProfile />
-        </li>
+        {user && (
+          <li>
+            <button
+              className="logout-btn"
+              onClick={handleLogout}
+            >
+              <i className="fas fa-sign-out-alt"></i> 登出
+            </button>
+          </li>
+        )}
       </ul>
     </nav>
   );

@@ -200,7 +200,7 @@ function MerchantList() {
             type="text"
             value={searchTerm}
             onChange={handleSearchChange}
-            placeholder="搜尋物品、商人、伺服器..."
+            placeholder="搜尋物品..."
             className="search-input"
           />
         </div>

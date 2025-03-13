@@ -107,7 +107,7 @@ function LoginPage() {
   
   return (
     <div className="page login-page">
-      <h1>雨果商人追蹤系統 - 登入</h1>
+      <h1 className="login-title">登入</h1>
       <p className="description">
         選擇您的伺服器並輸入遊戲ID進入本系統。所有資訊會在每日台灣時間午夜 (00:00) 自動重置。
       </p>
@@ -153,7 +153,7 @@ function LoginPage() {
             className="submit-btn" 
             disabled={loading}
           >
-            {loading ? '登入中...' : '登入系統'}
+            {loading ? '登入中...' : '登入'}
           </button>
         </form>
       </div>

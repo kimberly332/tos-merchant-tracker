@@ -4,6 +4,11 @@
 .login-page {
     animation: fadeIn 0.6s ease-out;
   }
+
+  .login-page .login-title,
+  .login-page .description {
+    text-align: center;
+  }
   
   .login-form-container {
     background-color: rgba(20, 59, 74, 0.85);
