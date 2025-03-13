@@ -436,10 +436,73 @@ function EditMerchantForm() {
       setShowNotification(true);
 
       if (result.success) {
+        // Show the success notification
+        setNotificationMessage('商人資訊已成功更新！');
+        setShowNotification(true);
+
         setSubmitResult({
           success: true,
           message: '商人資訊已成功更新！'
         });
+        
+        // 更新購物車中的商品資訊
+        try {
+          // 從 localStorage 獲取購物車資料
+          const savedCart = localStorage.getItem('shoppingCart');
+          if (savedCart) {
+            const cartItems = JSON.parse(savedCart);
+            
+            // 檢查購物車中是否有此商人的物品
+            const hasUpdatedItems = cartItems.some(item => item.playerId === formData.playerId);
+            
+            if (hasUpdatedItems) {
+              // 更新購物車中的相關物品
+              const updatedCart = cartItems.map(cartItem => {
+                // 如果不是當前商人的物品，保持不變
+                if (cartItem.playerId !== formData.playerId) {
+                  return cartItem;
+                }
+                
+                // 尋找更新後的物品資訊
+                const updatedItemInfo = processedData.items.find(
+                  item => item.itemName === cartItem.itemName
+                );
+                
+                // 如果找到更新後的物品，則更新購物車中的資料
+                if (updatedItemInfo) {
+                  return {
+                    ...cartItem,
+                    // 更新物品可用數量和交易資訊
+                    availableQuantity: updatedItemInfo.availableQuantity,
+                    price: updatedItemInfo.price,
+                    allowsCoinExchange: updatedItemInfo.allowsCoinExchange,
+                    allowsBarterExchange: updatedItemInfo.allowsBarterExchange,
+                    exchangeItemName: updatedItemInfo.exchangeItemName,
+                    exchangeQuantity: updatedItemInfo.exchangeQuantity,
+                    // 確保購買數量不超過新的可用數量
+                    quantity: Math.min(cartItem.quantity, updatedItemInfo.availableQuantity)
+                  };
+                }
+                
+                return cartItem;
+              });
+              
+              // 儲存更新後的購物車到 localStorage
+              localStorage.setItem('shoppingCart', JSON.stringify(updatedCart));
+              
+              // 觸發購物車更新事件，通知其他組件
+              const cartUpdatedEvent = new CustomEvent('cartUpdated', {
+                detail: { cart: updatedCart }
+              });
+              window.dispatchEvent(cartUpdatedEvent);
+              
+              // 添加購物車更新的提示到成功訊息中
+              setNotificationMessage('商人資訊和購物車內容已成功更新！');
+            }
+          }
+        } catch (error) {
+          console.error('更新購物車時發生錯誤:', error);
+        }
 
         // Navigate back to the list after 2 seconds
         setTimeout(() => {

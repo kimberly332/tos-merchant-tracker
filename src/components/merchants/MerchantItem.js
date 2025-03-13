@@ -16,6 +16,19 @@ const MerchantItem = ({ item, merchantInfo }) => {
       setIsInCart(inCart);
     };
     
+    // Function to handle removeFromCart events
+const handleRemoveFromCart = (event) => {
+    console.log('Remove event received:', event.detail);
+    console.log('This item:', item.itemName, merchantInfo.playerId);
+    
+    // Check if this item was removed
+    if (event.detail.itemName === item.itemName && 
+        event.detail.playerId === merchantInfo.playerId) {
+      console.log('Match found, updating cart status');
+      setIsInCart(false);
+    }
+  };
+    
     // Initial check - try to get cart from localStorage
     try {
       const savedCart = localStorage.getItem('shoppingCart');
@@ -31,10 +44,13 @@ const MerchantItem = ({ item, merchantInfo }) => {
 
     // Listen for cart update events
     window.addEventListener('cartUpdated', checkIfInCart);
+    // Listen for remove from cart events
+    window.addEventListener('removeFromCart', handleRemoveFromCart);
     
-    // Cleanup event listener
+    // Cleanup event listeners
     return () => {
       window.removeEventListener('cartUpdated', checkIfInCart);
+      window.removeEventListener('removeFromCart', handleRemoveFromCart);
     };
   }, [item.itemName, merchantInfo.playerId]);
 
