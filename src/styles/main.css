@@ -139,12 +139,6 @@ body {
     gap: 0.25rem;
   }
   
-  .item-name-container {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-  }
-  
   .item-name {
     font-weight: 600;
     font-size: 1rem;
@@ -286,47 +280,139 @@ body {
   }
   
   /* Category Buttons */
-  .category-filter {
-    background-color: rgba(16, 24, 35, 0.5);
-    border-radius: 6px;
-    padding: 1rem;
-    border: 1px solid rgba(138, 186, 179, 0.1);
+  /* Category Filter Styles with Expandable Groups */
+.category-filter {
+  background-color: rgba(16, 24, 35, 0.7);
+  border-radius: 8px;
+  padding: 1.25rem;
+  margin-bottom: 1.5rem;
+  border: 1px solid rgba(138, 186, 179, 0.15);
+}
+
+/* Header with title and expand button */
+.category-filter-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.category-filter h3 {
+  color: #8ABAB3;
+  font-size: 1rem;
+  font-weight: 500;
+  margin: 0;
+}
+
+/* Expand/collapse toggle button */
+.expand-toggle-btn {
+  background-color: rgba(72, 114, 123, 0.2);
+  color: #8ABAB3;
+  border: 1px solid rgba(138, 186, 179, 0.25);
+  border-radius: 4px;
+  padding: 0.35rem 0.75rem;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.expand-toggle-btn:hover {
+  background-color: rgba(72, 114, 123, 0.3);
+  color: white;
+}
+
+/* Category group styles */
+.category-groups {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.category-group {
+  animation: fadeIn 0.3s ease-out;
+}
+
+.group-name {
+  color: rgba(214, 216, 217, 0.7);
+  font-size: 0.9rem;
+  font-weight: 500;
+  margin: 0.5rem 0;
+  padding-bottom: 0.25rem;
+  border-bottom: 1px solid rgba(138, 186, 179, 0.15);
+}
+
+/* Button container */
+.category-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+/* Individual category button */
+.category-button {
+  background-color: rgba(72, 114, 123, 0.15);
+  border: 1px solid rgba(138, 186, 179, 0.25);
+  color: #D6D8D9;
+  border-radius: 4px;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.category-button:hover {
+  background-color: rgba(72, 114, 123, 0.3);
+  border-color: rgba(138, 186, 179, 0.5);
+}
+
+.category-button.active {
+  background-color: rgba(72, 114, 123, 0.5);
+  border-color: #8ABAB3;
+  color: white;
+}
+
+/* Selected categories display */
+.selected-categories {
+  margin-top: 1rem;
+  font-size: 0.85rem;
+  color: rgba(214, 216, 217, 0.8);
+}
+
+/* Animation for fading in groups */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(5px);
   }
-  
-  .category-filter h3 {
-    margin-bottom: 0.75rem;
-    color: #8ABAB3;
-    font-size: 0.9rem;
-    font-weight: 600;
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
-  
-  .category-buttons {
-    display: flex;
-    flex-wrap: wrap;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .category-filter-header {
+    flex-direction: column;
+    align-items: flex-start;
     gap: 0.5rem;
   }
   
+  .expand-toggle-btn {
+    align-self: flex-end;
+  }
+  
   .category-button {
-    background-color: rgba(72, 114, 123, 0.15);
-    border: 1px solid rgba(138, 186, 179, 0.25);
-    color: #D6D8D9;
-    border-radius: 4px;
-    padding: 0.35rem 0.5rem;
-    font-size: 0.8rem;
-    cursor: pointer;
-    transition: all 0.15s ease;
+    flex: 1 0 calc(33.33% - 0.5rem);
+    text-align: center;
   }
-  
-  .category-button:hover {
-    background-color: rgba(72, 114, 123, 0.3);
-    border-color: rgba(138, 186, 179, 0.5);
+}
+
+@media (max-width: 480px) {
+  .category-button {
+    flex: 1 0 calc(50% - 0.5rem);
   }
-  
-  .category-button.active {
-    background-color: rgba(72, 114, 123, 0.5);
-    border-color: #8ABAB3;
-    color: white;
-  }
+}
   
   /* Copy Message */
   .copy-message {
@@ -722,6 +808,7 @@ body {
   flex-wrap: wrap;
   align-items: center;
   gap: 0.5rem;
+  justify-content: space-between;
 }
 
 .merchant-card .item-quantity,
