@@ -16,6 +16,7 @@ const SearchableSelect = ({
   const [filteredOptions, setFilteredOptions] = useState([]);
   const dropdownRef = useRef(null);
   const inputRef = useRef(null);
+  const hiddenInputRef = useRef(null);
 
   // Initialize filtered options
   useEffect(() => {
@@ -79,6 +80,7 @@ const SearchableSelect = ({
     onChange(option);
     setIsOpen(false);
     setSearchTerm('');
+    
     // Reset filtered results
     if (groups) {
       const allOptions = [];
@@ -90,6 +92,11 @@ const SearchableSelect = ({
       setFilteredOptions(allOptions);
     } else {
       setFilteredOptions(options);
+    }
+    
+    // Trigger validation if needed
+    if (hiddenInputRef.current) {
+      hiddenInputRef.current.dispatchEvent(new Event('change', { bubbles: true }));
     }
   };
 
@@ -186,20 +193,26 @@ const SearchableSelect = ({
         </div>
       )}
       
-      {/* Hidden native select element for form submission */}
-      <select 
+      {/* Hidden but accessible input for validation */}
+      <input
+        ref={hiddenInputRef}
+        type="text"
         value={value || ''}
         onChange={(e) => onChange(e.target.value)}
-        style={{ display: 'none' }}
+        style={{ 
+          width: '1px',
+          height: '1px',
+          opacity: 0,
+          position: 'absolute',
+          left: '-9999px',
+          // Don't use display: none, which would make it not focusable
+        }}
         id={id}
         name={name}
         required={required}
-      >
-        <option value="" disabled>{placeholder}</option>
-        {options && options.map((option, index) => (
-          <option key={index} value={option}>{option}</option>
-        ))}
-      </select>
+        aria-hidden="true"
+        tabIndex={-1} // Make it focusable for form validation
+      />
     </div>
   );
 };
