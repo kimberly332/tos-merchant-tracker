@@ -53,23 +53,52 @@ const ShoppingCart = () => {
     };
   }, [checkMerchantsExistence]);
 
+  // Notify components when cart changes
+  useEffect(() => {
+    // Don't dispatch during initial render or when cart is empty
+    if (cartItems.length > 0) {
+      const cartUpdatedEvent = new CustomEvent('cartUpdated', {
+        detail: { cart: cartItems }
+      });
+      window.dispatchEvent(cartUpdatedEvent);
+    }
+  }, [cartItems]);
+
+  // Listen for direct remove events (from clicking items)
+  useEffect(() => {
+    const handleRemoveItem = (event) => {
+      const { itemName, playerId } = event.detail;
+      
+      setCartItems(prevItems => {
+        // Find the item and remove it
+        return prevItems.filter(item => 
+          !(item.itemName === itemName && item.playerId === playerId)
+        );
+      });
+      
+      // Save to localStorage (will be updated after state changes)
+      setTimeout(() => {
+        localStorage.setItem('shoppingCart', JSON.stringify(cartItems));
+      }, 0);
+    };
+    
+    window.addEventListener('removeFromCart', handleRemoveItem);
+    
+    return () => {
+      window.removeEventListener('removeFromCart', handleRemoveItem);
+    };
+  }, [cartItems]);
+
   // Add to cart with strict duplication prevention
   const handleAddToCart = useCallback((event) => {
     const newItem = event.detail;
 
-    console.group('Add to Cart Debug');
-    console.log('New Item:', newItem);
-
     setCartItems(prevItems => {
-      console.log('Previous Cart Items:', prevItems);
-
       // Prevent duplicate items or excessive quantity
       const existingItemIndex = prevItems.findIndex(item =>
         item.itemName === newItem.itemName &&
         item.playerId === newItem.playerId
       );
-
-      console.log('Existing Item Index:', existingItemIndex);
 
       if (existingItemIndex >= 0) {
         // If item exists, update only if quantity is less than purchase times
@@ -82,27 +111,22 @@ const ShoppingCart = () => {
             ...currentItem,
             quantity: Math.min(currentItem.quantity + 1, maxPurchaseTimes)
           };
-
-          console.log('Updated Existing Item:', updatedItems[existingItemIndex]);
-          console.groupEnd();
-
           return updatedItems;
+        } else {
+          // If at max purchase times, return existing items
+          return prevItems;
         }
-        
-        // If at max purchase times, return existing items
-        console.log('Max purchase times reached');
-        console.groupEnd();
-        return prevItems;
+      } else {
+        // Add new item with quantity 1
+        return [...prevItems, { ...newItem, quantity: 1 }];
       }
-
-      // Add new item with quantity 1
-      const newCartItems = [...prevItems, { ...newItem, quantity: 1 }];
-      console.log('New Cart Items:', newCartItems);
-      console.groupEnd();
-
-      return newCartItems;
     });
-  }, []);
+    
+    // Update localStorage after state changes
+    setTimeout(() => {
+      localStorage.setItem('shoppingCart', JSON.stringify(cartItems));
+    }, 0);
+  }, [cartItems]);
 
   // Toggle cart open/closed
   const toggleCart = () => {
@@ -111,22 +135,29 @@ const ShoppingCart = () => {
 
   // Remove item from cart
   const removeFromCart = (index) => {
+    // Save the item before removal for event
+    const itemToRemove = cartItems[index];
+    
     setCartItems(prevItems => {
       const updatedItems = [...prevItems];
-      const removedItem = updatedItems[index];
-
       updatedItems.splice(index, 1);
-
-      const removeEvent = new CustomEvent('removeFromCart', {
-        detail: {
-          itemName: removedItem.itemName,
-          playerId: removedItem.playerId
-        }
-      });
-      window.dispatchEvent(removeEvent);
-
       return updatedItems;
     });
+
+    // Update localStorage and dispatch events after state update
+    setTimeout(() => {
+      localStorage.setItem('shoppingCart', JSON.stringify(cartItems));
+      
+      if (itemToRemove) {
+        const removeEvent = new CustomEvent('removeFromCart', {
+          detail: {
+            itemName: itemToRemove.itemName,
+            playerId: itemToRemove.playerId
+          }
+        });
+        window.dispatchEvent(removeEvent);
+      }
+    }, 0);
   };
 
   // Update item quantity
@@ -150,16 +181,26 @@ const ShoppingCart = () => {
 
       return updatedItems;
     });
+
+    // Update localStorage after state update
+    setTimeout(() => {
+      localStorage.setItem('shoppingCart', JSON.stringify(cartItems));
+    }, 0);
   };
 
   // Clear entire cart
   const clearCart = () => {
     setCartItems([]);
-
-    const cartUpdatedEvent = new CustomEvent('cartUpdated', {
-      detail: { cart: [] }
-    });
-    window.dispatchEvent(cartUpdatedEvent);
+    
+    // Update localStorage and notify after state update
+    setTimeout(() => {
+      localStorage.removeItem('shoppingCart');
+      
+      const cartUpdatedEvent = new CustomEvent('cartUpdated', {
+        detail: { cart: [] }
+      });
+      window.dispatchEvent(cartUpdatedEvent);
+    }, 0);
   };
 
   // Initialize user and cart
@@ -187,6 +228,8 @@ const ShoppingCart = () => {
         );
 
         setCartItems(validatedCart);
+        
+        // Initial notification is handled by the effect that watches cartItems
       }
     } catch (error) {
       console.error('Error loading cart:', error);
@@ -194,23 +237,14 @@ const ShoppingCart = () => {
     }
   }, [resetCart]);
 
-  // Persist cart to localStorage and update user cart
+  // Persist cart to Firestore when it changes
   useEffect(() => {
-    if (user) {
+    if (user && cartItems.length > 0) {
       try {
-        // Save to localStorage
-        localStorage.setItem('shoppingCart', JSON.stringify(cartItems));
-        
         // Update user's cart in Firestore
         updateUserCart(user.userId, cartItems);
-
-        // Notify other components
-        const cartUpdatedEvent = new CustomEvent('cartUpdated', {
-          detail: { cart: cartItems }
-        });
-        window.dispatchEvent(cartUpdatedEvent);
       } catch (error) {
-        console.error('Error saving cart:', error);
+        console.error('Error saving cart to Firestore:', error);
       }
     }
   }, [cartItems, user]);
@@ -224,7 +258,7 @@ const ShoppingCart = () => {
     };
   }, [handleAddToCart]);
 
-  // Prevent infinite cart item growth
+  // Prevent infinite cart item growth - but don't dispatch events here
   const sanitizedCartItems = useMemo(() => {
     const uniqueItems = new Map();
     

@@ -202,54 +202,54 @@ function MerchantList() {
   };
 
   // Handle merchant deletion
-  const handleDeleteMerchant = async (merchantId) => {
-    if (!window.confirm('確定要刪除這個商人資訊嗎？此操作無法撤銷。')) {
-      return;
-    }
+const handleDeleteMerchant = async (merchantId) => {
+  if (!window.confirm('確定要刪除這個商人資訊嗎？此操作無法撤銷。')) {
+    return;
+  }
+  
+  setDeleting(true);
+  try {
+    const result = await deleteMerchant(merchantId);
     
-    setDeleting(true);
-    try {
-      const result = await deleteMerchant(merchantId);
+    if (result.success) {
+      // Update local merchant list
+      const updatedMerchants = merchants.filter(m => m.id !== merchantId);
+      setMerchants(updatedMerchants);
       
-      if (result.success) {
-        // Update local merchant list
-        const updatedMerchants = merchants.filter(m => m.id !== merchantId);
-        setMerchants(updatedMerchants);
-        
-        // Clear cart if it contains items from this merchant
-        try {
-          const savedCart = localStorage.getItem('shoppingCart');
-          if (savedCart) {
-            const cartItems = JSON.parse(savedCart);
-            const updatedCart = cartItems.filter(item => 
-              !item.merchantId || item.merchantId !== merchantId
-            );
-            
-            localStorage.setItem('shoppingCart', JSON.stringify(updatedCart));
-            
-            // Notify shopping cart component
-            const cartUpdatedEvent = new CustomEvent('cartUpdated', {
-              detail: { cart: updatedCart }
-            });
-            window.dispatchEvent(cartUpdatedEvent);
-          }
-        } catch (error) {
-          console.error('Error updating cart after deletion:', error);
+      // Clear cart if it contains items from this merchant
+      try {
+        const savedCart = localStorage.getItem('shoppingCart');
+        if (savedCart) {
+          const cartItems = JSON.parse(savedCart);
+          const updatedCart = cartItems.filter(item => 
+            !item.merchantId || item.merchantId !== merchantId
+          );
+          
+          localStorage.setItem('shoppingCart', JSON.stringify(updatedCart));
+          
+          // Notify shopping cart component
+          const cartUpdatedEvent = new CustomEvent('cartUpdated', {
+            detail: { cart: updatedCart }
+          });
+          window.dispatchEvent(cartUpdatedEvent);
         }
-        
-        // Show success notification
-        setNotificationMessage('商人資訊已成功刪除！');
-        setShowNotification(true);
-      } else {
-        setError('刪除商人資訊時發生錯誤，請稍後再試。');
+      } catch (error) {
+        console.error('Error updating cart after deletion:', error);
       }
-    } catch (err) {
-      console.error('Error deleting merchant:', err);
+      
+      // Show success notification
+      setNotificationMessage('商人資訊已成功刪除！');
+      setShowNotification(true);
+    } else {
       setError('刪除商人資訊時發生錯誤，請稍後再試。');
-    } finally {
-      setDeleting(false);
     }
-  };
+  } catch (err) {
+    console.error('Error deleting merchant:', err);
+    setError('刪除商人資訊時發生錯誤，請稍後再試。');
+  } finally {
+    setDeleting(false);
+  }
+};
 
   // Count special and regular merchants
   const specialMerchantCount = filteredMerchants.filter(m => m.isSpecialMerchant).length;

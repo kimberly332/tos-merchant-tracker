@@ -4,72 +4,70 @@ import React, { useState, useEffect } from 'react';
 const MerchantItem = ({ item, merchantInfo }) => {
   const [isInCart, setIsInCart] = useState(false);
   
-  // Check if item is in cart when component mounts and when cart changes
+  // Check initial cart status when component mounts
   useEffect(() => {
-    // Create a function to check if the item is in cart
-    const checkIfInCart = (event) => {
+    // Check localStorage directly to determine initial state
+    try {
+      const savedCart = localStorage.getItem('shoppingCart');
+      if (savedCart) {
+        const cart = JSON.parse(savedCart);
+        const found = cart.some(cartItem => 
+          cartItem.itemName === item.itemName && 
+          cartItem.playerId === merchantInfo.playerId
+        );
+        setIsInCart(found);
+      }
+    } catch (error) {
+      console.error('Error checking initial cart status:', error);
+    }
+  }, [item.itemName, merchantInfo.playerId]);
+  
+  // Listen for cart updates from other components
+  useEffect(() => {
+    const handleCartUpdate = (event) => {
       const cart = event?.detail?.cart || [];
-      const inCart = cart.some(cartItem => 
+      const found = cart.some(cartItem => 
         cartItem.itemName === item.itemName && 
         cartItem.playerId === merchantInfo.playerId
       );
-      setIsInCart(inCart);
+      setIsInCart(found);
     };
     
-    // Function to handle removeFromCart events
+    // Handle item removal events from cart
     const handleRemoveFromCart = (event) => {
-      // Check if this item was removed
       if (event.detail.itemName === item.itemName && 
           event.detail.playerId === merchantInfo.playerId) {
         setIsInCart(false);
       }
     };
     
-    // Initial check - try to get cart from localStorage
-    try {
-      const savedCart = localStorage.getItem('shoppingCart');
-      const cart = savedCart ? JSON.parse(savedCart) : [];
-      const inCart = cart.some(cartItem => 
-        cartItem.itemName === item.itemName && 
-        cartItem.playerId === merchantInfo.playerId
-      );
-      setIsInCart(inCart);
-    } catch (error) {
-      console.error('Error checking cart status:', error);
-    }
-
-    // Listen for cart update events
-    window.addEventListener('cartUpdated', checkIfInCart);
-    // Listen for remove from cart events
+    window.addEventListener('cartUpdated', handleCartUpdate);
     window.addEventListener('removeFromCart', handleRemoveFromCart);
     
-    // Cleanup event listeners
     return () => {
-      window.removeEventListener('cartUpdated', checkIfInCart);
+      window.removeEventListener('cartUpdated', handleCartUpdate);
       window.removeEventListener('removeFromCart', handleRemoveFromCart);
     };
   }, [item.itemName, merchantInfo.playerId]);
 
-  const handleToggleCart = () => {
+
+const handleToggleCart = () => {
     if (isInCart) {
-      // Remove from cart
+      // Remove from cart - send a simple event with just the item identifier
       const removeFromCartEvent = new CustomEvent('removeFromCart', {
         detail: {
-          itemName: item.itemName || '未知物品',
+          itemName: item.itemName,
           playerId: merchantInfo.playerId
         }
       });
       window.dispatchEvent(removeFromCartEvent);
-      
-      setIsInCart(false);
     } else {
-      // Prepare cart item with careful validation and include merchant ID
+      // Add to cart
       const cartItem = {
         itemName: item.itemName || '未知物品',
         playerId: merchantInfo.playerId,
-        merchantId: merchantInfo.id, // Store the merchant ID for easy filtering on delete
+        merchantId: merchantInfo.id,
         quantity: 1,
-        // Prioritize purchaseTimes, then availableQuantity, default to 1
         purchaseTimes: item.purchaseTimes || item.availableQuantity || 10,
         allowsCoinExchange: item.allowsCoinExchange,
         allowsBarterExchange: item.allowsBarterExchange,
@@ -77,14 +75,11 @@ const MerchantItem = ({ item, merchantInfo }) => {
         exchangeItemName: item.exchangeItemName,
         exchangeQuantity: item.exchangeQuantity || 1
       };
-  
-      // Create and dispatch a custom event
+      
       const addToCartEvent = new CustomEvent('addToCart', {
         detail: cartItem
       });
       window.dispatchEvent(addToCartEvent);
-      
-      setIsInCart(true);
     }
   };
 
@@ -125,7 +120,7 @@ const MerchantItem = ({ item, merchantInfo }) => {
         )}
       </div>
       
-      {/* Show appropriate icon based on cart status */}
+      {/* Cart indicator badge */}
       <div className="in-cart-badge">
         {isInCart ? (
           <i className="fas fa-shopping-cart"></i>
