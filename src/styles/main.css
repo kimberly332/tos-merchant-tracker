@@ -1059,5 +1059,6 @@ body {
   @import './animations.css';
   @import './components/notifications.css';
   @import './components/guide.css'; 
+  @import './components/delete-confirmation.css';
 
   
