@@ -5,6 +5,7 @@ import HomePage from './pages/HomePage';
 import AddMerchantPage from './pages/AddMerchantPage';
 import LoginPage from './pages/LoginPage';
 import UserGuidePage from './pages/UserGuidePage';
+import CartDetailPage from './pages/CartDetailPage';
 import ShoppingCart from './components/cart/ShoppingCart';
 import { checkUserAuth } from './firebase/userAuth';
 import './styles/main.css';
@@ -49,6 +50,13 @@ function App() {
             <Route path="/guide" element={
               <ProtectedRoute>
                 <UserGuidePage />
+              </ProtectedRoute>
+            } />
+
+            {/* 購物車詳情頁面 */}
+            <Route path="/cart" element={
+              <ProtectedRoute>
+                <CartDetailPage />
               </ProtectedRoute>
             } />
 

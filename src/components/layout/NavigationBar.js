@@ -6,6 +6,7 @@ import { checkUserAuth, logoutUser } from '../../firebase/userAuth';
 function NavigationBar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [user, setUser] = useState(null);
+  const [cartItemCount, setCartItemCount] = useState(0);
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -14,6 +15,41 @@ function NavigationBar() {
     const currentUser = checkUserAuth();
     setUser(currentUser);
   }, [location.pathname]); // 重新檢查用戶狀態，特別是在路由變化時
+
+  // 監聽購物車項目數量變化
+  useEffect(() => {
+    const updateCartCount = () => {
+      try {
+        const savedCart = localStorage.getItem('shoppingCart');
+        if (savedCart) {
+          const cartItems = JSON.parse(savedCart);
+          const itemCount = cartItems.reduce((total, item) => total + item.quantity, 0);
+          setCartItemCount(itemCount);
+        } else {
+          setCartItemCount(0);
+        }
+      } catch (error) {
+        console.error('Error checking cart count:', error);
+        setCartItemCount(0);
+      }
+    };
+
+    // 初始計算
+    updateCartCount();
+
+    // 監聽購物車更新事件
+    const handleCartUpdate = () => {
+      updateCartCount();
+    };
+
+    window.addEventListener('cartUpdated', handleCartUpdate);
+    window.addEventListener('storage', handleCartUpdate);
+
+    return () => {
+      window.removeEventListener('cartUpdated', handleCartUpdate);
+      window.removeEventListener('storage', handleCartUpdate);
+    };
+  }, []);
 
   // 切換手機選單
   const toggleMobileMenu = () => {
@@ -65,6 +101,14 @@ function NavigationBar() {
             </li>
             <li>
               <Link to="/guide" onClick={closeMobileMenu}>使用說明</Link>
+            </li>
+            <li>
+              <Link to="/cart" onClick={closeMobileMenu} className="cart-nav-link">
+                購物計劃 
+                {cartItemCount > 0 && (
+                  <span className="nav-cart-badge">{cartItemCount}</span>
+                )}
+              </Link>
             </li>
             <li>
               <button

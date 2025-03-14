@@ -1060,5 +1060,6 @@ body {
   @import './components/notifications.css';
   @import './components/guide.css'; 
   @import './components/delete-confirmation.css';
+  @import './components/cart-detail.css';
 
   
