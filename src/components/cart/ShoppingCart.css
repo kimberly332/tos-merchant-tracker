@@ -383,3 +383,10 @@
     margin-top: -0.25rem;
   }
 
+  .unit-price, .unit-exchange {
+    display: block;
+    font-size: 0.75rem;
+    color: rgba(214, 216, 217, 0.7);
+    margin-top: 0.1rem;
+  }
+

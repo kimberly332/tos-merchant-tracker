@@ -315,15 +315,19 @@ const ShoppingCart = () => {
                       <div className="cart-item-name">{item.itemName}</div>
                       <div className="cart-item-seller">賣家: {item.playerId}</div>
                       <div className="cart-item-exchange">
-                        {item.allowsCoinExchange && (
-                          <span className="cart-item-price">💰 {item.price} 枚</span>
-                        )}
-                        {item.allowsBarterExchange && (
-                          <span className="cart-item-exchange-material">
-                            🔄 {item.exchangeQuantity || 1} 個 {item.exchangeItemName}
-                          </span>
-                        )}
-                      </div>
+  {item.allowsCoinExchange && (
+    <span className="cart-item-price">
+      💰 {(item.price * item.quantity).toLocaleString()} 枚
+      <small className="unit-price">({item.price} 枚/個)</small>
+    </span>
+  )}
+  {item.allowsBarterExchange && (
+    <span className="cart-item-exchange-material">
+      🔄 {(item.exchangeQuantity || 1) * item.quantity} 個 {item.exchangeItemName}
+      <small className="unit-exchange">({item.exchangeQuantity || 1} 個/個)</small>
+    </span>
+  )}
+</div>
                     </div>
                     <div className="cart-item-actions">
                       <div className="quantity-control">
