@@ -25,6 +25,10 @@ body {
     margin: 0 auto;
     padding: 1.5rem;
   }
+
+  .page h1 {
+    margin: 0;
+  }
   
   /* Card Improvements */
   .merchant-card, .merchant-item {
@@ -392,6 +396,10 @@ body {
 
 /* Responsive adjustments */
 @media (max-width: 768px) {
+  .page h1 {
+    font-size: 1.5rem;
+  }
+
   .category-filter-header {
     flex-direction: column;
     align-items: flex-start;
@@ -496,6 +504,7 @@ body {
     border-radius: 4px;
     color: #D6D8D9;
     font-size: 0.95rem;
+    margin-bottom: 1em;
   }
   
   .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
@@ -741,6 +750,14 @@ body {
 
     .exchange-options {
       flex-direction: column;
+    }
+
+    /* Form Styling Improvements */
+    .merchant-form-container, .special-merchant-form-container {
+      background: none;
+      border: none;
+      padding: 0;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
     }
   }
   

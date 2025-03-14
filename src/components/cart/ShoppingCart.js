@@ -341,13 +341,13 @@ const ShoppingCart = () => {
                               {item.allowsCoinExchange && (
                                 <span className="cart-item-price">
                                   💰 {(item.price * item.quantity).toLocaleString()} 枚
-                                  <small className="unit-price">({item.price} 枚/個)</small>
+                                  {/* <small className="unit-price">({item.price} 枚/個)</small> */}
                                 </span>
                               )}
                               {item.allowsBarterExchange && (
                                 <span className="cart-item-exchange-material">
                                   🔄 {(item.exchangeQuantity || 1) * item.quantity} 個 {item.exchangeItemName}
-                                  <small className="unit-exchange">({item.exchangeQuantity || 1} 個/個)</small>
+                                  {/* <small className="unit-exchange">({item.exchangeQuantity || 1} 個/個)</small> */}
                                 </span>
                               )}
                             </div>
@@ -365,9 +365,9 @@ const ShoppingCart = () => {
                                 title={`最多可購買 ${item.purchaseTimes || 1} 個`}
                               >+</button>
                             </div>
-                            <div className="quantity-limit">
+                            {/* <div className="quantity-limit">
                               數量: {item.quantity}/{item.purchaseTimes || 1} 個
-                            </div>
+                            </div> */}
                             <button
                               className="remove-item"
                               onClick={() => removeFromCart(item)}
@@ -403,10 +403,10 @@ const ShoppingCart = () => {
                   </div>
                 )}
 
-                <div className="cart-item-count">
+                {/* <div className="cart-item-count">
                   <span className="summary-label">購物車商品總數:</span>
                   <span className="summary-value">{cartItems.reduce((total, item) => total + item.quantity, 0)} 件</span>
-                </div>
+                </div> */}
 
                 <button className="clear-cart" onClick={clearCart}>
                   清空購物車

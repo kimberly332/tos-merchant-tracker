@@ -11,9 +11,9 @@ const UserGuide = () => {
   return (
     <div className="merchant-form-container">
       <div className="guide-container">
-        <div className="guide-intro">
+        {/* <div className="guide-intro">
           本系統幫助玩家追蹤商人販售的物品資訊，方便尋找需要的物品並規劃購物清單。系統會在每日台灣時間午夜 (00:00) 自動重置所有商人資訊。
-        </div>
+        </div> */}
         
         {/* 目錄 */}
         <div className="guide-menu">

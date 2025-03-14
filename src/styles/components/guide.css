@@ -3,13 +3,13 @@
  * Styling for the user guide component - Dark Blue Theme
  */
 
- .guide-container {
+ /* .guide-container {
     background-color: rgba(16, 24, 35, 0.6);
     border-radius: 8px;
     padding: 20px;
     margin-bottom: 20px;
     border: 1px solid rgba(72, 114, 123, 0.3);
-  }
+  } */
   
   .guide-intro {
     margin-bottom: 20px;
@@ -148,8 +148,10 @@
       grid-template-columns: repeat(2, 1fr);
     }
     
-    .guide-content {
-      padding: 15px;
+    .guide-content {  
+      background: none;
+      border: none;
+      padding: 0;
     }
   }
   

@@ -466,7 +466,7 @@ function MerchantInputForm() {
             required
             disabled
           />
-          <small>遊戲ID已從登入資訊自動填入</small>
+          {/* <small>遊戲ID已從登入資訊自動填入</small> */}
         </div>
 
         <div className="form-group">
@@ -479,12 +479,12 @@ function MerchantInputForm() {
             onChange={handleDiscountChange}
             placeholder="例如: 20% 或 特殊折扣活動"
           />
-          <small>商人提供的折扣或特殊活動</small>
+          {/* <small>商人提供的折扣或特殊活動</small> */}
         </div>
 
         <h3>商人販售的商品</h3>
         <p className="description">
-          請填寫商人販售的商品及交易方式（選擇家園幣或以物易物其中一種）
+          {/* 請填寫商人販售的商品及交易方式（選擇家園幣或以物易物其中一種） */}
         </p>
 
         {formData.items.map((item, index) => (
@@ -598,7 +598,7 @@ function MerchantInputForm() {
                       min="1"
                       placeholder=""
                     />
-                    <small>每個物品的單價</small>
+                    {/* <small>每個物品的單價</small> */}
                   </div>
                 </div>
               )}

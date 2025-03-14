@@ -109,7 +109,7 @@ function LoginPage() {
     <div className="page login-page">
       <h1 className="login-title">登入</h1>
       <p className="description">
-        選擇您的伺服器並輸入遊戲ID進入本系統。所有資訊會在每日台灣時間午夜 (00:00) 自動重置。
+        選擇您的伺服器並輸入遊戲ID進入本系統。
       </p>
       
       {error && <div className="error-message">{error}</div>}
@@ -163,7 +163,7 @@ function LoginPage() {
         <ul>
           <li>每個伺服器都有獨立的商人資訊</li>
           <li>登入後可以查看和提交商人資訊</li>
-          <li>您可以編輯自己提交的商人資訊</li>
+          <li>您可以刪除自己提交的商人資訊</li>
           <li>購物車資訊會被保存，下次登入時仍可使用</li>
           <li>所有資訊會在每日台灣時間午夜 (00:00) 自動重置</li>
         </ul>
