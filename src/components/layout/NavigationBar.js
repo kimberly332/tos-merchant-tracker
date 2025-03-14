@@ -79,6 +79,7 @@ function NavigationBar() {
       </div>
       
       {/* 漢堡選單按鈕 */}
+      {!isLoginPage && (
       <button
         className="menu-toggle"
         onClick={toggleMobileMenu}
@@ -87,6 +88,7 @@ function NavigationBar() {
       >
         <i className={mobileMenuOpen ? "fas fa-times" : "fas fa-bars"}></i>
       </button>
+      )}
       
       {/* 導航連結 */}
       <ul className={`nav-links ${mobileMenuOpen ? "show" : ""}`}>
