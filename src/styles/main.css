@@ -767,7 +767,7 @@ body {
       box-shadow: none;
       border: none;
       padding: 0;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+      box-shadow: none;
     }
   }
   
