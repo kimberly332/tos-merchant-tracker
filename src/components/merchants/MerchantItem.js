@@ -50,7 +50,6 @@ const MerchantItem = ({ item, merchantInfo }) => {
     };
   }, [item.itemName, merchantInfo.playerId]);
 
-
 const handleToggleCart = () => {
     if (isInCart) {
       // Remove from cart - send a simple event with just the item identifier
