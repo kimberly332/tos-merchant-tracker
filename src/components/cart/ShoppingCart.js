@@ -2,6 +2,7 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { checkUserAuth } from '../../firebase/userAuth';
 import { updateUserCart } from '../../firebase/userAuth';
+import { useLocation } from 'react-router-dom';
 import './ShoppingCart.css';
 
 const ShoppingCart = () => {
@@ -9,6 +10,10 @@ const ShoppingCart = () => {
   const [cartItems, setCartItems] = useState([]);
   const [user, setUser] = useState(null);
   const [merchantsExist, setMerchantsExist] = useState(true);
+  const location = useLocation(); // Get current location/route
+  
+  // Check if the current page is the login page
+  const isLoginPage = location.pathname === '/login';
 
   // Reset cart to prevent item duplication
   const resetCart = useCallback(() => {
@@ -71,15 +76,15 @@ const ShoppingCart = () => {
       
       setCartItems(prevItems => {
         // Find the item and remove it
-        return prevItems.filter(item => 
+        const updatedItems = prevItems.filter(item => 
           !(item.itemName === itemName && item.playerId === playerId)
         );
+        
+        // Update localStorage immediately
+        localStorage.setItem('shoppingCart', JSON.stringify(updatedItems));
+        
+        return updatedItems;
       });
-      
-      // Save to localStorage (will be updated after state changes)
-      setTimeout(() => {
-        localStorage.setItem('shoppingCart', JSON.stringify(cartItems));
-      }, 0);
     };
     
     window.addEventListener('removeFromCart', handleRemoveItem);
@@ -87,43 +92,47 @@ const ShoppingCart = () => {
     return () => {
       window.removeEventListener('removeFromCart', handleRemoveItem);
     };
-  }, [cartItems]);
+  }, []);
 
   // Add to cart with strict duplication prevention
-const handleAddToCart = useCallback((event) => {
+  const handleAddToCart = useCallback((event) => {
     const newItem = event.detail;
-  
+
     setCartItems(prevItems => {
-      // Create a new array with the updated items
-      let updatedItems = [...prevItems];
-      
-      // Check for duplicates and handle quantity limits
-      const existingItemIndex = updatedItems.findIndex(item =>
+      // Prevent duplicate items or excessive quantity
+      const existingItemIndex = prevItems.findIndex(item =>
         item.itemName === newItem.itemName &&
         item.playerId === newItem.playerId
       );
-  
+
+      let updatedItems;
+
       if (existingItemIndex >= 0) {
-        const currentItem = updatedItems[existingItemIndex];
+        // If item exists, update only if quantity is less than purchase times
+        const currentItem = prevItems[existingItemIndex];
         const maxPurchaseTimes = currentItem.purchaseTimes || 1;
         
         if (currentItem.quantity < maxPurchaseTimes) {
+          updatedItems = [...prevItems];
           updatedItems[existingItemIndex] = {
             ...currentItem,
             quantity: Math.min(currentItem.quantity + 1, maxPurchaseTimes)
           };
+        } else {
+          // If at max purchase times, return existing items
+          return prevItems;
         }
       } else {
         // Add new item with quantity 1
-        updatedItems = [...updatedItems, { ...newItem, quantity: 1 }];
+        updatedItems = [...prevItems, { ...newItem, quantity: 1 }];
       }
       
-      // Update localStorage immediately with the new state
+      // Update localStorage immediately
       localStorage.setItem('shoppingCart', JSON.stringify(updatedItems));
       
       return updatedItems;
     });
-  }, []); // Remove cartItems from dependency array
+  }, []);
 
   // Toggle cart open/closed
   const toggleCart = () => {
@@ -133,24 +142,11 @@ const handleAddToCart = useCallback((event) => {
   // Remove item from cart
   const removeFromCart = (index) => {
     setCartItems(prevItems => {
-      // Save the item before removal for event
-      const itemToRemove = prevItems[index];
       const updatedItems = [...prevItems];
       updatedItems.splice(index, 1);
       
       // Update localStorage immediately
       localStorage.setItem('shoppingCart', JSON.stringify(updatedItems));
-      
-      // Dispatch removal event if needed
-      if (itemToRemove) {
-        const removeEvent = new CustomEvent('removeFromCart', {
-          detail: {
-            itemName: itemToRemove.itemName,
-            playerId: itemToRemove.playerId
-          }
-        });
-        window.dispatchEvent(removeEvent);
-      }
       
       return updatedItems;
     });
@@ -163,52 +159,31 @@ const handleAddToCart = useCallback((event) => {
       removeFromCart(index);
       return;
     }
-  
+
     setCartItems(prevItems => {
       const updatedItems = [...prevItems];
       const item = updatedItems[index];
-  
+
       // Ensure quantity doesn't exceed purchaseTimes
       const purchaseTimes = item.purchaseTimes || 1;
       updatedItems[index] = {
         ...item,
         quantity: Math.min(newQuantity, purchaseTimes)
       };
-  
-      // Update localStorage immediately with the new state
-      localStorage.setItem('shoppingCart', JSON.stringify(updatedItems));
       
+      // Update localStorage immediately
+      localStorage.setItem('shoppingCart', JSON.stringify(updatedItems));
+
       return updatedItems;
     });
-  };
-
-  // Add this helper function
-const loadCartFromLocalStorage = () => {
-    try {
-      const savedCart = localStorage.getItem('shoppingCart');
-      if (savedCart) {
-        const parsedCart = JSON.parse(savedCart);
-        
-        // Validate cart items and preserve quantities
-        return parsedCart.filter(item => 
-          item.itemName && 
-          item.playerId && 
-          item.quantity > 0
-        );
-      }
-    } catch (error) {
-      console.error('Error loading cart:', error);
-    }
-    return [];
   };
 
   // Clear entire cart
   const clearCart = () => {
     setCartItems([]);
-    // Clear localStorage immediately
     localStorage.removeItem('shoppingCart');
     
-    // Notify components
+    // Notify about empty cart
     const cartUpdatedEvent = new CustomEvent('cartUpdated', {
       detail: { cart: [] }
     });
@@ -219,20 +194,38 @@ const loadCartFromLocalStorage = () => {
   useEffect(() => {
     const currentUser = checkUserAuth();
     setUser(currentUser);
-  
+
+    // Reset cart if no user is logged in
     if (!currentUser) {
       resetCart();
       return;
     }
-  
-    const loadedCart = loadCartFromLocalStorage();
-    setCartItems(loadedCart);
-    
-    // Always notify about cart state
-    const cartUpdatedEvent = new CustomEvent('cartUpdated', {
-      detail: { cart: loadedCart }
-    });
-    window.dispatchEvent(cartUpdatedEvent);
+
+    // Load cart from localStorage
+    try {
+      const savedCart = localStorage.getItem('shoppingCart');
+      if (savedCart) {
+        const parsedCart = JSON.parse(savedCart);
+        
+        // Validate cart items
+        const validatedCart = parsedCart.filter(item => 
+          item.itemName && 
+          item.playerId && 
+          item.quantity > 0
+        );
+
+        setCartItems(validatedCart);
+        
+        // Initial notification
+        const cartUpdatedEvent = new CustomEvent('cartUpdated', {
+          detail: { cart: validatedCart }
+        });
+        window.dispatchEvent(cartUpdatedEvent);
+      }
+    } catch (error) {
+      console.error('Error loading cart:', error);
+      resetCart();
+    }
   }, [resetCart]);
 
   // Persist cart to Firestore when it changes
@@ -255,22 +248,11 @@ const loadCartFromLocalStorage = () => {
       window.removeEventListener('addToCart', handleAddToCart);
     };
   }, [handleAddToCart]);
-
-  // Prevent infinite cart item growth - but don't dispatch events here
-  const sanitizedCartItems = useMemo(() => {
-    const uniqueItems = new Map();
-    
-    cartItems.forEach(item => {
-      const key = `${item.itemName}_${item.playerId}`;
-      const existingItem = uniqueItems.get(key);
-      
-      if (!existingItem || existingItem.quantity < (item.purchaseTimes || 1)) {
-        uniqueItems.set(key, item);
-      }
-    });
-
-    return Array.from(uniqueItems.values());
-  }, [cartItems]);
+  
+  // Don't render the shopping cart on login page
+  if (isLoginPage) {
+    return null;
+  }
 
   return (
     <div className="shopping-cart-container">
@@ -279,9 +261,9 @@ const loadCartFromLocalStorage = () => {
         onClick={toggleCart}
         aria-label="購物車"
       >
-        {merchantsExist && sanitizedCartItems.length > 0 && (
+        {merchantsExist && cartItems.length > 0 && (
           <span className="cart-badge">
-            {sanitizedCartItems.reduce((total, item) => total + item.quantity, 0)}
+            {cartItems.reduce((total, item) => total + item.quantity, 0)}
           </span>
         )}
         <i className="fas fa-shopping-cart"></i>
@@ -299,7 +281,7 @@ const loadCartFromLocalStorage = () => {
               <p>目前沒有商人資訊</p>
               <p className="empty-cart-help">請先新增商人</p>
             </div>
-          ) : sanitizedCartItems.length === 0 ? (
+          ) : cartItems.length === 0 ? (
             <div className="empty-cart">
               <p>購物車是空的</p>
               <p className="empty-cart-help">點擊商品將其添加到購物車</p>
@@ -307,25 +289,25 @@ const loadCartFromLocalStorage = () => {
           ) : (
             <>
               <div className="cart-items">
-                {sanitizedCartItems.map((item, index) => (
+                {cartItems.map((item, index) => (
                   <div key={index} className="cart-item">
                     <div className="cart-item-details">
                       <div className="cart-item-name">{item.itemName}</div>
                       <div className="cart-item-seller">賣家: {item.playerId}</div>
                       <div className="cart-item-exchange">
-  {item.allowsCoinExchange && (
-    <span className="cart-item-price">
-      💰 {(item.price * item.quantity).toLocaleString()} 枚
-      <small className="unit-price">({item.price} 枚/個)</small>
-    </span>
-  )}
-  {item.allowsBarterExchange && (
-    <span className="cart-item-exchange-material">
-      🔄 {(item.exchangeQuantity || 1) * item.quantity} 個 {item.exchangeItemName}
-      <small className="unit-exchange">({item.exchangeQuantity || 1} 個/個)</small>
-    </span>
-  )}
-</div>
+                        {item.allowsCoinExchange && (
+                          <span className="cart-item-price">
+                            💰 {(item.price * item.quantity).toLocaleString()} 枚
+                            <small className="unit-price">({item.price} 枚/個)</small>
+                          </span>
+                        )}
+                        {item.allowsBarterExchange && (
+                          <span className="cart-item-exchange-material">
+                            🔄 {(item.exchangeQuantity || 1) * item.quantity} 個 {item.exchangeItemName}
+                            <small className="unit-exchange">({item.exchangeQuantity || 1} 個/個)</small>
+                          </span>
+                        )}
+                      </div>
                     </div>
                     <div className="cart-item-actions">
                       <div className="quantity-control">
@@ -377,7 +359,7 @@ const loadCartFromLocalStorage = () => {
 
                 <div className="cart-item-count">
                   <span className="summary-label">購物車商品總數:</span>
-                  <span className="summary-value">{sanitizedCartItems.reduce((total, item) => total + item.quantity, 0)} 件</span>
+                  <span className="summary-value">{cartItems.reduce((total, item) => total + item.quantity, 0)} 件</span>
                 </div>
 
                 <button className="clear-cart" onClick={clearCart}>

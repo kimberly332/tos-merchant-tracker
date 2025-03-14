@@ -23,7 +23,7 @@ const UserGuide = () => {
             { id: 'search', title: '搜尋商品', icon: '🔍' },
             { id: 'merchant', title: '添加商人資訊', icon: '👤' },
             { id: 'cart', title: '使用購物車', icon: '🛒' },
-            { id: 'edit', title: '編輯商人資訊', icon: '✏️' }
+            { id: 'delete', title: '刪除商人資訊', icon: '🗑️' }
           ].map(section => (
             <button 
               key={section.id}
@@ -48,7 +48,7 @@ const UserGuide = () => {
                   <li>搜尋其他玩家提交的商人販售物品</li>
                   <li>添加您所遇到的商人資訊，分享給其他玩家</li>
                   <li>使用購物車功能，規劃您的購物清單及所需材料</li>
-                  <li>編輯您提交的商人資訊</li>
+                  <li>刪除您提交的商人資訊</li>
                   <li>查看特殊商人（五商）資訊</li>
                 </ul>
                 <p>所有商人資訊會在每日台灣時間午夜 (00:00) 自動重置，與遊戲內商人機制同步。</p>
@@ -149,6 +149,9 @@ const UserGuide = () => {
                     <p>填寫完畢後點擊「提交商人資訊」按鈕完成提交。</p>
                   </li>
                 </ol>
+                <div className="guide-tip">
+                  <p>提示：每位玩家每天只能提交一個商人資訊。如需提交新資訊，需先刪除當日已提交的資訊。</p>
+                </div>
               </div>
             </div>
           )}
@@ -166,7 +169,7 @@ const UserGuide = () => {
                   </li>
                   <li>
                     <strong>查看購物車</strong>
-                    <p>點擊畫面右下角的購物車圖標打開購物車。</p>
+                    <p>點擊畫面右下角的購物車圖標打開購物車。請注意，購物車圖標在登入頁面不會顯示。</p>
                   </li>
                   <li>
                     <strong>調整數量</strong>
@@ -188,32 +191,28 @@ const UserGuide = () => {
             </div>
           )}
           
-          {/* 編輯商人資訊 */}
-          {activeSection === 'edit' && (
+          {/* 刪除商人資訊 */}
+          {activeSection === 'delete' && (
             <div className="guide-section">
-              <h2 className="guide-section-title">編輯商人資訊</h2>
+              <h2 className="guide-section-title">刪除商人資訊</h2>
               <div className="guide-section-content">
-                <p>您可以編輯自己提交的商人資訊：</p>
+                <p>您可以刪除自己提交的商人資訊：</p>
                 <ol className="guide-list numbered">
                   <li>
                     <strong>找到您的商人資訊</strong>
                     <p>在商人列表中找到您提交的商人（必須使用您提交時的相同遊戲ID登入）。</p>
                   </li>
                   <li>
-                    <strong>點擊編輯按鈕</strong>
-                    <p>您提交的商人資訊卡片底部會顯示「編輯」按鈕，點擊進入編輯頁面。</p>
+                    <strong>點擊刪除按鈕</strong>
+                    <p>您提交的商人資訊卡片底部會顯示「刪除」按鈕，點擊後會彈出確認提示。</p>
                   </li>
                   <li>
-                    <strong>修改資訊</strong>
-                    <p>可以修改折扣、物品資訊、交易方式、價格等信息。遊戲ID無法修改。</p>
-                  </li>
-                  <li>
-                    <strong>保存更改</strong>
-                    <p>點擊「更新商人資訊」按鈕保存您的修改。</p>
+                    <strong>確認刪除</strong>
+                    <p>在確認提示中點擊「確認刪除」按鈕完成刪除操作。</p>
                   </li>
                 </ol>
                 <div className="guide-tip">
-                  <p>提示：您只能編輯自己提交的商人資訊，無法編輯其他玩家提交的資訊。</p>
+                  <p>提示：刪除商人資訊後，您可以在當天提交新的商人資訊。請注意，刪除操作無法撤銷。</p>
                 </div>
               </div>
             </div>
