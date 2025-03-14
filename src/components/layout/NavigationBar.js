@@ -102,14 +102,7 @@ function NavigationBar() {
             <li>
               <Link to="/guide" onClick={closeMobileMenu}>使用說明</Link>
             </li>
-            <li>
-              <Link to="/cart" onClick={closeMobileMenu} className="cart-nav-link">
-                購物計劃 
-                {cartItemCount > 0 && (
-                  <span className="nav-cart-badge">{cartItemCount}</span>
-                )}
-              </Link>
-            </li>
+            {/* 移除購物車連結 */}
             <li>
               <button
                 className="logout-btn"

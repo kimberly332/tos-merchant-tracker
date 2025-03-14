@@ -5,7 +5,7 @@ import HomePage from './pages/HomePage';
 import AddMerchantPage from './pages/AddMerchantPage';
 import LoginPage from './pages/LoginPage';
 import UserGuidePage from './pages/UserGuidePage';
-import CartDetailPage from './pages/CartDetailPage';
+// Removed CartDetailPage import
 import ShoppingCart from './components/cart/ShoppingCart';
 import { checkUserAuth } from './firebase/userAuth';
 import './styles/main.css';
@@ -53,12 +53,7 @@ function App() {
               </ProtectedRoute>
             } />
 
-            {/* 購物車詳情頁面 */}
-            <Route path="/cart" element={
-              <ProtectedRoute>
-                <CartDetailPage />
-              </ProtectedRoute>
-            } />
+            {/* 移除購物車詳情頁面路由 */}
 
             {/* 受保護的路由 */}
             <Route path="/" element={
