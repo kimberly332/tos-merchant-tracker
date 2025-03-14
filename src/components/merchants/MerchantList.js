@@ -325,7 +325,7 @@ function MerchantList() {
         {/* 使用新的搜尋組件，設置為使用資料庫數據 */}
         <SearchWithSuggestions
           onSearch={handleSearch}
-          placeholder="搜尋物品、商人、伺服器..."
+          placeholder="搜尋物品..."
           initialValue={searchTerm}
           useRealTimeItems={false} // 不使用實時物品，而是使用固定資料庫
           allItems={searchKeywords} // 這個值不會被使用，但保留參數傳遞
