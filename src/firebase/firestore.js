@@ -80,7 +80,7 @@ export const addMerchant = async (merchantData) => {
       if (!item.purchaseTimes || Number(item.purchaseTimes) > Number(item.quantity)) {
         return {
           ...item,
-          purchaseTimes: Number(item.quantity)
+          purchaseTimes: 1
         };
       }
       return item;
