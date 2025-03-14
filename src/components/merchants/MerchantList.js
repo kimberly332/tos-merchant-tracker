@@ -1,9 +1,12 @@
-import React, { useState, useEffect } from 'react';
+// src/components/merchants/MerchantList.js
+import React, { useState, useEffect, useMemo } from 'react';
 import { getAllMerchants, deleteMerchant } from '../../firebase/firestore';
 import ItemCategoryFilter from '../search/ItemCategoryFilter';
 import { useNavigate } from 'react-router-dom';
 import MerchantItem from './MerchantItem';
 import SuccessNotification from '../common/SuccessNotification';
+import SearchWithSuggestions from '../search/SearchWithSuggestions';
+import '../search/SearchWithSuggestions.css';
 
 function MerchantList() {
   const navigate = useNavigate();
@@ -26,6 +29,39 @@ function MerchantList() {
   
   // 刪除中狀態
   const [deleting, setDeleting] = useState(false);
+
+  // 從所有商人數據中提取關鍵詞 (即使不使用，仍保留這個邏輯作為參考)
+  const searchKeywords = useMemo(() => {
+    if (!merchants || merchants.length === 0) return [];
+    
+    const keywordsSet = new Set();
+    
+    merchants.forEach(merchant => {
+      // 添加玩家ID作為關鍵詞
+      if (merchant.playerId) keywordsSet.add(merchant.playerId);
+      
+      // 處理商人的物品
+      if (merchant.items && Array.isArray(merchant.items)) {
+        merchant.items.forEach(item => {
+          // 添加物品名稱
+          if (item.itemName) keywordsSet.add(item.itemName);
+          
+          // 添加物品類別，如果不是「其他」
+          if (item.category && item.category !== "其他") {
+            keywordsSet.add(item.category);
+          }
+          
+          // 添加交換物品名稱，如果不是「其他」
+          if (item.exchangeItemName && item.exchangeItemName !== "其他") {
+            keywordsSet.add(item.exchangeItemName);
+          }
+        });
+      }
+    });
+    
+    // 轉換為數組並排序
+    return Array.from(keywordsSet).sort();
+  }, [merchants]);
 
   // Copy to clipboard function
   const copyToClipboard = (text) => {
@@ -196,8 +232,9 @@ function MerchantList() {
     setFilteredMerchants(results);
   }, [merchants, searchTerm, selectedCategories, showRegularMerchants, showSpecialMerchants, sortOption]);
 
-  const handleSearchChange = (e) => {
-    setSearchTerm(e.target.value);
+  // 處理搜尋動作
+  const handleSearch = (term) => {
+    setSearchTerm(term);
   };
 
   const handleCategorySelect = (categories) => {
@@ -285,15 +322,14 @@ function MerchantList() {
         </div>
       )}
       <div className="search-filter-section">
-        <div className="search-input-container">
-          <input
-            type="text"
-            value={searchTerm}
-            onChange={handleSearchChange}
-            placeholder="搜尋物品..."
-            className="search-input"
-          />
-        </div>
+        {/* 使用新的搜尋組件，設置為使用資料庫數據 */}
+        <SearchWithSuggestions
+          onSearch={handleSearch}
+          placeholder="搜尋物品、商人、伺服器..."
+          initialValue={searchTerm}
+          useRealTimeItems={false} // 不使用實時物品，而是使用固定資料庫
+          allItems={searchKeywords} // 這個值不會被使用，但保留參數傳遞
+        />
         
         <div className="filter-options">
           <div className="merchant-type-filter">

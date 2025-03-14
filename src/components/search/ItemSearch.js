@@ -1,7 +1,10 @@
-import React, { useState } from 'react';
+// src/components/search/ItemSearch.js
+import React, { useState, useEffect } from 'react';
 import { searchItems } from '../../firebase/firestore';
 import ItemCategoryFilter from './ItemCategoryFilter';
 import MerchantItem from '../merchants/MerchantItem';
+import SearchWithSuggestions from './SearchWithSuggestions';
+import './SearchWithSuggestions.css';
 
 function ItemSearch() {
   const [searchTerm, setSearchTerm] = useState('');
@@ -25,22 +28,17 @@ function ItemSearch() {
       });
   };
 
-  const handleSearchChange = (e) => {
-    setSearchTerm(e.target.value);
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  // 執行搜尋
+  const handleSearch = async (term) => {
+    if (!term.trim()) return;
     
-    if (!searchTerm.trim()) return;
-    
+    setSearchTerm(term);
     setSearching(true);
     setSearchResults([]);
     
     try {
-      // This will fetch results where items match the search term
-      // The backend searchItems function already filters to only matching items
-      const results = await searchItems(searchTerm);
+      // 這將獲取與搜尋詞匹配的物品結果
+      const results = await searchItems(term);
       setSearchResults(results);
       setSearchPerformed(true);
     } catch (error) {
@@ -101,21 +99,14 @@ function ItemSearch() {
           {copyMessage}
         </div>
       )}
-      <form onSubmit={handleSubmit} className="search-form">
-        <div className="search-input-container">
-          <input
-            type="text"
-            value={searchTerm}
-            onChange={handleSearchChange}
-            placeholder="輸入物品名稱"
-            className="search-input"
-            required
-          />
-          <button type="submit" className="search-button" disabled={searching}>
-            {searching ? '搜尋中...' : '搜尋'}
-          </button>
-        </div>
-      </form>
+      
+      {/* 使用新的搜尋建議組件，設置為使用資料庫數據 */}
+      <SearchWithSuggestions
+        onSearch={handleSearch}
+        placeholder="輸入物品名稱"
+        initialValue={searchTerm}
+        useRealTimeItems={false} // 不使用實時物品，使用物品資料庫
+      />
 
       {searchPerformed && (
         <div className="search-results">
@@ -126,7 +117,9 @@ function ItemSearch() {
             selectedCategories={selectedCategories}
           />}
           
-          {(filteredResults.length === 0 && searchPerformed) ? (
+          {searching ? (
+            <div className="loading-indicator">搜尋中...</div>
+          ) : filteredResults.length === 0 ? (
             <p className="no-results">
               無法找到符合「{searchTerm}」
               {!selectedCategories.includes('全部') ? 

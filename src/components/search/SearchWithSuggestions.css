@@ -1,0 +1,138 @@
+/* src/components/search/SearchWithSuggestions.css */
+
+.search-with-suggestions {
+    position: relative;
+    width: 100%;
+  }
+  
+  .search-input-container {
+    display: flex;
+    position: relative;
+    width: 100%;
+    margin-bottom: 0.5rem;
+  }
+  
+  .search-input {
+    width: 100%;
+    padding: 0.75rem;
+    background-color: rgba(255, 255, 255, 0.07);
+    border: 1px solid rgba(138, 186, 179, 0.3);
+    border-radius: 6px;
+    color: #D6D8D9;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    padding-right: 60px;
+    font-size: 1rem;
+  }
+  
+  .search-input:focus {
+    border-color: #8ABAB3;
+    box-shadow: 0 0 0 2px rgba(138, 186, 179, 0.2);
+    outline: none;
+  }
+  
+  .search-button {
+    position: absolute;
+    right: 6px;
+    top: 50%;
+    transform: translateY(-50%);
+    background-color: #48727B;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 6px 12px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    font-size: 0.9rem;
+    font-weight: 500;
+  }
+  
+  .search-button:hover {
+    background-color: #5a8691;
+  }
+  
+  /* 建議列表樣式 */
+  .suggestions-list {
+    position: absolute;
+    width: 100%;
+    max-height: 300px;
+    overflow-y: auto;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    background-color: rgba(16, 24, 35, 0.95);
+    border: 1px solid rgba(138, 186, 179, 0.2);
+    border-radius: 6px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    z-index: 100;
+    backdrop-filter: blur(5px);
+    animation: fadeIn 0.2s ease-out;
+  }
+  
+  .suggestion-item {
+    padding: 0.75rem 1rem;
+    cursor: pointer;
+    transition: background-color 0.15s ease;
+    color: #D6D8D9;
+    border-bottom: 1px solid rgba(138, 186, 179, 0.1);
+  }
+  
+  .suggestion-item:last-child {
+    border-bottom: none;
+  }
+  
+  .suggestion-item:hover,
+  .suggestion-item.active {
+    background-color: rgba(72, 114, 123, 0.3);
+  }
+  
+  .suggestion-item strong {
+    color: #8ABAB3;
+    font-weight: 600;
+  }
+  
+  /* 自訂滾動條 */
+  .suggestions-list::-webkit-scrollbar {
+    width: 6px;
+  }
+  
+  .suggestions-list::-webkit-scrollbar-track {
+    background: rgba(16, 24, 35, 0.3);
+  }
+  
+  .suggestions-list::-webkit-scrollbar-thumb {
+    background-color: #48727B;
+    border-radius: 3px;
+  }
+  
+  .suggestions-list::-webkit-scrollbar-thumb:hover {
+    background-color: #8ABAB3;
+  }
+  
+  /* 動畫效果 */
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(-5px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  /* 響應式調整 */
+  @media (max-width: 768px) {
+    .search-input {
+      font-size: 0.95rem;
+      padding: 0.7rem;
+    }
+    
+    .search-button {
+      padding: 5px 10px;
+      font-size: 0.85rem;
+    }
+    
+    .suggestion-item {
+      padding: 0.65rem 0.85rem;
+    }
+  }
