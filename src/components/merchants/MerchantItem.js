@@ -86,8 +86,8 @@ const handleToggleCart = () => {
       const cartItem = {
         itemName: item.itemName || '未知物品',
         playerId: merchantInfo.playerId,
+        quantity: 1,
         merchantId: merchantInfo.id,
-        quantity: item.quantity || 1,
         // 直接使用原始值，不做任何调整
         purchaseTimes: item.purchaseTimes,  // 修改这一行
         allowsCoinExchange: item.allowsCoinExchange,

@@ -75,16 +75,16 @@ export const addMerchant = async (merchantData) => {
     const expiresAt = getTaiwanEndOfDay();
     
     // 確保每個物品有 purchaseTimes 屬性
-    const processedItems = merchantData.items.map(item => {
-      // 如果沒有提供 purchaseTimes，或 purchaseTimes 大於 quantity，則設置為 quantity
-      if (!item.purchaseTimes || Number(item.purchaseTimes) > Number(item.quantity)) {
-        return {
-          ...item,
-          purchaseTimes: 1
-        };
-      }
-      return item;
-    });
+const processedItems = merchantData.items.map(item => {
+  // 如果沒有提供 purchaseTimes，設置為 1
+  if (!item.purchaseTimes) {
+    return {
+      ...item,
+      purchaseTimes: 1
+    };
+  }
+  return item;
+});
     
     // 使用伺服器子集合添加商人資料
     const serverMerchantsRef = collection(db, `servers/${serverId}/merchants`);
