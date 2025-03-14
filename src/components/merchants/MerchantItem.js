@@ -55,8 +55,16 @@ const handleRemoveFromCart = (event) => {
   }, [item.itemName, merchantInfo.playerId]);
 
   const handleToggleCart = () => {
+    // Debug logging
+    console.log('Item Details:', {
+      itemName: item.itemName,
+      quantity: item.quantity,
+      purchaseTimes: item.purchaseTimes,
+      availableQuantity: item.availableQuantity
+    });
+  
     if (isInCart) {
-      // If already in cart, remove it
+      // Remove from cart
       const removeFromCartEvent = new CustomEvent('removeFromCart', {
         detail: {
           itemName: item.itemName || '未知物品',
@@ -65,15 +73,15 @@ const handleRemoveFromCart = (event) => {
       });
       window.dispatchEvent(removeFromCartEvent);
       
-      // Update local state
       setIsInCart(false);
     } else {
-      // If not in cart, add it
+      // Prepare cart item with careful validation
       const cartItem = {
         itemName: item.itemName || '未知物品',
         playerId: merchantInfo.playerId,
         quantity: 1,
-        purchaseTimes: item.availableQuantity || 1, // Use availableQuantity/purchaseTimes
+        // Prioritize purchaseTimes, then availableQuantity, default to 1
+        purchaseTimes: item.purchaseTimes || item.availableQuantity || 10, // Added default of 10
         allowsCoinExchange: item.allowsCoinExchange,
         allowsBarterExchange: item.allowsBarterExchange,
         price: item.price,
@@ -81,13 +89,14 @@ const handleRemoveFromCart = (event) => {
         exchangeQuantity: item.exchangeQuantity || 1
       };
   
+      console.log('Cart Item Being Added:', cartItem);
+  
       // Create and dispatch a custom event
       const addToCartEvent = new CustomEvent('addToCart', {
         detail: cartItem
       });
       window.dispatchEvent(addToCartEvent);
       
-      // Mark item as in cart
       setIsInCart(true);
     }
   };

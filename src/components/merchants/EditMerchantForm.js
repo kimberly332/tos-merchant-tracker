@@ -499,30 +499,53 @@ function EditMerchantForm() {
             const hasUpdatedItems = cartItems.some(item => item.playerId === formData.playerId);
 
             if (hasUpdatedItems) {
-              // 更新購物車中的相關物品
+              // Comprehensive Cart Update Logic
               const updatedCart = cartItems.map(cartItem => {
-                // 如果不是當前商人的物品，保持不變
+                // Only update items from this merchant
                 if (cartItem.playerId !== formData.playerId) {
                   return cartItem;
                 }
 
-                // 尋找更新後的物品資訊
-                const updatedItemInfo = processedData.items.find(
-                  item => (item.category === '其他' ? item.customItem : item.category) === cartItem.itemName
-                );
+                // More flexible and comprehensive item matching
+                const updatedItemInfo = processedData.items.find(item => {
+                  // Handle both standard and custom items
+                  const itemName = item.category === '其他'
+                    ? (item.customItem || item.category)
+                    : item.category;
 
-                // 如果找到更新後的物品，則更新購物車中的資料
+                  const cartItemName = cartItem.itemName;
+
+                  // Case-insensitive matching, trim whitespace
+                  return itemName.trim().toLowerCase() === cartItemName.trim().toLowerCase();
+                });
+
+                // If matching item found, update ALL cart details comprehensively
                 if (updatedItemInfo) {
+                  console.log('Updating Cart Item:', {
+                    oldCartItem: cartItem,
+                    newItemInfo: updatedItemInfo
+                  });
+
                   return {
                     ...cartItem,
-                    // 更新物品可用數量和交易資訊
+                    // Update item name (in case of custom item)
+                    itemName: updatedItemInfo.category === '其他'
+                      ? updatedItemInfo.customItem
+                      : updatedItemInfo.category,
+
+                    // Comprehensive field updates
                     purchaseTimes: updatedItemInfo.purchaseTimes,
                     price: updatedItemInfo.price,
+
+                    // Exchange method flags
                     allowsCoinExchange: updatedItemInfo.allowsCoinExchange,
                     allowsBarterExchange: updatedItemInfo.allowsBarterExchange,
+
+                    // Exchange item details
                     exchangeItemName: updatedItemInfo.exchangeItemName,
                     exchangeQuantity: updatedItemInfo.exchangeQuantity,
-                    // 確保購買數量不超過新的可用數量
+
+                    // Ensure quantity doesn't exceed new purchase times
                     quantity: Math.min(cartItem.quantity, updatedItemInfo.purchaseTimes)
                   };
                 }
@@ -530,10 +553,13 @@ function EditMerchantForm() {
                 return cartItem;
               });
 
+              console.log('Original Cart:', cartItems);
+              console.log('Updated Cart:', updatedCart);
+
               // 儲存更新後的購物車到 localStorage
               localStorage.setItem('shoppingCart', JSON.stringify(updatedCart));
 
-              // 觸發購物車更新事件，通知其他組件
+              // Trigger cart update event with new cart
               const cartUpdatedEvent = new CustomEvent('cartUpdated', {
                 detail: { cart: updatedCart }
               });
