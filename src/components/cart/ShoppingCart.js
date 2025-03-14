@@ -21,6 +21,21 @@ const ShoppingCart = () => {
     localStorage.removeItem('shoppingCart');
   }, []);
 
+  // Group cart items by merchant ID
+  const groupedCartItems = useMemo(() => {
+    const groups = {};
+    
+    cartItems.forEach(item => {
+      const merchantId = item.playerId;
+      if (!groups[merchantId]) {
+        groups[merchantId] = [];
+      }
+      groups[merchantId].push(item);
+    });
+    
+    return groups;
+  }, [cartItems]);
+
   // Memoized calculation of total coins and required materials
   const { totalCoins, requiredMaterials } = useMemo(() => {
     let coins = 0;
@@ -99,7 +114,7 @@ const ShoppingCart = () => {
     const newItem = event.detail;
   
     setCartItems(prevItems => {
-      // 检查物品是否已存在
+      // Check if item already exists
       const existingItemIndex = prevItems.findIndex(item =>
         item.itemName === newItem.itemName &&
         item.playerId === newItem.playerId
@@ -108,26 +123,25 @@ const ShoppingCart = () => {
       let updatedItems;
   
       if (existingItemIndex >= 0) {
-        // 如果物品已存在，可能需要更新它
-        // 但确保保留原始 purchaseTimes 值
+        // If item exists, update it but preserve original purchaseTimes
         const existingItem = prevItems[existingItemIndex];
         
         updatedItems = [...prevItems];
         updatedItems[existingItemIndex] = {
           ...existingItem,
-          // 确保不修改 purchaseTimes
+          // Ensure we don't modify purchaseTimes
           purchaseTimes: newItem.purchaseTimes || existingItem.purchaseTimes
         };
       } else {
-        // 添加新物品，确保保留 purchaseTimes
+        // Add new item, ensuring we preserve purchaseTimes
         updatedItems = [...prevItems, {
           ...newItem,
-          // 确保使用原始 purchaseTimes
+          // Ensure we use original purchaseTimes
           purchaseTimes: newItem.purchaseTimes
         }];
       }
       
-      // 更新本地存储
+      // Update localStorage
       localStorage.setItem('shoppingCart', JSON.stringify(updatedItems));
       
       return updatedItems;
@@ -139,11 +153,24 @@ const ShoppingCart = () => {
     setIsOpen(!isOpen);
   };
 
+  // Copy merchant ID to clipboard
+  const copyMerchantId = (merchantId) => {
+    navigator.clipboard.writeText(merchantId)
+      .then(() => {
+        // Could add a mini notification here if desired
+        console.log(`Copied: ${merchantId}`);
+      })
+      .catch(err => {
+        console.error('Failed to copy:', err);
+      });
+  };
+
   // Remove item from cart
-  const removeFromCart = (index) => {
+  const removeFromCart = (item) => {
     setCartItems(prevItems => {
-      const updatedItems = [...prevItems];
-      updatedItems.splice(index, 1);
+      const updatedItems = prevItems.filter(cartItem => 
+        !(cartItem.itemName === item.itemName && cartItem.playerId === item.playerId)
+      );
       
       // Update localStorage immediately
       localStorage.setItem('shoppingCart', JSON.stringify(updatedItems));
@@ -153,23 +180,25 @@ const ShoppingCart = () => {
   };
 
   // Update item quantity
-  const updateQuantity = (index, newQuantity) => {
+  const updateQuantity = (item, newQuantity) => {
     if (newQuantity < 1) {
       // If quantity is less than 1, remove the item
-      removeFromCart(index);
+      removeFromCart(item);
       return;
     }
 
     setCartItems(prevItems => {
-      const updatedItems = [...prevItems];
-      const item = updatedItems[index];
-
-      // Ensure quantity doesn't exceed purchaseTimes
-      const purchaseTimes = item.purchaseTimes || 1;
-      updatedItems[index] = {
-        ...item,
-        quantity: Math.min(newQuantity, purchaseTimes)
-      };
+      const updatedItems = prevItems.map(cartItem => {
+        if (cartItem.itemName === item.itemName && cartItem.playerId === item.playerId) {
+          // Ensure quantity doesn't exceed purchaseTimes
+          const purchaseTimes = cartItem.purchaseTimes || 1;
+          return {
+            ...cartItem,
+            quantity: Math.min(newQuantity, purchaseTimes)
+          };
+        }
+        return cartItem;
+      });
       
       // Update localStorage immediately
       localStorage.setItem('shoppingCart', JSON.stringify(updatedItems));
@@ -289,48 +318,65 @@ const ShoppingCart = () => {
           ) : (
             <>
               <div className="cart-items">
-                {cartItems.map((item, index) => (
-                  <div key={index} className="cart-item">
-                    <div className="cart-item-details">
-                      <div className="cart-item-name">{item.itemName}</div>
-                      <div className="cart-item-seller">賣家: {item.playerId}</div>
-                      <div className="cart-item-exchange">
-                        {item.allowsCoinExchange && (
-                          <span className="cart-item-price">
-                            💰 {(item.price * item.quantity).toLocaleString()} 枚
-                            <small className="unit-price">({item.price} 枚/個)</small>
-                          </span>
-                        )}
-                        {item.allowsBarterExchange && (
-                          <span className="cart-item-exchange-material">
-                            🔄 {(item.exchangeQuantity || 1) * item.quantity} 個 {item.exchangeItemName}
-                            <small className="unit-exchange">({item.exchangeQuantity || 1} 個/個)</small>
-                          </span>
-                        )}
+                {Object.entries(groupedCartItems).map(([merchantId, items]) => (
+                  <div key={merchantId} className="merchant-group">
+                    <div 
+                      className="merchant-group-header"
+                      onClick={() => copyMerchantId(merchantId)}
+                    >
+                      <div className="merchant-id">
+                        {merchantId} <i className="fas fa-copy copy-icon"></i>
+                      </div>
+                      <div className="merchant-item-count">
+                        {items.reduce((total, item) => total + item.quantity, 0)} 個商品
                       </div>
                     </div>
-                    <div className="cart-item-actions">
-                      <div className="quantity-control">
-                        <button
-                          onClick={() => updateQuantity(index, item.quantity - 1)}
-                          disabled={item.quantity <= 1}
-                        >-</button>
-                        <span>{item.quantity}</span>
-                        <button
-                          onClick={() => updateQuantity(index, item.quantity + 1)}
-                          disabled={item.quantity >= (item.purchaseTimes || 1)}
-                          title={`最多可購買 ${item.purchaseTimes || 1} 個`}
-                        >+</button>
-                      </div>
-                      <div className="quantity-limit">
-                        數量: {item.quantity}/{item.purchaseTimes || 1} 個
-                      </div>
-                      <button
-                        className="remove-item"
-                        onClick={() => removeFromCart(index)}
-                      >
-                        <i className="fas fa-trash-alt"></i>
-                      </button>
+                    
+                    <div className="merchant-items">
+                      {items.map((item, index) => (
+                        <div key={index} className="cart-item">
+                          <div className="cart-item-details">
+                            <div className="cart-item-name">{item.itemName}</div>
+                            <div className="cart-item-exchange">
+                              {item.allowsCoinExchange && (
+                                <span className="cart-item-price">
+                                  💰 {(item.price * item.quantity).toLocaleString()} 枚
+                                  <small className="unit-price">({item.price} 枚/個)</small>
+                                </span>
+                              )}
+                              {item.allowsBarterExchange && (
+                                <span className="cart-item-exchange-material">
+                                  🔄 {(item.exchangeQuantity || 1) * item.quantity} 個 {item.exchangeItemName}
+                                  <small className="unit-exchange">({item.exchangeQuantity || 1} 個/個)</small>
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                          <div className="cart-item-actions">
+                            <div className="quantity-control">
+                              <button
+                                onClick={() => updateQuantity(item, item.quantity - 1)}
+                                disabled={item.quantity <= 1}
+                              >-</button>
+                              <span>{item.quantity}</span>
+                              <button
+                                onClick={() => updateQuantity(item, item.quantity + 1)}
+                                disabled={item.quantity >= (item.purchaseTimes || 1)}
+                                title={`最多可購買 ${item.purchaseTimes || 1} 個`}
+                              >+</button>
+                            </div>
+                            <div className="quantity-limit">
+                              數量: {item.quantity}/{item.purchaseTimes || 1} 個
+                            </div>
+                            <button
+                              className="remove-item"
+                              onClick={() => removeFromCart(item)}
+                            >
+                              <i className="fas fa-trash-alt"></i>
+                            </button>
+                          </div>
+                        </div>
+                      ))}
                     </div>
                   </div>
                 ))}
