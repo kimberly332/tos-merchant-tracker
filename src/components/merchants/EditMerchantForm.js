@@ -16,7 +16,17 @@ function EditMerchantForm() {
   const [formData, setFormData] = useState({
     playerId: '',
     discount: '',
-    items: []
+    items: [{
+      category: '',
+      customItem: '',
+      quantity: '',
+      purchaseTimes: '',
+      price: '',
+      allowsCoinExchange: true,
+      allowsBarterExchange: false,
+      exchangeItemName: '',
+      exchangeQuantity: ''
+    }]
   });
 
   const [isSpecialMerchant, setIsSpecialMerchant] = useState(false);
@@ -276,8 +286,8 @@ function EditMerchantForm() {
             category: item.category || (item.itemName === '家園幣' ? '家園幣' : '其他'),
             customItem: item.category === '其他' ? item.itemName : '',
             quantity: item.quantity?.toString() || '1',
-            // 添加可購買數量欄位，如果存在則使用，否則默認為物品總數量
-            availableQuantity: item.availableQuantity?.toString() || item.quantity?.toString() || '1',
+            // 添加可購買數量欄位，如果存在則使用，否則默認為物品數量
+            purchaseTimes: item.purchaseTimes?.toString() || item.quantity?.toString() || '1',
             price: item.price ? item.price.toString() : '',
             allowsCoinExchange: item.allowsCoinExchange || false,
             allowsBarterExchange: item.allowsBarterExchange || false,
@@ -353,17 +363,6 @@ function EditMerchantForm() {
       setIsSpecialMerchant(false);
     }
 
-    // 修改這部分：當編輯物品總數量時，不再自動更新可購買數量
-    // 只有當可購買數量大於新的總數量時，才進行調整
-    if (name === 'quantity') {
-      const totalQuantity = Number(value);
-      const availableQuantity = Number(updatedItems[index].availableQuantity);
-
-      if (availableQuantity > totalQuantity && totalQuantity > 0) {
-        updatedItems[index].availableQuantity = value;
-      }
-    }
-
     setFormData(prev => ({
       ...prev,
       items: updatedItems
@@ -377,7 +376,7 @@ function EditMerchantForm() {
         category: '',
         customItem: '',
         quantity: '1',
-        availableQuantity: '1', // 添加可購買數量欄位 
+        purchaseTimes: '1', // 添加可購買數量欄位 
         price: '',
         allowsCoinExchange: true,
         allowsBarterExchange: false,
@@ -412,15 +411,59 @@ function EditMerchantForm() {
     const processedData = {
       ...formData,
       isSpecialMerchant,
-      items: formData.items.map(item => ({
-        ...item,
-        price: Number(item.price || 0),
-        quantity: Number(item.quantity || 1),  // 如果未填寫則預設為1
-        availableQuantity: Number(item.availableQuantity || 1), // 如果未填寫則預設為1
-        exchangeQuantity: Number(item.exchangeQuantity || 1),
-        itemName: item.category === '其他' ? item.customItem : item.category,
-        exchangeItemName: item.exchangeItemName === '其他' ? item.customExchangeItem : item.exchangeItemName
-      }))
+      items: formData.items.map(item => {
+        // Validate required fields
+        if (!item.category) {
+          throw new Error('必須選擇物品類別');
+        }
+    
+        if (item.category === '其他' && !item.customItem) {
+          throw new Error('選擇「其他」類別時必須填寫自定義物品名稱');
+        }
+    
+        if (!item.quantity || Number(item.quantity) <= 0) {
+          throw new Error('物品數量必須為正數');
+        }
+    
+        if (!item.purchaseTimes || Number(item.purchaseTimes) <= 0) {
+          throw new Error('可購買次數必須為正數');
+        }
+    
+        // Validate exchange method
+        if (!item.allowsCoinExchange && !item.allowsBarterExchange) {
+          throw new Error('必須選擇一種交易方式');
+        }
+    
+        if (item.allowsCoinExchange && (!item.price || Number(item.price) <= 0)) {
+          throw new Error('家園幣交易必須填寫有效單價');
+        }
+    
+        if (item.allowsBarterExchange && !item.exchangeItemName) {
+          throw new Error('以物易物必須選擇交換物品');
+        }
+    
+        if (item.exchangeItemName === '其他' && !item.customExchangeItem) {
+          throw new Error('選擇「其他」交換物品時必須填寫自定義物品名稱');
+        }
+    
+        // Process and transform data
+        return {
+          ...item,
+          // Use custom item name if category is '其他'
+          itemName: item.category === '其他' ? item.customItem : item.category,
+          
+          // Convert to numbers, ensuring positive values
+          price: item.allowsCoinExchange ? Number(item.price) : 0,
+          quantity: Number(item.quantity),
+          purchaseTimes: Number(item.purchaseTimes),
+          
+          // Handle exchange item name
+          exchangeItemName: item.allowsBarterExchange 
+            ? (item.exchangeItemName === '其他' ? item.customExchangeItem : item.exchangeItemName)
+            : '',
+          exchangeQuantity: item.allowsBarterExchange ? Number(item.exchangeQuantity || 1) : 0
+        };
+      })
     };
 
     try {
@@ -465,7 +508,7 @@ function EditMerchantForm() {
                 
                 // 尋找更新後的物品資訊
                 const updatedItemInfo = processedData.items.find(
-                  item => item.itemName === cartItem.itemName
+                  item => (item.category === '其他' ? item.customItem : item.category) === cartItem.itemName
                 );
                 
                 // 如果找到更新後的物品，則更新購物車中的資料
@@ -473,14 +516,14 @@ function EditMerchantForm() {
                   return {
                     ...cartItem,
                     // 更新物品可用數量和交易資訊
-                    availableQuantity: updatedItemInfo.availableQuantity,
+                    purchaseTimes: updatedItemInfo.purchaseTimes,
                     price: updatedItemInfo.price,
                     allowsCoinExchange: updatedItemInfo.allowsCoinExchange,
                     allowsBarterExchange: updatedItemInfo.allowsBarterExchange,
                     exchangeItemName: updatedItemInfo.exchangeItemName,
                     exchangeQuantity: updatedItemInfo.exchangeQuantity,
                     // 確保購買數量不超過新的可用數量
-                    quantity: Math.min(cartItem.quantity, updatedItemInfo.availableQuantity)
+                    quantity: Math.min(cartItem.quantity, updatedItemInfo.purchaseTimes)
                   };
                 }
                 
@@ -639,7 +682,7 @@ function EditMerchantForm() {
 
                 {/* 物品數量輸入欄位的更新 */}
                 <div className="form-group form-group-spacing">
-                  <label htmlFor={`quantity-${index}`}>物品總數量</label>
+                  <label htmlFor={`quantity-${index}`}>物品數量</label>
                   <input
                     type="number"
                     id={`quantity-${index}`}
@@ -654,12 +697,12 @@ function EditMerchantForm() {
 
                 {/* 可購買數量欄位的更新 */}
                 <div className="form-group form-group-spacing">
-                  <label htmlFor={`availableQuantity-${index}`}>本攤位可購入次數</label>
+                  <label htmlFor={`purchaseTimes-${index}`}>本攤位可購入次數</label>
                   <input
                     type="number"
-                    id={`availableQuantity-${index}`}
-                    name="availableQuantity"
-                    value={item.availableQuantity}
+                    id={`purchaseTimes-${index}`}
+                    name="purchaseTimes"
+                    value={item.purchaseTimes}
                     onChange={(e) => handleItemChange(index, e)}
                     min="1"
                     placeholder="預設為1"
@@ -816,8 +859,9 @@ function EditMerchantForm() {
             disabled={submitting || formData.items.some(item =>
               (!item.allowsCoinExchange && !item.allowsBarterExchange) ||
               (item.allowsCoinExchange && item.price === '') ||
-              (item.allowsBarterExchange && item.exchangeItemName === '')
-              // 移除了對數量欄位的必填檢查
+              (item.allowsBarterExchange && item.exchangeItemName === '') ||
+              !item.quantity ||
+              !item.purchaseTimes
             )}
           >
             {submitting ? '更新中...' : '更新商人資訊'}

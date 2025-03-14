@@ -43,16 +43,28 @@ function MerchantList() {
         const data = await getAllMerchants();
         setMerchants(data);
         setFilteredMerchants(data);
+
+        // Dispatch event about merchants' existence
+        const merchantsExistEvent = new CustomEvent('merchantsExistence', {
+          detail: { hasNoMerchants: data.length === 0 }
+        });
+        window.dispatchEvent(merchantsExistEvent);
       } catch (err) {
         console.error('Error fetching merchants:', err);
         setError('獲取商人資訊時發生錯誤，請稍後再試。');
+
+        // Dispatch event about merchants' non-existence in case of error
+        const merchantsExistEvent = new CustomEvent('merchantsExistence', {
+          detail: { hasNoMerchants: true }
+        });
+        window.dispatchEvent(merchantsExistEvent);
       } finally {
         setLoading(false);
       }
     };
 
     fetchMerchants();
-  }, []);
+}, []);
 
   // Search, filter and sort
   useEffect(() => {

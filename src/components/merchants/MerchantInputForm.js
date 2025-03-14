@@ -12,14 +12,14 @@ function MerchantInputForm() {
     items: [{
       category: '',
       customItem: '',
-      quantity: '1',  // 物品總數量
-      availableQuantity: '1', // 添加可購買數量欄位
+      quantity: '',  // 物品數量
+      purchaseTimes: '', // 添加可購買數量欄位
       price: '',
       allowsCoinExchange: true,
       allowsBarterExchange: false,
       exchangeItemName: '',
       customExchangeItem: '',
-      exchangeQuantity: '1'
+      exchangeQuantity: ''
     }]
   });
 
@@ -324,17 +324,6 @@ function MerchantInputForm() {
       setIsSpecialMerchant(false);
     }
 
-    // 修改這部分：當編輯物品總數量時，不再自動更新可購買數量
-    // 只有當可購買數量大於新的總數量時，才進行調整
-    if (name === 'quantity') {
-      const totalQuantity = Number(value);
-      const availableQuantity = Number(updatedItems[index].availableQuantity);
-
-      if (availableQuantity > totalQuantity && totalQuantity > 0) {
-        updatedItems[index].availableQuantity = value;
-      }
-    }
-
     setFormData(prev => ({
       ...prev,
       items: updatedItems
@@ -355,13 +344,13 @@ function MerchantInputForm() {
       items: [...prev.items, {
         category: '',
         customItem: '',
-        quantity: '1',
-        availableQuantity: '1', // 添加可購買數量欄位
+        quantity: '',
+        purchaseTimes: '', // 添加可購買數量欄位
         price: '',
         allowsCoinExchange: true,
         allowsBarterExchange: false,
         exchangeItemName: '',
-        exchangeQuantity: '1'
+        exchangeQuantity: ''
       }]
     }));
   };
@@ -387,20 +376,24 @@ function MerchantInputForm() {
     setSubmitting(true);
     setSubmitResult(null);
 
-    // 處理數據，增加數量預設值處理
+    // In the submit handler, update the processing
     const processedData = {
       ...formData,
       isSpecialMerchant,
-      items: formData.items.map(item => ({
-        ...item,
-        // 設置預設值為1，如果用戶沒有填寫或填寫為空
-        price: Number(item.price || 0),
-        quantity: Number(item.quantity || 1),  // 如果未填寫則預設為1
-        availableQuantity: Number(item.availableQuantity || 1), // 如果未填寫則預設為1
-        exchangeQuantity: Number(item.exchangeQuantity || 1),
-        itemName: item.category === '其他' ? item.customItem : item.category,
-        exchangeItemName: item.exchangeItemName === '其他' ? item.customExchangeItem : item.exchangeItemName
-      }))
+      items: formData.items.map(item => {
+        if (!item.quantity || !item.purchaseTimes) {
+          throw new Error('數量不能為空');
+        }
+        return {
+          ...item,
+          price: Number(item.price),
+          quantity: Number(item.quantity),
+          purchaseTimes: Number(item.purchaseTimes),
+          exchangeQuantity: item.allowsBarterExchange ? Number(item.exchangeQuantity) : 0,
+          itemName: item.category === '其他' ? item.customItem : item.category,
+          exchangeItemName: item.exchangeItemName === '其他' ? item.customExchangeItem : item.exchangeItemName
+        };
+      })
     };
 
     try {
@@ -426,7 +419,7 @@ function MerchantInputForm() {
             category: '',
             customItem: '',
             quantity: '',  // 變更為空字串，讓預設機制生效
-            availableQuantity: '', // 變更為空字串，讓預設機制生效
+            purchaseTimes: '', // 變更為空字串，讓預設機制生效
             price: '',
             allowsCoinExchange: true,
             allowsBarterExchange: false,
@@ -531,32 +524,30 @@ function MerchantInputForm() {
                 )}
 
                 <div className="form-group form-group-spacing">
-                  <label htmlFor={`quantity-${index}`}>物品總數量</label>
+                  <label htmlFor={`quantity-${index}`}>物品數量</label>
                   <input
                     type="number"
                     id={`quantity-${index}`}
                     name="quantity"
                     value={item.quantity}
                     onChange={(e) => handleItemChange(index, e)}
-                    min="1"
-                    placeholder="預設為1"
+                    required
+                    placeholder="請輸入物品數量"
                   />
-                  <small>如未填寫則預設為1</small>
                 </div>
 
                 {/* 可購買數量欄位的更新 */}
                 <div className="form-group form-group-spacing">
-                  <label htmlFor={`availableQuantity-${index}`}>本攤位可購入次數</label>
+                  <label htmlFor={`purchaseTimes-${index}`}>本攤位可購入次數</label>
                   <input
                     type="number"
-                    id={`availableQuantity-${index}`}
-                    name="availableQuantity"
-                    value={item.availableQuantity}
+                    id={`purchaseTimes-${index}`}
+                    name="purchaseTimes"
+                    value={item.purchaseTimes}
                     onChange={(e) => handleItemChange(index, e)}
-                    min="1"
-                    placeholder="預設為1"
+                    required
+                    placeholder="請輸入可購入次數"
                   />
-                  <small>如未填寫則預設為1</small>
                 </div>
               </div>
             </div>
@@ -657,10 +648,9 @@ function MerchantInputForm() {
                         value={item.exchangeQuantity}
                         onChange={(e) => handleItemChange(index, e)}
                         min="1"
-                        placeholder="預設為1"
+                        placeholder="請輸入交換數量"
                         required={item.allowsBarterExchange}
                       />
-                      <small>如未填寫則預設為1</small>
                     </div>
                   </div>
                 </div>
@@ -685,14 +675,17 @@ function MerchantInputForm() {
         >
           添加更多商品
         </button>
+
         <button
           type="submit"
           className="submit-btn"
           disabled={submitting || formData.items.some(item =>
             (!item.allowsCoinExchange && !item.allowsBarterExchange) ||
             (item.allowsCoinExchange && item.price === '') ||
-            (item.allowsBarterExchange && item.exchangeItemName === '')
-            // 移除了對數量欄位的必填檢查
+            (item.allowsBarterExchange && item.exchangeItemName === '') ||
+            item.category === '' ||
+            item.quantity === '' ||
+            item.purchaseTimes === ''
           )}
         >
           {submitting ? '提交中...' : '提交商人資訊'}

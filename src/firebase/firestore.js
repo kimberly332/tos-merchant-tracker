@@ -68,13 +68,13 @@ export const addMerchant = async (merchantData) => {
     // 設置過期時間為台灣午夜
     const expiresAt = getTaiwanEndOfDay();
     
-    // 確保每個物品有 availableQuantity 屬性
+    // 確保每個物品有 purchaseTimes 屬性
     const processedItems = merchantData.items.map(item => {
-      // 如果沒有提供 availableQuantity，或 availableQuantity 大於 quantity，則設置為 quantity
-      if (!item.availableQuantity || Number(item.availableQuantity) > Number(item.quantity)) {
+      // 如果沒有提供 purchaseTimes，或 purchaseTimes 大於 quantity，則設置為 quantity
+      if (!item.purchaseTimes || Number(item.purchaseTimes) > Number(item.quantity)) {
         return {
           ...item,
-          availableQuantity: Number(item.quantity)
+          purchaseTimes: Number(item.quantity)
         };
       }
       return item;
@@ -109,13 +109,13 @@ export const updateMerchant = async (merchantId, updatedData) => {
       return { success: false, error: '用戶未登入或伺服器信息缺失' };
     }
     
-    // 確保每個物品有 availableQuantity 屬性
+    // 確保每個物品有 purchaseTimes 屬性
     const processedItems = updatedData.items.map(item => {
-      // 如果沒有提供 availableQuantity，或 availableQuantity 大於 quantity，則設置為 quantity
-      if (!item.availableQuantity || Number(item.availableQuantity) > Number(item.quantity)) {
+      // 如果沒有提供 purchaseTimes，或 purchaseTimes 大於 quantity，則設置為 quantity
+      if (!item.purchaseTimes || Number(item.purchaseTimes) > Number(item.quantity)) {
         return {
           ...item,
-          availableQuantity: Number(item.quantity)
+          purchaseTimes: Number(item.quantity)
         };
       }
       return item;

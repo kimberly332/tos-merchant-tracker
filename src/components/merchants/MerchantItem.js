@@ -73,7 +73,7 @@ const handleRemoveFromCart = (event) => {
         itemName: item.itemName || '未知物品',
         playerId: merchantInfo.playerId,
         quantity: 1,
-        availableQuantity: item.availableQuantity || item.quantity || 1,
+        purchaseTimes: item.availableQuantity || 1, // Use availableQuantity/purchaseTimes
         allowsCoinExchange: item.allowsCoinExchange,
         allowsBarterExchange: item.allowsBarterExchange,
         price: item.price,
@@ -102,9 +102,9 @@ const handleRemoveFromCart = (event) => {
         {item.quantity > 1 && (
           <span className="item-quantity">x{item.quantity}</span>
         )}
-        {item.availableQuantity && item.availableQuantity < item.quantity && (
-          <span className="item-available-quantity">可購: {item.availableQuantity}</span>
-        )}
+        {item.purchaseTimes !== undefined && (
+  <span className="item-available-quantity">可購: {item.purchaseTimes}</span>
+)}
       </div>
       
       <div className="item-details">
