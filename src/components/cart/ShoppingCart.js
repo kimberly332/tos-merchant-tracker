@@ -90,43 +90,40 @@ const ShoppingCart = () => {
   }, [cartItems]);
 
   // Add to cart with strict duplication prevention
-  const handleAddToCart = useCallback((event) => {
+const handleAddToCart = useCallback((event) => {
     const newItem = event.detail;
-
+  
     setCartItems(prevItems => {
-      // Prevent duplicate items or excessive quantity
-      const existingItemIndex = prevItems.findIndex(item =>
+      // Create a new array with the updated items
+      let updatedItems = [...prevItems];
+      
+      // Check for duplicates and handle quantity limits
+      const existingItemIndex = updatedItems.findIndex(item =>
         item.itemName === newItem.itemName &&
         item.playerId === newItem.playerId
       );
-
+  
       if (existingItemIndex >= 0) {
-        // If item exists, update only if quantity is less than purchase times
-        const currentItem = prevItems[existingItemIndex];
+        const currentItem = updatedItems[existingItemIndex];
         const maxPurchaseTimes = currentItem.purchaseTimes || 1;
         
         if (currentItem.quantity < maxPurchaseTimes) {
-          const updatedItems = [...prevItems];
           updatedItems[existingItemIndex] = {
             ...currentItem,
             quantity: Math.min(currentItem.quantity + 1, maxPurchaseTimes)
           };
-          return updatedItems;
-        } else {
-          // If at max purchase times, return existing items
-          return prevItems;
         }
       } else {
         // Add new item with quantity 1
-        return [...prevItems, { ...newItem, quantity: 1 }];
+        updatedItems = [...updatedItems, { ...newItem, quantity: 1 }];
       }
+      
+      // Update localStorage immediately with the new state
+      localStorage.setItem('shoppingCart', JSON.stringify(updatedItems));
+      
+      return updatedItems;
     });
-    
-    // Update localStorage after state changes
-    setTimeout(() => {
-      localStorage.setItem('shoppingCart', JSON.stringify(cartItems));
-    }, 0);
-  }, [cartItems]);
+  }, []); // Remove cartItems from dependency array
 
   // Toggle cart open/closed
   const toggleCart = () => {
@@ -135,19 +132,16 @@ const ShoppingCart = () => {
 
   // Remove item from cart
   const removeFromCart = (index) => {
-    // Save the item before removal for event
-    const itemToRemove = cartItems[index];
-    
     setCartItems(prevItems => {
+      // Save the item before removal for event
+      const itemToRemove = prevItems[index];
       const updatedItems = [...prevItems];
       updatedItems.splice(index, 1);
-      return updatedItems;
-    });
-
-    // Update localStorage and dispatch events after state update
-    setTimeout(() => {
-      localStorage.setItem('shoppingCart', JSON.stringify(cartItems));
       
+      // Update localStorage immediately
+      localStorage.setItem('shoppingCart', JSON.stringify(updatedItems));
+      
+      // Dispatch removal event if needed
       if (itemToRemove) {
         const removeEvent = new CustomEvent('removeFromCart', {
           detail: {
@@ -157,7 +151,9 @@ const ShoppingCart = () => {
         });
         window.dispatchEvent(removeEvent);
       }
-    }, 0);
+      
+      return updatedItems;
+    });
   };
 
   // Update item quantity
@@ -167,74 +163,76 @@ const ShoppingCart = () => {
       removeFromCart(index);
       return;
     }
-
+  
     setCartItems(prevItems => {
       const updatedItems = [...prevItems];
       const item = updatedItems[index];
-
+  
       // Ensure quantity doesn't exceed purchaseTimes
       const purchaseTimes = item.purchaseTimes || 1;
       updatedItems[index] = {
         ...item,
         quantity: Math.min(newQuantity, purchaseTimes)
       };
-
+  
+      // Update localStorage immediately with the new state
+      localStorage.setItem('shoppingCart', JSON.stringify(updatedItems));
+      
       return updatedItems;
     });
+  };
 
-    // Update localStorage after state update
-    setTimeout(() => {
-      localStorage.setItem('shoppingCart', JSON.stringify(cartItems));
-    }, 0);
+  // Add this helper function
+const loadCartFromLocalStorage = () => {
+    try {
+      const savedCart = localStorage.getItem('shoppingCart');
+      if (savedCart) {
+        const parsedCart = JSON.parse(savedCart);
+        
+        // Validate cart items and preserve quantities
+        return parsedCart.filter(item => 
+          item.itemName && 
+          item.playerId && 
+          item.quantity > 0
+        );
+      }
+    } catch (error) {
+      console.error('Error loading cart:', error);
+    }
+    return [];
   };
 
   // Clear entire cart
   const clearCart = () => {
     setCartItems([]);
+    // Clear localStorage immediately
+    localStorage.removeItem('shoppingCart');
     
-    // Update localStorage and notify after state update
-    setTimeout(() => {
-      localStorage.removeItem('shoppingCart');
-      
-      const cartUpdatedEvent = new CustomEvent('cartUpdated', {
-        detail: { cart: [] }
-      });
-      window.dispatchEvent(cartUpdatedEvent);
-    }, 0);
+    // Notify components
+    const cartUpdatedEvent = new CustomEvent('cartUpdated', {
+      detail: { cart: [] }
+    });
+    window.dispatchEvent(cartUpdatedEvent);
   };
 
   // Initialize user and cart
   useEffect(() => {
     const currentUser = checkUserAuth();
     setUser(currentUser);
-
-    // Reset cart if no user is logged in
+  
     if (!currentUser) {
       resetCart();
       return;
     }
-
-    // Load cart from localStorage
-    try {
-      const savedCart = localStorage.getItem('shoppingCart');
-      if (savedCart) {
-        const parsedCart = JSON.parse(savedCart);
-        
-        // Validate cart items
-        const validatedCart = parsedCart.filter(item => 
-          item.itemName && 
-          item.playerId && 
-          item.quantity > 0
-        );
-
-        setCartItems(validatedCart);
-        
-        // Initial notification is handled by the effect that watches cartItems
-      }
-    } catch (error) {
-      console.error('Error loading cart:', error);
-      resetCart();
-    }
+  
+    const loadedCart = loadCartFromLocalStorage();
+    setCartItems(loadedCart);
+    
+    // Always notify about cart state
+    const cartUpdatedEvent = new CustomEvent('cartUpdated', {
+      detail: { cart: loadedCart }
+    });
+    window.dispatchEvent(cartUpdatedEvent);
   }, [resetCart]);
 
   // Persist cart to Firestore when it changes

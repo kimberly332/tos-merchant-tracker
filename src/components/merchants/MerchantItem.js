@@ -5,21 +5,42 @@ const MerchantItem = ({ item, merchantInfo }) => {
   const [isInCart, setIsInCart] = useState(false);
   
   // Check initial cart status when component mounts
-  useEffect(() => {
-    // Check localStorage directly to determine initial state
-    try {
-      const savedCart = localStorage.getItem('shoppingCart');
-      if (savedCart) {
-        const cart = JSON.parse(savedCart);
-        const found = cart.some(cartItem => 
-          cartItem.itemName === item.itemName && 
-          cartItem.playerId === merchantInfo.playerId
-        );
-        setIsInCart(found);
+useEffect(() => {
+    // Check localStorage directly on mount
+    const checkCartStatus = () => {
+      try {
+        const savedCart = localStorage.getItem('shoppingCart');
+        if (savedCart) {
+          const cart = JSON.parse(savedCart);
+          const found = cart.some(cartItem => 
+            cartItem.itemName === item.itemName && 
+            cartItem.playerId === merchantInfo.playerId
+          );
+          setIsInCart(found);
+        } else {
+          setIsInCart(false);
+        }
+      } catch (error) {
+        console.error('Error checking cart status:', error);
+        setIsInCart(false);
       }
-    } catch (error) {
-      console.error('Error checking initial cart status:', error);
-    }
+    };
+    
+    // Initial check
+    checkCartStatus();
+    
+    // Add direct event listener for storage changes
+    const handleStorageChange = (e) => {
+      if (e.key === 'shoppingCart') {
+        checkCartStatus();
+      }
+    };
+    
+    window.addEventListener('storage', handleStorageChange);
+    
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+    };
   }, [item.itemName, merchantInfo.playerId]);
   
   // Listen for cart updates from other components
