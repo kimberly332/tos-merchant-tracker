@@ -1,5 +1,4 @@
 // src/components/layout/NavigationBar.js
-// 更新：添加使用說明頁面的導航鏈接
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { checkUserAuth, logoutUser } from '../../firebase/userAuth';

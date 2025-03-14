@@ -983,6 +983,76 @@ body {
   }
 }
 
+/* Add this to your main.css or create a new CSS file */
+
+/* Delete button styling */
+.delete-btn {
+  background-color: rgba(244, 67, 54, 0.1);
+  color: #ff8a80;
+  border: 1px solid rgba(244, 67, 54, 0.3);
+  border-radius: 4px;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.9rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all 0.15s ease;
+}
+
+.delete-btn:hover {
+  background-color: rgba(244, 67, 54, 0.2);
+  transform: translateY(-1px);
+}
+
+.delete-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.delete-icon {
+  font-size: 1em;
+}
+
+/* Message for already submitted merchant */
+.already-submitted-message {
+  background-color: rgba(16, 24, 35, 0.6);
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin: 1.5rem 0;
+  border: 1px solid rgba(138, 186, 179, 0.15);
+  text-align: center;
+}
+
+.already-submitted-message p {
+  margin-bottom: 0.75rem;
+  color: #D6D8D9;
+}
+
+.already-submitted-message p:last-of-type {
+  margin-bottom: 1.5rem;
+}
+
+/* Form buttons container */
+.form-buttons {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  margin-top: 1.5rem;
+}
+
+.form-buttons button {
+  min-width: 150px;
+}
+
+/* Delete Controls */
+.merchant-footer .edit-controls .delete-btn {
+  background-color: rgba(244, 67, 54, 0.1);
+  color: #ff8a80;
+  padding: 0.35rem 0.75rem;
+}
+
   /* Import auth.css for user authentication styles */
   @import './components/auth.css';  
   @import './components/merchants.css';

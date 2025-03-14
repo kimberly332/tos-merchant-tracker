@@ -17,17 +17,13 @@ const MerchantItem = ({ item, merchantInfo }) => {
     };
     
     // Function to handle removeFromCart events
-const handleRemoveFromCart = (event) => {
-    console.log('Remove event received:', event.detail);
-    console.log('This item:', item.itemName, merchantInfo.playerId);
-    
-    // Check if this item was removed
-    if (event.detail.itemName === item.itemName && 
-        event.detail.playerId === merchantInfo.playerId) {
-      console.log('Match found, updating cart status');
-      setIsInCart(false);
-    }
-  };
+    const handleRemoveFromCart = (event) => {
+      // Check if this item was removed
+      if (event.detail.itemName === item.itemName && 
+          event.detail.playerId === merchantInfo.playerId) {
+        setIsInCart(false);
+      }
+    };
     
     // Initial check - try to get cart from localStorage
     try {
@@ -55,14 +51,6 @@ const handleRemoveFromCart = (event) => {
   }, [item.itemName, merchantInfo.playerId]);
 
   const handleToggleCart = () => {
-    // Debug logging
-    console.log('Item Details:', {
-      itemName: item.itemName,
-      quantity: item.quantity,
-      purchaseTimes: item.purchaseTimes,
-      availableQuantity: item.availableQuantity
-    });
-  
     if (isInCart) {
       // Remove from cart
       const removeFromCartEvent = new CustomEvent('removeFromCart', {
@@ -75,21 +63,20 @@ const handleRemoveFromCart = (event) => {
       
       setIsInCart(false);
     } else {
-      // Prepare cart item with careful validation
+      // Prepare cart item with careful validation and include merchant ID
       const cartItem = {
         itemName: item.itemName || '未知物品',
         playerId: merchantInfo.playerId,
+        merchantId: merchantInfo.id, // Store the merchant ID for easy filtering on delete
         quantity: 1,
         // Prioritize purchaseTimes, then availableQuantity, default to 1
-        purchaseTimes: item.purchaseTimes || item.availableQuantity || 10, // Added default of 10
+        purchaseTimes: item.purchaseTimes || item.availableQuantity || 10,
         allowsCoinExchange: item.allowsCoinExchange,
         allowsBarterExchange: item.allowsBarterExchange,
         price: item.price,
         exchangeItemName: item.exchangeItemName,
         exchangeQuantity: item.exchangeQuantity || 1
       };
-  
-      console.log('Cart Item Being Added:', cartItem);
   
       // Create and dispatch a custom event
       const addToCartEvent = new CustomEvent('addToCart', {
@@ -112,8 +99,8 @@ const handleRemoveFromCart = (event) => {
           <span className="item-quantity">x{item.quantity}</span>
         )}
         {item.purchaseTimes !== undefined && (
-  <span className="item-available-quantity">可購: {item.purchaseTimes}</span>
-)}
+          <span className="item-available-quantity">可購: {item.purchaseTimes}</span>
+        )}
       </div>
       
       <div className="item-details">

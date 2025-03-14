@@ -65,6 +65,12 @@ export const addMerchant = async (merchantData) => {
       return { success: false, error: '用戶未登入或伺服器信息缺失' };
     }
     
+    // 檢查當前用戶今天是否已提交過商人資訊
+    const result = await checkUserHasSubmittedToday(merchantData.playerId);
+    if (result.hasSubmitted) {
+      return { success: false, error: '您今天已經提交過商人資訊，請先刪除已有資訊再重新提交。' };
+    }
+    
     // 設置過期時間為台灣午夜
     const expiresAt = getTaiwanEndOfDay();
     
@@ -97,11 +103,11 @@ export const addMerchant = async (merchantData) => {
   }
 };
 
-// 更新現有商人資料
-export const updateMerchant = async (merchantId, updatedData) => {
+// 刪除商人資料
+export const deleteMerchant = async (merchantId) => {
   try {
     // 導入需要的函數
-    const { doc, updateDoc } = await import('firebase/firestore');
+    const { doc, deleteDoc, getDoc } = await import('firebase/firestore');
     
     // 獲取當前用戶伺服器
     const serverId = getCurrentServerId();
@@ -109,30 +115,32 @@ export const updateMerchant = async (merchantId, updatedData) => {
       return { success: false, error: '用戶未登入或伺服器信息缺失' };
     }
     
-    // 確保每個物品有 purchaseTimes 屬性
-    const processedItems = updatedData.items.map(item => {
-      // 如果沒有提供 purchaseTimes，或 purchaseTimes 大於 quantity，則設置為 quantity
-      if (!item.purchaseTimes || Number(item.purchaseTimes) > Number(item.quantity)) {
-        return {
-          ...item,
-          purchaseTimes: Number(item.quantity)
-        };
-      }
-      return item;
-    });
+    // 獲取當前用戶ID
+    const user = checkUserAuth();
+    if (!user || !user.playerId) {
+      return { success: false, error: '用戶未登入' };
+    }
     
-    // 引用伺服器商人文件
+    // 引用商人文件
     const merchantRef = doc(db, `servers/${serverId}/merchants`, merchantId);
     
-    // 更新文件
-    await updateDoc(merchantRef, {
-      ...updatedData,
-      items: processedItems
-    });
+    // 先取得商人資料，檢查是否為當前用戶所有
+    const merchantSnap = await getDoc(merchantRef);
+    if (!merchantSnap.exists()) {
+      return { success: false, error: '商人資訊不存在' };
+    }
+    
+    const merchantData = merchantSnap.data();
+    if (merchantData.playerId !== user.playerId) {
+      return { success: false, error: '您只能刪除自己提交的商人資訊' };
+    }
+    
+    // 刪除文件
+    await deleteDoc(merchantRef);
     
     return { success: true };
   } catch (error) {
-    console.error('更新商人時發生錯誤:', error);
+    console.error('刪除商人時發生錯誤:', error);
     return { success: false, error };
   }
 };
@@ -243,6 +251,12 @@ export const addSpecialMerchant = async (merchantData) => {
     const serverId = getCurrentServerId();
     if (!serverId) {
       return { success: false, error: '用戶未登入或伺服器信息缺失' };
+    }
+    
+    // 檢查當前用戶今天是否已提交過商人資訊
+    const result = await checkUserHasSubmittedToday(merchantData.playerId);
+    if (result.hasSubmitted) {
+      return { success: false, error: '您今天已經提交過商人資訊，請先刪除已有資訊再重新提交。' };
     }
     
     // 設置過期時間為台灣午夜

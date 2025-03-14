@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { getAllMerchants } from '../../firebase/firestore';
+import { getAllMerchants, deleteMerchant } from '../../firebase/firestore';
 import ItemCategoryFilter from '../search/ItemCategoryFilter';
 import { useNavigate } from 'react-router-dom';
 import MerchantItem from './MerchantItem';
+import SuccessNotification from '../common/SuccessNotification';
 
 function MerchantList() {
   const navigate = useNavigate();
@@ -13,6 +14,8 @@ function MerchantList() {
   const [selectedCategories, setSelectedCategories] = useState(['全部']);
   const [error, setError] = useState(null);
   const [copyMessage, setCopyMessage] = useState(null);
+  const [showNotification, setShowNotification] = useState(false);
+  const [notificationMessage, setNotificationMessage] = useState('');
   
   // 排序選項 - 默認為五商優先
   const [sortOption, setSortOption] = useState('specialMerchantFirst');
@@ -20,6 +23,9 @@ function MerchantList() {
   // 篩選選項
   const [showRegularMerchants, setShowRegularMerchants] = useState(true);
   const [showSpecialMerchants, setShowSpecialMerchants] = useState(true);
+  
+  // 刪除中狀態
+  const [deleting, setDeleting] = useState(false);
 
   // Copy to clipboard function
   const copyToClipboard = (text) => {
@@ -64,7 +70,7 @@ function MerchantList() {
     };
 
     fetchMerchants();
-}, []);
+  }, []);
 
   // Search, filter and sort
   useEffect(() => {
@@ -195,6 +201,56 @@ function MerchantList() {
     });
   };
 
+  // Handle merchant deletion
+  const handleDeleteMerchant = async (merchantId) => {
+    if (!window.confirm('確定要刪除這個商人資訊嗎？此操作無法撤銷。')) {
+      return;
+    }
+    
+    setDeleting(true);
+    try {
+      const result = await deleteMerchant(merchantId);
+      
+      if (result.success) {
+        // Update local merchant list
+        const updatedMerchants = merchants.filter(m => m.id !== merchantId);
+        setMerchants(updatedMerchants);
+        
+        // Clear cart if it contains items from this merchant
+        try {
+          const savedCart = localStorage.getItem('shoppingCart');
+          if (savedCart) {
+            const cartItems = JSON.parse(savedCart);
+            const updatedCart = cartItems.filter(item => 
+              !item.merchantId || item.merchantId !== merchantId
+            );
+            
+            localStorage.setItem('shoppingCart', JSON.stringify(updatedCart));
+            
+            // Notify shopping cart component
+            const cartUpdatedEvent = new CustomEvent('cartUpdated', {
+              detail: { cart: updatedCart }
+            });
+            window.dispatchEvent(cartUpdatedEvent);
+          }
+        } catch (error) {
+          console.error('Error updating cart after deletion:', error);
+        }
+        
+        // Show success notification
+        setNotificationMessage('商人資訊已成功刪除！');
+        setShowNotification(true);
+      } else {
+        setError('刪除商人資訊時發生錯誤，請稍後再試。');
+      }
+    } catch (err) {
+      console.error('Error deleting merchant:', err);
+      setError('刪除商人資訊時發生錯誤，請稍後再試。');
+    } finally {
+      setDeleting(false);
+    }
+  };
+
   // Count special and regular merchants
   const specialMerchantCount = filteredMerchants.filter(m => m.isSpecialMerchant).length;
   const regularMerchantCount = filteredMerchants.filter(m => !m.isSpecialMerchant).length;
@@ -276,6 +332,10 @@ function MerchantList() {
             // Skip if expired
             if (!merchant.expiresAt || new Date() > new Date(merchant.expiresAt)) return null;
             
+            // Get current user playerId from localStorage
+            const currentPlayerId = localStorage.getItem('submitterPlayerId');
+            const isOwnMerchant = currentPlayerId === merchant.playerId;
+            
             return (
               <div key={index} className={`merchant-card ${merchant.isSpecialMerchant ? 'special-merchant-card' : ''}`}>
                 <div className="merchant-header">
@@ -298,13 +358,12 @@ function MerchantList() {
                 
                 {merchant.items && merchant.items.length > 0 ? (
                   <div className="items-section">
-                    {/* <h4>販售物品:</h4> */}
                     <ul className="items-list">
                       {merchant.items.map((item, itemIndex) => (
                         <MerchantItem 
                           key={itemIndex} 
                           item={item} 
-                          merchantInfo={merchant}
+                          merchantInfo={{...merchant, id: merchant.id}}
                         />
                       ))}
                     </ul>
@@ -322,14 +381,15 @@ function MerchantList() {
                       </p>
                     </div>
                     
-                    {localStorage.getItem('submitterPlayerId') === merchant.playerId && (
+                    {isOwnMerchant && (
                       <div className="edit-controls">
                         <button 
-                          className="edit-btn"
-                          onClick={() => navigate(`/edit-merchant/${merchant.id}`)}
-                          title="編輯商人資訊"
+                          className="delete-btn"
+                          onClick={() => handleDeleteMerchant(merchant.id)}
+                          title="刪除商人資訊"
+                          disabled={deleting}
                         >
-                          <span className="edit-icon">✏️</span> 編輯
+                          <span className="delete-icon">🗑️</span> {deleting ? '刪除中...' : '刪除'}
                         </button>
                       </div>
                     )}
@@ -339,6 +399,18 @@ function MerchantList() {
             );
           }).filter(Boolean)}
         </div>
+      )}
+      
+      {/* Success notification */}
+      {showNotification && (
+        <SuccessNotification
+          message={notificationMessage}
+          duration={3000}
+          onClose={() => {
+            setShowNotification(false);
+            setTimeout(() => setNotificationMessage(''), 300);
+          }}
+        />
       )}
     </div>
   );

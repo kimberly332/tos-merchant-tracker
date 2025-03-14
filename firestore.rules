@@ -4,22 +4,22 @@ service cloud.firestore {
     // 用戶文檔安全規則
     match /users/{userId} {
       allow read: if true;
-      allow create, update: if true; // 允許創建和更新用戶資料
-      allow delete: if false; // 禁止刪除用戶資料
+      allow create, update: if true; 
+      allow delete: if false; 
     }
     
     // 分伺服器的商人數據
-    match /servers/{serverId}/merchants/{document=**} {
-      allow read: if true; // 允許公開讀取
-      allow create, update: if true; // 允許創建和更新商人資料
-      allow delete: if false; // 禁止刪除商人資料
+    match /servers/{serverId}/merchants/{merchantId} {
+      allow read: if true; 
+      allow create, update: if true; 
+      allow delete: if true; // Simply allow deletion for now
     }
     
     // 舊版查詢兼容
     match /merchants/{document=**} {
       allow read: if true;
       allow create, update: if true;
-      allow delete: if false;
+      allow delete: if true; // Simply allow deletion for now
     }
   }
 }
