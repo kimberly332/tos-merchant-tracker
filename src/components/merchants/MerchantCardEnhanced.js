@@ -28,7 +28,7 @@ const MerchantCardEnhanced = ({
       
       {merchant.items && merchant.items.length > 0 ? (
         <div className="items-section">
-          <h4>販售物品:</h4>
+          {/* <h4>販售物品:</h4> */}
           <div className="items-list">
             {merchant.items.map((item, itemIndex) => (
               <div key={itemIndex} className="item">
