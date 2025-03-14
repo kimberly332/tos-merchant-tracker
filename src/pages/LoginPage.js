@@ -6,7 +6,7 @@ import { loginUser, checkUserAuth } from '../firebase/userAuth';
 function LoginPage() {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
-    serverId: '',
+    serverId: 'cargo_bay_sunshine_orchard',
     playerId: ''
   });
   const [loading, setLoading] = useState(false);
