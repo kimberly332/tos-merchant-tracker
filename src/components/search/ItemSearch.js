@@ -164,7 +164,7 @@ function ItemSearch() {
                         {merchant.items.map((item, itemIndex) => (
                           <MerchantItem 
                             key={itemIndex} 
-                            item={item} 
+                            item={{...item, showQuantity: true}} 
                             merchantInfo={merchant}
                           />
                         ))}

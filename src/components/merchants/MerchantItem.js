@@ -5,7 +5,7 @@ const MerchantItem = ({ item, merchantInfo }) => {
   const [isInCart, setIsInCart] = useState(false);
   
   // Check initial cart status when component mounts
-useEffect(() => {
+  useEffect(() => {
     // Check localStorage directly on mount
     const checkCartStatus = () => {
       try {
@@ -71,7 +71,7 @@ useEffect(() => {
     };
   }, [item.itemName, merchantInfo.playerId]);
 
-const handleToggleCart = () => {
+  const handleToggleCart = () => {
     if (isInCart) {
       // Remove from cart - send a simple event with just the item identifier
       const removeFromCartEvent = new CustomEvent('removeFromCart', {
@@ -89,7 +89,7 @@ const handleToggleCart = () => {
         quantity: 1,
         merchantId: merchantInfo.id,
         // 直接使用原始值，不做任何调整
-        purchaseTimes: item.purchaseTimes,  // 修改这一行
+        purchaseTimes: item.purchaseTimes,
         allowsCoinExchange: item.allowsCoinExchange,
         allowsBarterExchange: item.allowsBarterExchange,
         price: item.price,
@@ -111,12 +111,11 @@ const handleToggleCart = () => {
     >
       <div className="item-name-container">
         <span className="item-name">{item.itemName || '未知物品'}</span>
-        {item.quantity > 1 && (
-          <span className="item-quantity">x{item.quantity}</span>
-        )}
+        {/* Always show quantity, even when it's 1 */}
+        <span className="item-quantity">x{item.quantity || 1}</span>
         {(item.purchaseTimes !== undefined) && (
-  <span className="item-available-quantity">可購: {item.purchaseTimes}</span>
-)}
+          <span className="item-available-quantity">可購: {item.purchaseTimes}</span>
+        )}
       </div>
       
       <div className="item-details">
