@@ -224,6 +224,18 @@
   margin-bottom: 0.25rem;
 }
 
+.cart-item-name-quantity {
+  display: inline-block;
+  font-size: 0.85rem;
+  font-weight: normal;
+  color: rgba(214, 216, 217, 0.8);
+  background-color: rgba(72, 114, 123, 0.15);
+  padding: 0.1rem 0.35rem;
+  border-radius: 4px;
+  margin-left: 0.5rem;
+  vertical-align: text-top;
+}
+
 .cart-item-exchange {
   display: flex;
   flex-direction: column;

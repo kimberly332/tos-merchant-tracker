@@ -357,9 +357,9 @@ function MerchantList() {
                     <button 
                       className="edit-btn"
                       onClick={() => navigate(`/edit-merchant/${merchant.id}`)}
-                      title="編輯商人資訊"
+                      title="刪除商人資訊"
                     >
-                      <span className="edit-icon">✏️</span> 編輯
+                      <span className="edit-icon">✏️</span> 刪除
                     </button>
                   </div>
                 )}

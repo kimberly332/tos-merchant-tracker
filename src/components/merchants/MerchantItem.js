@@ -88,6 +88,8 @@ const MerchantItem = ({ item, merchantInfo }) => {
         playerId: merchantInfo.playerId,
         quantity: 1,
         merchantId: merchantInfo.id,
+        // Store the original item quantity
+        itemQuantity: item.quantity || 1,
         // 直接使用原始值，不做任何调整
         purchaseTimes: item.purchaseTimes,
         allowsCoinExchange: item.allowsCoinExchange,
