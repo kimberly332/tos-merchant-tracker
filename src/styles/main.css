@@ -1068,15 +1068,81 @@ body {
   margin-top: 1.5rem;
 }
 
-.form-buttons button {
+/* .form-buttons button {
   min-width: 150px;
-}
+} */
 
 /* Delete Controls */
 .merchant-footer .edit-controls .delete-btn {
   background-color: rgba(244, 67, 54, 0.1);
   color: #ff8a80;
   padding: 0.35rem 0.75rem;
+}
+
+/* Container for all items that enables horizontal scrolling on mobile */
+.items-container {
+  width: 100%;
+  position: relative;
+}
+
+@media (max-width: 768px) {
+  .items-container {
+    display: flex;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none; /* For Firefox */
+    /* margin-bottom: 2rem; */
+    padding-bottom: 0.5rem;
+  }
+  
+  .items-container::-webkit-scrollbar {
+    display: none; /* For Chrome, Safari and Opera */
+  }
+  
+  .item-entry-container {
+    flex: 0 0 90%;
+    scroll-snap-align: start;
+    margin-right: 1rem;
+    min-width: 280px;
+  }
+  
+  /* For indicating there are more items to scroll */
+  .items-container::after {
+    content: "";
+    flex: 0 0 1rem;
+  }
+  
+  /* Indicator dots for horizontal scrolling */
+  .scroll-indicator {
+    display: flex;
+    justify-content: center;
+    margin: 1rem 0;
+  }
+  
+  .scroll-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: rgba(138, 186, 179, 0.3);
+    margin: 0 4px;
+    transition: background-color 0.2s ease;
+  }
+  
+  .scroll-dot.active {
+    background-color: var(--color-accent, #48727B);
+  }
+}
+
+/* Desktop view remains vertical */
+@media (min-width: 769px) {
+  .items-container {
+    display: block;
+  }
+  
+  .scroll-indicator {
+    display: none;
+  }
 }
 
   /* Import auth.css for user authentication styles */

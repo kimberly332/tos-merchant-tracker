@@ -23,6 +23,52 @@ function MerchantInputForm() {
     }]
   });
 
+  const [activeItemIndex, setActiveItemIndex] = useState(0);
+  useEffect(() => {
+    const handleItemScroll = () => {
+      const container = document.querySelector('.items-container');
+      if (!container) return;
+
+      // Determine which item is most visible
+      const items = Array.from(container.querySelectorAll('.item-entry-container'));
+      const containerLeft = container.scrollLeft;
+      const containerWidth = container.clientWidth;
+
+      // Find the item that is most in view
+      let mostVisibleIndex = 0;
+      let highestVisibility = 0;
+
+      items.forEach((item, index) => {
+        const itemLeft = item.offsetLeft;
+        const itemWidth = item.clientWidth;
+
+        // Calculate how much of the item is visible (0 to 1)
+        const visibleLeft = Math.max(itemLeft, containerLeft);
+        const visibleRight = Math.min(itemLeft + itemWidth, containerLeft + containerWidth);
+        const visibleWidth = Math.max(0, visibleRight - visibleLeft);
+        const visibilityRatio = visibleWidth / itemWidth;
+
+        if (visibilityRatio > highestVisibility) {
+          highestVisibility = visibilityRatio;
+          mostVisibleIndex = index;
+        }
+      });
+
+      setActiveItemIndex(mostVisibleIndex);
+    };
+
+    const container = document.querySelector('.items-container');
+    if (container) {
+      container.addEventListener('scroll', handleItemScroll);
+      // Initialize correctly
+      handleItemScroll();
+
+      return () => {
+        container.removeEventListener('scroll', handleItemScroll);
+      };
+    }
+  }, [formData.items.length]); // Re-run when items change
+
   const [user, setUser] = useState(null);
   useEffect(() => {
     const currentUser = checkUserAuth();
@@ -369,6 +415,19 @@ function MerchantInputForm() {
       items: updatedItems
     }));
   };
+  const scrollToItem = (index) => {
+    const container = document.querySelector('.items-container');
+    const item = container.querySelectorAll('.item-entry-container')[index];
+
+    if (container && item) {
+      container.scrollTo({
+        left: item.offsetLeft,
+        behavior: 'smooth'
+      });
+
+      setActiveItemIndex(index);
+    }
+  };
 
   // 在handleSubmit函數中，修改處理數據的邏輯
   const handleSubmit = async (e) => {
@@ -487,186 +546,199 @@ function MerchantInputForm() {
           {/* 請填寫商人販售的商品及交易方式（選擇家園幣或以物易物其中一種） */}
         </p>
 
-        {formData.items.map((item, index) => (
-          <div key={index} className="item-entry-container">
-            <div className="item-section">
-              <h4 className="item-section-title">物品資訊</h4>
-              <div className="item-entry">
-                <div className="form-group">
-                  <label htmlFor={`category-${index}`}>物品名稱</label>
-                  <SearchableSelect
-                    groups={categoryGroups}
-                    value={item.category}
-                    onChange={(value) => handleItemChange(index, {
-                      target: { name: 'category', value }
-                    })}
-                    placeholder="請選擇物品"
-                    id={`category-${index}`}
-                    name="category"
-                    required={true}
-                  />
+        <div className="items-container">
+          {formData.items.map((item, index) => (
+            <div key={index} className="item-entry-container">
+              <div className="item-section">
+                <h4 className="item-section-title">物品資訊 {index + 1}</h4>
+                <div className="item-entry">
+                  <div className="form-group">
+                    <label htmlFor={`category-${index}`}>物品名稱</label>
+                    <SearchableSelect
+                      groups={categoryGroups}
+                      value={item.category}
+                      onChange={(value) => handleItemChange(index, {
+                        target: { name: 'category', value }
+                      })}
+                      placeholder="請選擇物品"
+                      id={`category-${index}`}
+                      name="category"
+                      required={true}
+                    />
+                  </div>
+
+                  {/* 當選擇「其他」時顯示自定義輸入框 */}
+                  {item.category === '其他' && (
+                    <div className="form-group">
+                      <label htmlFor={`customItem-${index}`}>自定義物品名稱</label>
+                      <input
+                        type="text"
+                        id={`customItem-${index}`}
+                        name="customItem"
+                        value={item.customItem}
+                        onChange={(e) => handleItemChange(index, e)}
+                        placeholder="請輸入物品名稱"
+                        required={item.category === '其他'}
+                      />
+                    </div>
+                  )}
+
+                  <div className="form-group form-group-spacing">
+                    <label htmlFor={`quantity-${index}`}>物品數量</label>
+                    <input
+                      type="number"
+                      id={`quantity-${index}`}
+                      name="quantity"
+                      value={item.quantity}
+                      onChange={(e) => handleItemChange(index, e)}
+                      required
+                      placeholder="請輸入物品數量"
+                    />
+                  </div>
+
+                  {/* 可購買數量欄位的更新 */}
+                  <div className="form-group form-group-spacing">
+                    <label htmlFor={`purchaseTimes-${index}`}>本攤位可購入次數</label>
+                    <input
+                      type="number"
+                      id={`purchaseTimes-${index}`}
+                      name="purchaseTimes"
+                      value={item.purchaseTimes}
+                      onChange={(e) => handleItemChange(index, e)}
+                      required
+                      placeholder="請輸入可購入次數"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="exchange-section">
+                <div className="exchange-options">
+                  <label className="exchange-option">
+                    <input
+                      type="radio"
+                      name={`exchangeType-${index}`}
+                      checked={item.allowsCoinExchange}
+                      onChange={(e) => handleExchangeToggle(index, 'coin', e.target.checked)}
+                      disabled={item.category === '家園幣'} // 禁用家園幣的家園幣交易選項
+                    />
+                    支持家園幣交易
+                  </label>
+                  <label className="exchange-option exchange-option-spacing">
+                    <input
+                      type="radio"
+                      name={`exchangeType-${index}`}
+                      checked={item.allowsBarterExchange}
+                      onChange={(e) => handleExchangeToggle(index, 'barter', e.target.checked)}
+                    />
+                    支持以物易物
+                    {item.category === '家園幣' && <span className="required-tag">必選</span>}
+                  </label>
                 </div>
 
-                {/* 當選擇「其他」時顯示自定義輸入框 */}
-                {item.category === '其他' && (
-                  <div className="form-group">
-                    <label htmlFor={`customItem-${index}`}>自定義物品名稱</label>
-                    <input
-                      type="text"
-                      id={`customItem-${index}`}
-                      name="customItem"
-                      value={item.customItem}
-                      onChange={(e) => handleItemChange(index, e)}
-                      placeholder="請輸入物品名稱"
-                      required={item.category === '其他'}
-                    />
+                {/* 至少需要選擇一種交換方式的錯誤提示 */}
+                {!item.allowsCoinExchange && !item.allowsBarterExchange && (
+                  <div className="error-message">
+                    請選擇一種交易方式（家園幣或物品）
                   </div>
                 )}
 
-                <div className="form-group form-group-spacing">
-                  <label htmlFor={`quantity-${index}`}>物品數量</label>
-                  <input
-                    type="number"
-                    id={`quantity-${index}`}
-                    name="quantity"
-                    value={item.quantity}
-                    onChange={(e) => handleItemChange(index, e)}
-                    required
-                    placeholder="請輸入物品數量"
-                  />
-                </div>
-
-                {/* 可購買數量欄位的更新 */}
-                <div className="form-group form-group-spacing">
-                  <label htmlFor={`purchaseTimes-${index}`}>本攤位可購入次數</label>
-                  <input
-                    type="number"
-                    id={`purchaseTimes-${index}`}
-                    name="purchaseTimes"
-                    value={item.purchaseTimes}
-                    onChange={(e) => handleItemChange(index, e)}
-                    required
-                    placeholder="請輸入可購入次數"
-                  />
-                </div>
-              </div>
-            </div>
-
-            <div className="exchange-section">
-              <div className="exchange-options">
-                <label className="exchange-option">
-                  <input
-                    type="radio"
-                    name={`exchangeType-${index}`}
-                    checked={item.allowsCoinExchange}
-                    onChange={(e) => handleExchangeToggle(index, 'coin', e.target.checked)}
-                    disabled={item.category === '家園幣'} // 禁用家園幣的家園幣交易選項
-                  />
-                  支持家園幣交易
-                </label>
-                <label className="exchange-option exchange-option-spacing">
-                  <input
-                    type="radio"
-                    name={`exchangeType-${index}`}
-                    checked={item.allowsBarterExchange}
-                    onChange={(e) => handleExchangeToggle(index, 'barter', e.target.checked)}
-                  />
-                  支持以物易物
-                  {item.category === '家園幣' && <span className="required-tag">必選</span>}
-                </label>
-              </div>
-
-              {/* 至少需要選擇一種交換方式的錯誤提示 */}
-              {!item.allowsCoinExchange && !item.allowsBarterExchange && (
-                <div className="error-message">
-                  請選擇一種交易方式（家園幣或物品）
-                </div>
-              )}
-
-              {/* 家園幣價格輸入 (當啟用家園幣交易時顯示) */}
-              {item.allowsCoinExchange && (
-                <div className="exchange-fields">
-                  <div className="form-group">
-                    <label htmlFor={`price-${index}`}>單價 (家園幣)</label>
-                    <input
-                      type="number"
-                      id={`price-${index}`}
-                      name="price"
-                      value={item.price}
-                      onChange={(e) => handleItemChange(index, e)}
-                      required={item.allowsCoinExchange}
-                      min="1"
-                      placeholder=""
-                    />
-                    {/* <small>每個物品的單價</small> */}
-                  </div>
-                </div>
-              )}
-
-              {/* 物品交換輸入 (當啟用以物易物時顯示) */}
-              {item.allowsBarterExchange && (
-                <div className="exchange-fields">
-                  <div className="barter-item-entry">
+                {/* 家園幣價格輸入 (當啟用家園幣交易時顯示) */}
+                {item.allowsCoinExchange && (
+                  <div className="exchange-fields">
                     <div className="form-group">
-                      <label htmlFor={`exchange-item-${index}`}>交換物品名稱</label>
-                      <SearchableSelect
-                        groups={exchangeCategoryGroups}
-                        value={item.exchangeItemName}
-                        onChange={(value) => handleItemChange(index, {
-                          target: { name: 'exchangeItemName', value }
-                        })}
-                        placeholder="請選擇交換物品"
-                        id={`exchange-item-${index}`}
-                        name="exchangeItemName"
-                        required={item.allowsBarterExchange}
-                      />
-                    </div>
-
-                    {/* 當選擇「其他」作為交換物品時顯示自定義輸入框 */}
-                    {item.exchangeItemName === '其他' && (
-                      <div className="form-group">
-                        <label htmlFor={`customExchangeItem-${index}`}>自定義交換物品名稱</label>
-                        <input
-                          type="text"
-                          id={`customExchangeItem-${index}`}
-                          name="customExchangeItem"
-                          value={item.customExchangeItem || ''}
-                          onChange={(e) => handleItemChange(index, e)}
-                          placeholder="請輸入交換物品名稱"
-                          required={item.exchangeItemName === '其他'}
-                        />
-                      </div>
-                    )}
-
-                    {/* 交換數量輸入欄位的更新 */}
-                    <div className="form-group">
-                      <label htmlFor={`exchange-quantity-${index}`}>交換數量</label>
+                      <label htmlFor={`price-${index}`}>單價 (家園幣)</label>
                       <input
                         type="number"
-                        id={`exchange-quantity-${index}`}
-                        name="exchangeQuantity"
-                        value={item.exchangeQuantity}
+                        id={`price-${index}`}
+                        name="price"
+                        value={item.price}
                         onChange={(e) => handleItemChange(index, e)}
+                        required={item.allowsCoinExchange}
                         min="1"
-                        placeholder="請輸入交換數量"
-                        required={item.allowsBarterExchange}
+                        placeholder=""
                       />
+                      {/* <small>每個物品的單價</small> */}
                     </div>
                   </div>
-                </div>
-              )}
-            </div>
+                )}
 
-            <button
-              type="button"
-              className="remove-item-btn"
-              onClick={() => removeItemField(index)}
-              disabled={formData.items.length === 1}
-            >
-              移除
-            </button>
-          </div>
-        ))}
+                {/* 物品交換輸入 (當啟用以物易物時顯示) */}
+                {item.allowsBarterExchange && (
+                  <div className="exchange-fields">
+                    <div className="barter-item-entry">
+                      <div className="form-group">
+                        <label htmlFor={`exchange-item-${index}`}>交換物品名稱</label>
+                        <SearchableSelect
+                          groups={exchangeCategoryGroups}
+                          value={item.exchangeItemName}
+                          onChange={(value) => handleItemChange(index, {
+                            target: { name: 'exchangeItemName', value }
+                          })}
+                          placeholder="請選擇交換物品"
+                          id={`exchange-item-${index}`}
+                          name="exchangeItemName"
+                          required={item.allowsBarterExchange}
+                        />
+                      </div>
+
+                      {/* 當選擇「其他」作為交換物品時顯示自定義輸入框 */}
+                      {item.exchangeItemName === '其他' && (
+                        <div className="form-group">
+                          <label htmlFor={`customExchangeItem-${index}`}>自定義交換物品名稱</label>
+                          <input
+                            type="text"
+                            id={`customExchangeItem-${index}`}
+                            name="customExchangeItem"
+                            value={item.customExchangeItem || ''}
+                            onChange={(e) => handleItemChange(index, e)}
+                            placeholder="請輸入交換物品名稱"
+                            required={item.exchangeItemName === '其他'}
+                          />
+                        </div>
+                      )}
+
+                      {/* 交換數量輸入欄位的更新 */}
+                      <div className="form-group">
+                        <label htmlFor={`exchange-quantity-${index}`}>交換數量</label>
+                        <input
+                          type="number"
+                          id={`exchange-quantity-${index}`}
+                          name="exchangeQuantity"
+                          value={item.exchangeQuantity}
+                          onChange={(e) => handleItemChange(index, e)}
+                          min="1"
+                          placeholder="請輸入交換數量"
+                          required={item.allowsBarterExchange}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <button
+                type="button"
+                className="remove-item-btn"
+                onClick={() => removeItemField(index)}
+                disabled={formData.items.length === 1}
+              >
+                移除
+              </button>
+            </div>
+          ))}
+        </div>
+
+        {/* Add scroll indicator dots for mobile */}
+        <div className="scroll-indicator">
+          {formData.items.map((_, index) => (
+            <div
+              key={index}
+              className={`scroll-dot ${index === activeItemIndex ? 'active' : ''}`}
+              onClick={() => scrollToItem(index)}
+            ></div>
+          ))}
+        </div>
 
         <button
           type="button"
@@ -690,8 +762,8 @@ function MerchantInputForm() {
         >
           {submitting ? '提交中...' : '提交商人資訊'}
         </button>
-
       </form>
+
       {/* 成功通知 */}
       {showNotification && (
         <SuccessNotification
