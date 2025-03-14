@@ -764,6 +764,7 @@ body {
     /* Form Styling Improvements */
     .merchant-form-container, .special-merchant-form-container {
       background: none;
+      box-shadow: none;
       border: none;
       padding: 0;
       box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);

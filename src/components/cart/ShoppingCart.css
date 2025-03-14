@@ -424,7 +424,6 @@
     width: calc(100vw - 20px);
     max-width: 400px;
     height: calc(100vh - 5.5rem);
-    max-height: none;
   }
   
   .shopping-cart-container {
