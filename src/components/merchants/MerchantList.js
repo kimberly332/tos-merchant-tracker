@@ -72,7 +72,7 @@ function MerchantList() {
     fetchMerchants();
   }, []);
 
-  // Search, filter and sort
+  // Search, filter and sort - UPDATED to filter items within merchants
   useEffect(() => {
     // Ensure we have merchant data to process
     if (!merchants || merchants.length === 0) {
@@ -83,33 +83,55 @@ function MerchantList() {
     // Create a deep copy of merchant data
     let results = JSON.parse(JSON.stringify(merchants));
     
-    // Category filtering
-    if (!selectedCategories.includes('全部') && selectedCategories.length > 0) {
-      results = results.filter(merchant => 
-        merchant.items && merchant.items.some(item => {
-          return selectedCategories.some(selectedCategory => 
-            (item.itemName && item.itemName.includes(selectedCategory)) || 
-            (item.category && item.category.includes(selectedCategory))
+    // If search term exists, filter items within each merchant
+    if (searchTerm.trim()) {
+      const term = searchTerm.toLowerCase();
+      
+      // Create a new array with filtered merchant data
+      results = results.map(merchant => {
+        // If merchant has items, filter them based on search term
+        if (merchant.items && merchant.items.length > 0) {
+          const filteredItems = merchant.items.filter(item => 
+            (item.itemName && item.itemName.toLowerCase().includes(term)) ||
+            (item.category && item.category.toLowerCase().includes(term)) ||
+            (item.exchangeItemName && item.exchangeItemName.toLowerCase().includes(term))
           );
-        })
+          
+          // Return merchant with only matching items
+          return {
+            ...merchant,
+            items: filteredItems
+          };
+        }
+        
+        return merchant;
+      }).filter(merchant => 
+        // Keep only merchants with matching items or whose basic info matches
+        (merchant.items && merchant.items.length > 0) ||
+        (merchant.serverName && merchant.serverName.toLowerCase().includes(term)) ||
+        (merchant.playerId && merchant.playerId.toLowerCase().includes(term)) ||
+        (merchant.guildName && merchant.guildName.toLowerCase().includes(term))
       );
     }
     
-    // Keyword search
-    if (searchTerm.trim()) {
-      const term = searchTerm.toLowerCase();
-      results = results.filter(merchant =>
-        // Search merchant basic info
-        (merchant.serverName && merchant.serverName.toLowerCase().includes(term)) ||
-        (merchant.playerId && merchant.playerId.toLowerCase().includes(term)) ||
-        (merchant.guildName && merchant.guildName.toLowerCase().includes(term)) ||
-        // Search item related info
-        (merchant.items && merchant.items.some(item => 
-          (item.itemName && item.itemName.toLowerCase().includes(term)) ||
-          (item.category && item.category.toLowerCase().includes(term)) ||
-          (item.exchangeItemName && item.exchangeItemName.toLowerCase().includes(term))
-        ))
-      );
+    // Category filtering - only items that match the selected categories
+    if (!selectedCategories.includes('全部') && selectedCategories.length > 0) {
+      results = results.map(merchant => {
+        if (merchant.items && merchant.items.length > 0) {
+          const filteredItems = merchant.items.filter(item => {
+            return selectedCategories.some(selectedCategory => 
+              (item.itemName && item.itemName.includes(selectedCategory)) || 
+              (item.category && item.category.includes(selectedCategory))
+            );
+          });
+          
+          return {
+            ...merchant,
+            items: filteredItems
+          };
+        }
+        return merchant;
+      }).filter(merchant => merchant.items && merchant.items.length > 0);
     }
     
     // Merchant type filtering
@@ -202,54 +224,54 @@ function MerchantList() {
   };
 
   // Handle merchant deletion
-const handleDeleteMerchant = async (merchantId) => {
-  if (!window.confirm('確定要刪除這個商人資訊嗎？此操作無法撤銷。')) {
-    return;
-  }
-  
-  setDeleting(true);
-  try {
-    const result = await deleteMerchant(merchantId);
-    
-    if (result.success) {
-      // Update local merchant list
-      const updatedMerchants = merchants.filter(m => m.id !== merchantId);
-      setMerchants(updatedMerchants);
-      
-      // Clear cart if it contains items from this merchant
-      try {
-        const savedCart = localStorage.getItem('shoppingCart');
-        if (savedCart) {
-          const cartItems = JSON.parse(savedCart);
-          const updatedCart = cartItems.filter(item => 
-            !item.merchantId || item.merchantId !== merchantId
-          );
-          
-          localStorage.setItem('shoppingCart', JSON.stringify(updatedCart));
-          
-          // Notify shopping cart component
-          const cartUpdatedEvent = new CustomEvent('cartUpdated', {
-            detail: { cart: updatedCart }
-          });
-          window.dispatchEvent(cartUpdatedEvent);
-        }
-      } catch (error) {
-        console.error('Error updating cart after deletion:', error);
-      }
-      
-      // Show success notification
-      setNotificationMessage('商人資訊已成功刪除！');
-      setShowNotification(true);
-    } else {
-      setError('刪除商人資訊時發生錯誤，請稍後再試。');
+  const handleDeleteMerchant = async (merchantId) => {
+    if (!window.confirm('確定要刪除這個商人資訊嗎？此操作無法撤銷。')) {
+      return;
     }
-  } catch (err) {
-    console.error('Error deleting merchant:', err);
-    setError('刪除商人資訊時發生錯誤，請稍後再試。');
-  } finally {
-    setDeleting(false);
-  }
-};
+    
+    setDeleting(true);
+    try {
+      const result = await deleteMerchant(merchantId);
+      
+      if (result.success) {
+        // Update local merchant list
+        const updatedMerchants = merchants.filter(m => m.id !== merchantId);
+        setMerchants(updatedMerchants);
+        
+        // Clear cart if it contains items from this merchant
+        try {
+          const savedCart = localStorage.getItem('shoppingCart');
+          if (savedCart) {
+            const cartItems = JSON.parse(savedCart);
+            const updatedCart = cartItems.filter(item => 
+              !item.merchantId || item.merchantId !== merchantId
+            );
+            
+            localStorage.setItem('shoppingCart', JSON.stringify(updatedCart));
+            
+            // Notify shopping cart component
+            const cartUpdatedEvent = new CustomEvent('cartUpdated', {
+              detail: { cart: updatedCart }
+            });
+            window.dispatchEvent(cartUpdatedEvent);
+          }
+        } catch (error) {
+          console.error('Error updating cart after deletion:', error);
+        }
+        
+        // Show success notification
+        setNotificationMessage('商人資訊已成功刪除！');
+        setShowNotification(true);
+      } else {
+        setError('刪除商人資訊時發生錯誤，請稍後再試。');
+      }
+    } catch (err) {
+      console.error('Error deleting merchant:', err);
+      setError('刪除商人資訊時發生錯誤，請稍後再試。');
+    } finally {
+      setDeleting(false);
+    }
+  };
 
   // Count special and regular merchants
   const specialMerchantCount = filteredMerchants.filter(m => m.isSpecialMerchant).length;
@@ -328,7 +350,7 @@ const handleDeleteMerchant = async (merchantId) => {
         </div>
       ) : (
         <div className="merchants-grid">
-          {filteredMerchants.map((merchant, index) => {
+          {filteredMerchants.filter(merchant => merchant.items && merchant.items.length > 0).map((merchant, index) => {
             // Skip if expired
             if (!merchant.expiresAt || new Date() > new Date(merchant.expiresAt)) return null;
             
@@ -369,7 +391,7 @@ const handleDeleteMerchant = async (merchantId) => {
                     </ul>
                   </div>
                 ) : (
-                  <div className="no-items">此商人沒有物品信息</div>
+                  <div className="no-items">此商人沒有符合搜尋條件的物品</div>
                 )}
                 
                 <div className="merchant-footer">

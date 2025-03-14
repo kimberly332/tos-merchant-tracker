@@ -282,6 +282,7 @@ export const addSpecialMerchant = async (merchantData) => {
   }
 };
 
+
 // 搜索商品
 export const searchItems = async (searchTerm) => {
   try {
@@ -294,6 +295,7 @@ export const searchItems = async (searchTerm) => {
     // 在商人集合中搜索
     const results = [];
     const now = new Date();
+    const term = searchTerm.toLowerCase();
     
     // 只搜索未過期的商人
     const merchantQuery = query(
@@ -305,15 +307,17 @@ export const searchItems = async (searchTerm) => {
     
     merchantSnapshot.forEach(doc => {
       const data = doc.data();
+      
+      // 僅過濾出符合搜索條件的物品，不再返回所有物品
       const matchingItems = data.items ? data.items.filter(item => 
-        item.itemName && item.itemName.toLowerCase().includes(searchTerm.toLowerCase())
+        item.itemName && item.itemName.toLowerCase().includes(term)
       ) : [];
       
       if (matchingItems.length > 0) {
         const commonData = {
           id: doc.id,
           playerId: data.playerId || '未知玩家',
-          items: matchingItems,
+          items: matchingItems, // 僅包含符合條件的物品
           timestamp: data.timestamp?.toDate() || new Date(),
           discount: data.discount || null,
           expiresAt: data.expiresAt?.toDate() || getTaiwanEndOfDay()

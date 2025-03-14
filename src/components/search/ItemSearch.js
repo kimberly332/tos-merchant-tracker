@@ -38,6 +38,8 @@ function ItemSearch() {
     setSearchResults([]);
     
     try {
+      // This will fetch results where items match the search term
+      // The backend searchItems function already filters to only matching items
       const results = await searchItems(searchTerm);
       setSearchResults(results);
       setSearchPerformed(true);
@@ -54,22 +56,28 @@ function ItemSearch() {
   };
   
   // Filter results by categories if needed
-  const filteredResults = searchResults.filter(merchant => {
-    // If '全部' category is selected or no categories selected, don't filter by category
+  const filteredResults = searchResults.map(merchant => {
+    // If '全部' category is selected or no categories selected, don't filter items
     if (selectedCategories.includes('全部') || selectedCategories.length === 0) {
-      return true;
+      return merchant;
     }
     
-    // Check if any merchant items match the selected categories
-    return merchant.items.some(item => 
+    // Filter merchant's items to only include those matching selected categories
+    const filteredItems = merchant.items.filter(item => 
       selectedCategories.some(selectedCategory => 
-        item.category === selectedCategory || 
-        item.itemName === selectedCategory || 
+        (item.itemName && item.itemName.includes(selectedCategory)) || 
+        (item.category && item.category.includes(selectedCategory)) || 
         // Handle case when items don't have categories in older data
         (selectedCategory === '其他' && !item.category)
       )
     );
-  });
+    
+    // Return merchant with filtered items
+    return {
+      ...merchant,
+      items: filteredItems
+    };
+  }).filter(merchant => merchant.items.length > 0); // Only include merchants with items after filtering
 
   // Format timestamp to a readable date and time
   const formatTimestamp = (timestamp) => {
@@ -151,7 +159,7 @@ function ItemSearch() {
                     </div>
                     
                     <div className="items-list">
-                      <h4>販售物品:</h4>
+                      <h4>符合的物品:</h4>
                       <ul>
                         {merchant.items.map((item, itemIndex) => (
                           <MerchantItem 
