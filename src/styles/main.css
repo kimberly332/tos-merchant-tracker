@@ -400,6 +400,10 @@ body {
     font-size: 1.5rem;
   }
 
+  .category-filter {
+    display: none;
+  }
+
   .category-filter-header {
     flex-direction: column;
     align-items: flex-start;
@@ -551,6 +555,10 @@ body {
   .exchange-option input[type="radio"]:checked::before {
     transform: scale(1);
   }
+
+  .item-section-title {
+    margin-top: 0;
+  }
   
   /* Button Styling */
   .submit-btn, .add-item-btn, .remove-item-btn {
@@ -696,6 +704,7 @@ body {
     .filter-options {
       flex-direction: column;
       align-items: flex-start;
+      margin-bottom: 0;
     }
     
     .merchant-type-filter, .sort-options {
@@ -1073,8 +1082,8 @@ body {
   /* Import auth.css for user authentication styles */
   @import './components/auth.css';  
   @import './components/merchants.css';
+  /* @import './components/forms.css'; */
   @import './animations.css';
   @import './components/notifications.css';
   @import './components/guide.css'; 
-  @import './components/delete-confirmation.css';
-  
+  @import './components/delete-confirmation.css';  
