@@ -377,18 +377,22 @@ function CartDetailPage() {
                               <span className="item-quantity">×{item.quantity}</span>
                             </div>
                             
+                            <div className="item-details-row">
+                              <span className="purchase-times">可購買 {item.purchaseTimes || 1} 次 (總計 {item.quantity * (item.purchaseTimes || 1)} 個)</span>
+                            </div>
+                            
                             <div className="item-price-row">
                               {item.allowsCoinExchange && item.price > 0 && (
                                 <div className="price-tag">
                                   <span className="coin-icon">💰</span>
-                                  <span>{item.price} 枚</span>
+                                  <span>{item.price} 枚 (每次購買{item.quantity}個)</span>
                                 </div>
                               )}
                               
                               {item.allowsBarterExchange && item.exchangeItemName && (
                                 <div className="exchange-tag">
                                   <span className="exchange-icon">🔄</span>
-                                  <span>{item.exchangeItemName} × {(item.exchangeQuantity || 1)}</span>
+                                  <span>需要 {item.exchangeItemName} × {(item.exchangeQuantity || 1)} 個 (每次)</span>
                                 </div>
                               )}
                             </div>

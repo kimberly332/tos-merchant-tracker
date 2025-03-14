@@ -97,37 +97,37 @@ const ShoppingCart = () => {
   // Add to cart with strict duplication prevention
   const handleAddToCart = useCallback((event) => {
     const newItem = event.detail;
-
+  
     setCartItems(prevItems => {
-      // Prevent duplicate items or excessive quantity
+      // 检查物品是否已存在
       const existingItemIndex = prevItems.findIndex(item =>
         item.itemName === newItem.itemName &&
         item.playerId === newItem.playerId
       );
-
+  
       let updatedItems;
-
+  
       if (existingItemIndex >= 0) {
-        // If item exists, update only if quantity is less than purchase times
-        const currentItem = prevItems[existingItemIndex];
-        const maxPurchaseTimes = currentItem.purchaseTimes || 1;
+        // 如果物品已存在，可能需要更新它
+        // 但确保保留原始 purchaseTimes 值
+        const existingItem = prevItems[existingItemIndex];
         
-        if (currentItem.quantity < maxPurchaseTimes) {
-          updatedItems = [...prevItems];
-          updatedItems[existingItemIndex] = {
-            ...currentItem,
-            quantity: Math.min(currentItem.quantity + 1, maxPurchaseTimes)
-          };
-        } else {
-          // If at max purchase times, return existing items
-          return prevItems;
-        }
+        updatedItems = [...prevItems];
+        updatedItems[existingItemIndex] = {
+          ...existingItem,
+          // 确保不修改 purchaseTimes
+          purchaseTimes: newItem.purchaseTimes || existingItem.purchaseTimes
+        };
       } else {
-        // Add new item with quantity 1
-        updatedItems = [...prevItems, { ...newItem, quantity: 1 }];
+        // 添加新物品，确保保留 purchaseTimes
+        updatedItems = [...prevItems, {
+          ...newItem,
+          // 确保使用原始 purchaseTimes
+          purchaseTimes: newItem.purchaseTimes
+        }];
       }
       
-      // Update localStorage immediately
+      // 更新本地存储
       localStorage.setItem('shoppingCart', JSON.stringify(updatedItems));
       
       return updatedItems;

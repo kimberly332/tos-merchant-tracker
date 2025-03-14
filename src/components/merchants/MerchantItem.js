@@ -87,8 +87,9 @@ const handleToggleCart = () => {
         itemName: item.itemName || '未知物品',
         playerId: merchantInfo.playerId,
         merchantId: merchantInfo.id,
-        quantity: 1,
-        purchaseTimes: item.purchaseTimes || item.availableQuantity || 10,
+        quantity: item.quantity || 1,
+        // 直接使用原始值，不做任何调整
+        purchaseTimes: item.purchaseTimes,  // 修改这一行
         allowsCoinExchange: item.allowsCoinExchange,
         allowsBarterExchange: item.allowsBarterExchange,
         price: item.price,
@@ -113,9 +114,9 @@ const handleToggleCart = () => {
         {item.quantity > 1 && (
           <span className="item-quantity">x{item.quantity}</span>
         )}
-        {item.purchaseTimes !== undefined && (
-          <span className="item-available-quantity">可購: {item.purchaseTimes}</span>
-        )}
+        {(item.purchaseTimes !== undefined) && (
+  <span className="item-available-quantity">可購: {item.purchaseTimes}</span>
+)}
       </div>
       
       <div className="item-details">
