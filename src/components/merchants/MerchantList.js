@@ -30,6 +30,9 @@ function MerchantList() {
   // 刪除中狀態
   const [deleting, setDeleting] = useState(false);
 
+  // 新增：用於跟踪哪些商人被展開
+  const [expandedMerchants, setExpandedMerchants] = useState({});
+
   // 從所有商人數據中提取關鍵詞 (即使不使用，仍保留這個邏輯作為參考)
   const searchKeywords = useMemo(() => {
     if (!merchants || merchants.length === 0) return [];
@@ -108,7 +111,7 @@ function MerchantList() {
     fetchMerchants();
   }, []);
 
-  // Search, filter and sort - UPDATED to filter items within merchants
+  // Search, filter and sort - UPDATED to support expanding merchants
   useEffect(() => {
     // Ensure we have merchant data to process
     if (!merchants || merchants.length === 0) {
@@ -125,6 +128,9 @@ function MerchantList() {
       
       // Create a new array with filtered merchant data
       results = results.map(merchant => {
+        // Store all original items for expansion
+        const allItems = [...merchant.items];
+        
         // If merchant has items, filter them based on search term
         if (merchant.items && merchant.items.length > 0) {
           const filteredItems = merchant.items.filter(item => 
@@ -133,41 +139,67 @@ function MerchantList() {
             (item.exchangeItemName && item.exchangeItemName.toLowerCase().includes(term))
           );
           
-          // Return merchant with only matching items
+          // Add a property to track if this merchant's items were filtered
+          const wasFiltered = filteredItems.length < allItems.length && filteredItems.length > 0;
+          
+          // Check if this merchant is expanded
+          const isExpanded = expandedMerchants[merchant.id];
+          
+          // Return merchant with matching items or all items if expanded
           return {
             ...merchant,
-            items: filteredItems
+            items: isExpanded ? allItems : filteredItems,
+            allItems: allItems, // Store all items for later expansion
+            filteredItems: filteredItems, // Store filtered items for display info
+            wasFiltered: wasFiltered // Flag to show expansion toggle
           };
         }
         
         return merchant;
       }).filter(merchant => 
         // Keep only merchants with matching items or whose basic info matches
-        (merchant.items && merchant.items.length > 0) ||
+        (merchant.filteredItems && merchant.filteredItems.length > 0) ||
         (merchant.serverName && merchant.serverName.toLowerCase().includes(term)) ||
         (merchant.playerId && merchant.playerId.toLowerCase().includes(term)) ||
         (merchant.guildName && merchant.guildName.toLowerCase().includes(term))
       );
+    } else {
+      // No search term, just prepare merchants with expansion properties
+      results = results.map(merchant => ({
+        ...merchant,
+        allItems: merchant.items,
+        filteredItems: merchant.items,
+        wasFiltered: false
+      }));
     }
     
     // Category filtering - only items that match the selected categories
     if (!selectedCategories.includes('全部') && selectedCategories.length > 0) {
       results = results.map(merchant => {
-        if (merchant.items && merchant.items.length > 0) {
-          const filteredItems = merchant.items.filter(item => {
+        // Already have allItems from search
+        const allItems = merchant.allItems || merchant.items;
+        
+        if (allItems && allItems.length > 0) {
+          const filteredItems = allItems.filter(item => {
             return selectedCategories.some(selectedCategory => 
               (item.itemName && item.itemName.includes(selectedCategory)) || 
               (item.category && item.category.includes(selectedCategory))
             );
           });
           
+          const wasFiltered = filteredItems.length < allItems.length && filteredItems.length > 0;
+          const isExpanded = expandedMerchants[merchant.id];
+          
           return {
             ...merchant,
-            items: filteredItems
+            items: isExpanded ? allItems : filteredItems,
+            allItems: allItems,
+            filteredItems: filteredItems,
+            wasFiltered: wasFiltered
           };
         }
         return merchant;
-      }).filter(merchant => merchant.items && merchant.items.length > 0);
+      }).filter(merchant => merchant.filteredItems && merchant.filteredItems.length > 0);
     }
     
     // Merchant type filtering
@@ -197,8 +229,8 @@ function MerchantList() {
         results.sort((a, b) => {
           if (a.isSpecialMerchant && !b.isSpecialMerchant) return -1;
           if (!a.isSpecialMerchant && b.isSpecialMerchant) return 1;
-          const aPrice = Math.min(...a.items.filter(i => i.price && i.price > 0).map(i => i.price) || [0]);
-          const bPrice = Math.min(...b.items.filter(i => i.price && i.price > 0).map(i => i.price) || [0]);
+          const aPrice = Math.min(...(a.filteredItems || []).filter(i => i.price && i.price > 0).map(i => i.price) || [0]);
+          const bPrice = Math.min(...(b.filteredItems || []).filter(i => i.price && i.price > 0).map(i => i.price) || [0]);
           return aPrice - bPrice;
         });
         break;
@@ -206,8 +238,8 @@ function MerchantList() {
         results.sort((a, b) => {
           if (a.isSpecialMerchant && !b.isSpecialMerchant) return -1;
           if (!a.isSpecialMerchant && b.isSpecialMerchant) return 1;
-          const aPrice = Math.max(...a.items.filter(i => i.price && i.price > 0).map(i => i.price) || [0]);
-          const bPrice = Math.max(...b.items.filter(i => i.price && i.price > 0).map(i => i.price) || [0]);
+          const aPrice = Math.max(...(a.filteredItems || []).filter(i => i.price && i.price > 0).map(i => i.price) || [0]);
+          const bPrice = Math.max(...(b.filteredItems || []).filter(i => i.price && i.price > 0).map(i => i.price) || [0]);
           return bPrice - aPrice;
         });
         break;
@@ -230,19 +262,31 @@ function MerchantList() {
     }
     
     setFilteredMerchants(results);
-  }, [merchants, searchTerm, selectedCategories, showRegularMerchants, showSpecialMerchants, sortOption]);
+  }, [merchants, searchTerm, selectedCategories, showRegularMerchants, showSpecialMerchants, sortOption, expandedMerchants]);
 
   // 處理搜尋動作
   const handleSearch = (term) => {
     setSearchTerm(term);
+    // Reset expanded merchants when performing a new search
+    setExpandedMerchants({});
   };
 
   const handleCategorySelect = (categories) => {
     setSelectedCategories(categories);
+    // Reset expanded merchants when changing category filters
+    setExpandedMerchants({});
   };
   
   const handleSortChange = (e) => {
     setSortOption(e.target.value);
+  };
+
+  // 新增：處理展開/收起商人物品的切換
+  const toggleMerchantExpansion = (merchantId) => {
+    setExpandedMerchants(prev => ({
+      ...prev,
+      [merchantId]: !prev[merchantId]
+    }));
   };
 
   // Format timestamp to a readable date and time
@@ -394,6 +438,15 @@ function MerchantList() {
             const currentPlayerId = localStorage.getItem('submitterPlayerId');
             const isOwnMerchant = currentPlayerId === merchant.playerId;
             
+            // Check if this merchant is expanded
+            const isExpanded = expandedMerchants[merchant.id];
+            
+            // Determine if there are more items to show
+            const hasMoreItems = merchant.wasFiltered && 
+                               merchant.allItems && 
+                               merchant.filteredItems && 
+                               merchant.allItems.length > merchant.filteredItems.length;
+            
             return (
               <div key={index} className={`merchant-card ${merchant.isSpecialMerchant ? 'special-merchant-card' : ''}`}>
                 <div className="merchant-header">
@@ -416,7 +469,7 @@ function MerchantList() {
                 
                 {merchant.items && merchant.items.length > 0 ? (
                   <div className="items-section">
-                    <ul className="items-list">
+                    <ul className={`items-list ${merchant.wasFiltered && isExpanded ? 'items-expanding' : ''}`}>
                       {merchant.items.map((item, itemIndex) => (
                         <MerchantItem 
                           key={itemIndex} 
@@ -425,6 +478,17 @@ function MerchantList() {
                         />
                       ))}
                     </ul>
+                    
+                    {/* Show expand/collapse button at the bottom if there are more items */}
+                    {hasMoreItems && (
+                      <button 
+                        className="expand-collapse-btn"
+                        onClick={() => toggleMerchantExpansion(merchant.id)}
+                      >
+                        {isExpanded ? '收起顯示' : '顯示所有商品'}
+                        <i className={`fas ${isExpanded ? 'fa-chevron-up' : 'fa-chevron-down'}`}></i>
+                      </button>
+                    )}
                   </div>
                 ) : (
                   <div className="no-items">此商人沒有符合搜尋條件的物品</div>
