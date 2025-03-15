@@ -142,8 +142,8 @@
 
 /* Icon container within option */
 .option-icon-container {
-  width: 20px;
-  height: 20px;
+  width: 24px;
+  height: 24px;
   margin-right: 8px;
   display: flex;
   align-items: center;
@@ -153,15 +153,15 @@
 
 /* The actual icon image */
 .option-icon {
-  max-width: 20px;
-  max-height: 20px;
+  max-width: 24px;
+  max-height: 24px;
   object-fit: contain;
 }
 
 /* Empty placeholder for when no icon is available */
 .option-icon-placeholder {
-  width: 20px;
-  height: 20px;
+  width: 24px;
+  height: 24px;
 }
 
 .option-text {

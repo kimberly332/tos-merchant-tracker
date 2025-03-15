@@ -406,8 +406,6 @@ function MerchantList() {
               <option value="specialMerchantFirst">五商優先</option>
               <option value="newest">最新發布</option>
               <option value="oldest">最早發布</option>
-              <option value="priceAsc">價格低到高</option>
-              <option value="priceDesc">價格高到低</option>
             </select>
           </div>
         </div>
