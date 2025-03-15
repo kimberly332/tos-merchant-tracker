@@ -9,7 +9,9 @@ const SearchableSelect = ({
   placeholder = '請選擇...',
   id,
   name,
-  required = false
+  required = false,
+  showIcons = false, // New prop to toggle icon display
+  iconPath = '/icons/' // Default path to icons
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
@@ -113,6 +115,42 @@ const SearchableSelect = ({
     }
   };
 
+  // Get the icon path for an option
+  const getIconPath = (option) => {
+    // Check if the option is a valid item that should have an icon
+    const itemCategories = [
+      // Categories
+      '原料', '加工品', '礦產', '礦產與素材', '果品', '果品與海產', '海產',
+      
+      // 原料
+      '小麥', '玉米', '胡蘿蔔', '番茄', '甘蔗', '草莓', '雞蛋', '牛奶', '蜂蜜',
+      
+      // 加工品 - complete list from your reference
+      '小麵包', '玉米麵包', '曲奇餅', '鮮奶油', '奶油', '起司',
+      '胡蘿蔔汁', '蕃茄汁', '番茄汁', '草莓鮮奶汁', '混合果汁',
+      '番茄醬', '披薩醬', '草莓醬', '魚露',
+      '砂糖', '方糖', '糖漿',
+      '玉米霜淇淋', '奶油霜淇淋', '草莓霜淇淋', '鮮奶油霜淇淋',
+      '鮮奶油蛋糕', '胡蘿蔔蛋糕', '起司蛋糕', '蜂蜜蛋糕', '草莓蛋糕',
+      '田園披薩', '起司披薩', '水果披薩', '海鮮披薩',
+      
+      // 礦產
+      '燃火黏土', '幽藍黏土', '耐火黏土', '赤晶石', '赤鐵礦', '蒼天石', '夜鐵礦',
+      '赤紅樹脂', '黏性樹脂',
+      
+      // 果品與海產
+      '黃金汁液', '緋紅汁液', '濃綢汁液', '百里香', '阿奇米果', '高嶺樹果', '飛雲菇',
+      '智慧香精', '暗紫香精', '海結晶', '胸棘鯛魚', '利齒蛤蜊', '魔龍鱒', '丁香龍蝦'
+    ];
+    
+    // Only return an icon path if this option should have an icon
+    if (itemCategories.includes(option)) {
+      return `${iconPath}${option}.png`;
+    }
+    
+    return null;
+  };
+
   // Render grouped options
   const renderGroupedOptions = () => {
     if (!groups || !Array.isArray(groups)) return null;
@@ -134,7 +172,23 @@ const SearchableSelect = ({
               className={`option ${value === item ? 'selected' : ''}`}
               onClick={() => handleOptionSelect(item)}
             >
-              {item}
+              {showIcons && (
+                <div className="option-icon-container">
+                  {getIconPath(item) ? (
+                    <img 
+                      src={getIconPath(item)} 
+                      alt="" 
+                      className="option-icon"
+                      onError={(e) => {
+                        e.target.style.display = 'none'; // Hide broken images
+                      }}
+                    />
+                  ) : (
+                    <div className="option-icon-placeholder"></div>
+                  )}
+                </div>
+              )}
+              <span className="option-text">{item}</span>
             </div>
           ))}
         </div>
@@ -154,7 +208,23 @@ const SearchableSelect = ({
         className={`option ${value === option ? 'selected' : ''}`}
         onClick={() => handleOptionSelect(option)}
       >
-        {option}
+        {showIcons && (
+          <div className="option-icon-container">
+            {getIconPath(option) ? (
+              <img 
+                src={getIconPath(option)} 
+                alt="" 
+                className="option-icon"
+                onError={(e) => {
+                  e.target.style.display = 'none';
+                }}
+              />
+            ) : (
+              <div className="option-icon-placeholder"></div>
+            )}
+          </div>
+        )}
+        <span className="option-text">{option}</span>
       </div>
     ));
   };
@@ -162,9 +232,19 @@ const SearchableSelect = ({
   return (
     <div className="searchable-select-container" ref={dropdownRef}>
       <div 
-        className={`select-display ${isOpen ? 'open' : ''}`}
+        className={`select-display ${isOpen ? 'open' : ''} ${showIcons ? 'with-icon' : ''}`}
         onClick={toggleDropdown}
       >
+        {showIcons && value && getIconPath(value) && (
+          <img 
+            src={getIconPath(value)} 
+            alt="" 
+            className="selected-icon"
+            onError={(e) => {
+              e.target.style.display = 'none';
+            }}
+          />
+        )}
         <span className={value ? 'has-value' : 'placeholder'}>
           {value || placeholder}
         </span>

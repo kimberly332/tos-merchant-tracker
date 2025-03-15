@@ -374,6 +374,7 @@ function MerchantInputForm() {
       items: updatedItems
     }));
   };
+  
   const scrollToItem = (index) => {
     const container = document.querySelector('.items-container');
     const item = container.querySelectorAll('.item-entry-container')[index];
@@ -523,6 +524,8 @@ function MerchantInputForm() {
                       id={`category-${index}`}
                       name="category"
                       required={true}
+                      showIcons={true} // 啟用圖標顯示
+                      iconPath="/icons/" // 指定圖標路徑
                     />
                   </div>
 
@@ -638,6 +641,8 @@ function MerchantInputForm() {
                           id={`exchange-item-${index}`}
                           name="exchangeItemName"
                           required={item.allowsBarterExchange}
+                          showIcons={true} // 啟用圖標顯示
+                          iconPath="/icons/" // 指定圖標路徑
                         />
                       </div>
 
