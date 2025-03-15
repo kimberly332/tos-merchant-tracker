@@ -26,7 +26,7 @@ const getTaiwanDateString = () => {
 export const loginUser = async (serverId, playerId) => {
   try {
     if (!serverId || !playerId.trim()) {
-      return { success: false, message: '伺服器和遊戲ID都必須填寫' };
+      return { success: false, message: '伺服器和遊戲名稱都必須填寫' };
     }
     
     // 檢查使用者是否已存在

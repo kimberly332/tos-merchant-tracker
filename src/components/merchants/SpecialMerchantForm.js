@@ -65,7 +65,7 @@ function SpecialMerchantForm() {
       
       <form onSubmit={handleSubmit} className="special-merchant-form">
         <div className="form-group">
-          <label htmlFor="playerId">您的遊戲ID</label>
+          <label htmlFor="playerId">您的遊戲名稱</label>
           <input
             type="text"
             id="playerId"

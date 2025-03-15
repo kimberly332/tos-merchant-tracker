@@ -80,7 +80,7 @@ function UserProfile() {
             </div>
             <div className="dropdown-item">
               <i className="fas fa-user"></i>
-              <span>遊戲ID: {user.playerId}</span>
+              <span>遊戲名稱: {user.playerId}</span>
             </div>
           </div>
           <div className="dropdown-actions">

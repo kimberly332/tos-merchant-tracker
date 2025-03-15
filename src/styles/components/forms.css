@@ -1,293 +1,152 @@
-/* Enhanced Form Styling */
+/* Form Styling Improvements */
+.merchant-form-container, .special-merchant-form-container {
+  background-color: rgba(20, 59, 74, 0.8);
+  border-radius: 8px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(138, 186, 179, 0.2);
+}
 
-/* Form container */
-.merchant-form-container {
-    background-color: rgba(20, 59, 74, 0.85);
-    border-radius: 10px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-    padding: 2rem;
-    margin-bottom: 2rem;
-    border: 1px solid rgba(138, 186, 179, 0.25);
-  }
-  
-  .merchant-form-container h2 {
-    font-size: 1.5rem;
-    color: #8ABAB3;
-    margin-bottom: 1.5rem;
-    text-align: center;
-    border-bottom: 1px solid rgba(138, 186, 179, 0.3);
-    padding-bottom: 0.75rem;
-  }
-  
-  .form-group {
-    margin-bottom: 1.25rem;
-  }
-  
-  .form-group label {
-    display: block;
-    margin-bottom: 0.5rem;
-    font-weight: 500;
-    color: #8ABAB3;
-    font-size: 0.95rem;
-  }
-  
-  .form-group small {
-    display: block;
-    margin-top: 0.25rem;
-    font-size: 0.8rem;
-    color: rgba(214, 216, 217, 0.7);
-  }
-  
-  .form-group input,
-  .form-group select,
-  .form-group textarea {
-    width: 100%;
-    padding: 0.75rem;
-    background-color: rgba(255, 255, 255, 0.07);
-    border: 1px solid rgba(138, 186, 179, 0.3);
-    border-radius: 6px;
-    color: #D6D8D9;
-    font-size: 0.95rem;
-    transition: all 0.2s ease;
-  }
-  
-  .form-group input:focus,
-  .form-group select:focus,
-  .form-group textarea:focus {
-    outline: none;
-    border-color: #8ABAB3;
-    box-shadow: 0 0 0 2px rgba(138, 186, 179, 0.2);
-  }
-  
-  .form-group input:disabled,
-  .form-group select:disabled,
-  .form-group textarea:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-    background-color: rgba(0, 0, 0, 0.1);
-  }
-  
-  /* Item entry styling */
-  .item-entry-container {
-    background-color: rgba(16, 24, 35, 0.6);
-    border-radius: 8px;
-    padding: 1.5rem;
-    margin-bottom: 1.25rem;
-    position: relative;
-    border: 1px solid rgba(138, 186, 179, 0.15);
-  }
-  
-  .item-section-title {
-    font-size: 0.9rem;
-    color: #8ABAB3;
-    margin-bottom: 1rem;
-    font-weight: 500;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-  }
-  
-  /* Exchange options */
-  .exchange-options {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 1rem;
-    margin: 1rem 0;
-  }
-  
-  .exchange-option {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    cursor: pointer;
-  }
-  
-  .exchange-option input[type="radio"] {
-    appearance: none;
-    width: 18px;
-    height: 18px;
-    border: 1px solid rgba(138, 186, 179, 0.5);
-    border-radius: 50%;
-    background-color: rgba(255, 255, 255, 0.07);
-    display: grid;
-    place-content: center;
-    cursor: pointer;
-  }
-  
-  .exchange-option input[type="radio"]::before {
-    content: "";
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
-    background-color: #8ABAB3;
-    transform: scale(0);
-    transition: transform 0.15s ease;
-  }
-  
-  .exchange-option input[type="radio"]:checked::before {
-    transform: scale(1);
-  }
-  
-  .exchange-option input[type="radio"]:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-  }
-  
-  .required-tag {
-    display: inline-block;
-    background-color: #FFA500;
-    color: white;
-    font-size: 0.65rem;
-    padding: 0.15rem 0.35rem;
-    border-radius: 3px;
-    margin-left: 0.5rem;
-    font-weight: bold;
-    text-transform: uppercase;
-  }
-  
-  /* Exchange fields */
-  .exchange-fields {
-    background-color: rgba(72, 114, 123, 0.1);
-    border-radius: 6px;
-    padding: 0.75rem;
-    margin-top: 0.75rem;
-    border: 1px solid rgba(138, 186, 179, 0.1);
-  }
-  
-  /* Remove and add item buttons */
-  .remove-item-btn {
-    position: absolute;
-    top: 0.75rem;
-    right: 0.75rem;
-    background-color: rgba(244, 67, 54, 0.15);
-    color: #ff8a80;
-    font-size: 0.8rem;
-    padding: 0.25rem 0.5rem;
-    border-radius: 4px;
-    border: none;
-    cursor: pointer;
-    transition: all 0.15s ease;
-  }
-  
-  .remove-item-btn:hover {
-    background-color: rgba(244, 67, 54, 0.25);
-  }
-  
-  .remove-item-btn:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-  }
-  
-  .add-item-btn {
-    background-color: rgba(72, 114, 123, 0.2);
-    color: #8ABAB3;
-    padding: 0.75rem;
-    width: 100%;
-    margin: 1rem 0 1.5rem;
-    border: 1px dashed rgba(138, 186, 179, 0.4);
-    border-radius: 6px;
-    cursor: pointer;
-    font-weight: 500;
-    transition: all 0.15s ease;
-  }
-  
-  .add-item-btn:hover {
-    background-color: rgba(72, 114, 123, 0.3);
-    border-color: rgba(138, 186, 179, 0.6);
-  }
-  
-  /* Submit button */
-  .submit-btn {
-    background-color: #48727B;
-    color: white;
-    padding: 0.85rem 1.5rem;
-    border-radius: 6px;
-    border: none;
-    width: 100%;
-    font-size: 1rem;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    position: relative;
-    overflow: hidden;
-    margin-top: 1rem;
-  }
-  
-  .submit-btn:hover {
-    background-color: #5a8691;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  }
-  
-  .submit-btn:disabled {
-    background-color: rgba(72, 114, 123, 0.5);
-    cursor: not-allowed;
-    transform: none;
-    box-shadow: none;
-  }
-  
-  /* Error and success messages */
-  .error-message {
-    color: #ff8a80;
-    font-size: 0.85rem;
-    margin-top: 0.5rem;
-    display: flex;
-    align-items: center;
-    gap: 0.25rem;
-  }
-  
-  .error-message::before {
-    content: "⚠️";
-    font-size: 0.85rem;
-  }
-  
-  .submit-result {
-    padding: 1rem;
-    border-radius: 6px;
-    margin-bottom: 1.5rem;
-    text-align: center;
-    font-weight: 500;
-  }
-  
-  .submit-result.success {
-    background-color: rgba(76, 175, 80, 0.1);
-    border: 1px solid rgba(76, 175, 80, 0.3);
-    color: #81c784;
-  }
-  
-  .submit-result.error {
-    background-color: rgba(244, 67, 54, 0.1);
-    border: 1px solid rgba(244, 67, 54, 0.3);
-    color: #ff8a80;
-  }
-  
-  /* Responsive adjustments */
-  @media (min-width: 768px) {
-    .item-entry {
-      display: flex;
-      gap: 1rem;
-      flex-wrap: wrap;
-    }
-    
-    .form-group {
-      flex: 1;
-      min-width: 200px;
-    }
-    
-    .exchange-fields {
-      display: flex;
-      gap: 1rem;
-      flex-wrap: wrap;
-    }
-    
-    .exchange-fields .form-group {
-      flex: 1;
-      min-width: 150px;
-    }
-    
-    .barter-item-entry {
-      display: flex;
-      gap: 1rem;
-      flex-wrap: wrap;
-      width: 100%;
-    }
-  }
+.item-entry-container {
+  background-color: rgba(16, 24, 35, 0.5);
+  border-radius: 6px;
+  padding: 1.25rem;
+  margin-bottom: 1rem;
+  border: 1px solid rgba(138, 186, 179, 0.15);
+  position: relative;
+}
+
+.form-group label {
+  color: #8ABAB3;
+  font-weight: 500;
+  margin-bottom: 0.35rem;
+  display: block;
+}
+
+.form-group input, .form-group select, .form-group textarea {
+  width: 100%;
+  padding: 0.6rem;
+  background-color: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(138, 186, 179, 0.3);
+  border-radius: 4px;
+  color: #D6D8D9;
+  font-size: 0.95rem;
+  margin-bottom: 1em;
+}
+
+.form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+  outline: none;
+  border-color: #8ABAB3;
+  box-shadow: 0 0 0 2px rgba(138, 186, 179, 0.2);
+}
+
+.exchange-options {
+  display: flex;
+  gap: 1rem;
+  margin: 1rem 0;
+}
+
+.exchange-option {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+}
+
+.exchange-option input[type="radio"] {
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  border: 1px solid rgba(138, 186, 179, 0.5);
+  border-radius: 50%;
+  background-color: rgba(255, 255, 255, 0.07);
+  display: grid;
+  place-content: center;
+  cursor: pointer;
+}
+
+.exchange-option input[type="radio"]::before {
+  content: "";
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background-color: #8ABAB3;
+  transform: scale(0);
+  transition: transform 0.15s ease;
+}
+
+.exchange-option input[type="radio"]:checked::before {
+  transform: scale(1);
+}
+
+.item-section-title {
+  margin-top: 0;
+}
+
+/* Button Styling */
+.submit-btn, .add-item-btn, .remove-item-btn {
+  cursor: pointer;
+  transition: all 0.15s ease;
+  border: none;
+  border-radius: 4px;
+  font-weight: 500;
+}
+
+.submit-btn {
+  background-color: #48727B;
+  color: white;
+  padding: 0.75rem 1rem;
+  width: 100%;
+  font-size: 1rem;
+  margin-top: 1rem;
+}
+
+.submit-btn:hover {
+  background-color: #5a8691;
+  transform: translateY(-2px);
+}
+
+.submit-btn:disabled {
+  background-color: rgba(72, 114, 123, 0.5);
+  cursor: not-allowed;
+  transform: none;
+}
+
+.add-item-btn {
+  background-color: rgba(72, 114, 123, 0.2);
+  color: #8ABAB3;
+  padding: 0.5rem;
+  width: 100%;
+  margin-bottom: 1rem;
+  border: 1px dashed rgba(138, 186, 179, 0.4);
+}
+
+.add-item-btn:hover {
+  background-color: rgba(72, 114, 123, 0.3);
+}
+
+.remove-item-btn {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  background-color: rgba(244, 67, 54, 0.1);
+  color: #ff8a80;
+  font-size: 0.8rem;
+  padding: 0.2rem 0.5rem;
+}
+
+.remove-item-btn:hover {
+  background-color: rgba(244, 67, 54, 0.2);
+}
+
+.required-tag {
+  display: inline-block;
+  background-color: #FFA500;
+  color: white;
+  font-size: 0.65rem;
+  padding: 0.15rem 0.35rem;
+  border-radius: 3px;
+  margin-left: 0.5rem;
+  font-weight: bold;
+  text-transform: uppercase;
+}

@@ -67,7 +67,7 @@ const UserGuide = () => {
                     <p>從下拉選單中選擇您遊玩的伺服器，每個伺服器的商人資訊是獨立的。</p>
                   </li>
                   <li>
-                    <strong>輸入遊戲ID</strong>
+                    <strong>輸入遊戲名稱</strong>
                     <p>請輸入您在遊戲中的角色ID，這將用於標識您提交的商人資訊。</p>
                   </li>
                   <li>
@@ -126,7 +126,7 @@ const UserGuide = () => {
                   </li>
                   <li>
                     <strong>填寫商人資訊</strong>
-                    <p>您的遊戲ID會自動填入，可以選擇性填寫商人提供的折扣信息。</p>
+                    <p>您的遊戲名稱會自動填入，可以選擇性填寫商人提供的折扣信息。</p>
                   </li>
                   <li>
                     <strong>添加物品</strong>
@@ -200,7 +200,7 @@ const UserGuide = () => {
                 <ol className="guide-list numbered">
                   <li>
                     <strong>找到您的商人資訊</strong>
-                    <p>在商人列表中找到您提交的商人（必須使用您提交時的相同遊戲ID登入）。</p>
+                    <p>在商人列表中找到您提交的商人（必須使用您提交時的相同遊戲名稱登入）。</p>
                   </li>
                   <li>
                     <strong>點擊刪除按鈕</strong>

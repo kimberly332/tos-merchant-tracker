@@ -109,7 +109,7 @@ function LoginPage() {
     <div className="page login-page">
       <h1 className="login-title">登入</h1>
       <p className="description">
-        選擇您的伺服器並輸入遊戲ID進入本系統。
+        選擇您的伺服器並輸入遊戲名稱進入本系統。
       </p>
       
       {error && <div className="error-message">{error}</div>}
@@ -136,14 +136,14 @@ function LoginPage() {
           </div>
           
           <div className="form-group">
-            <label htmlFor="playerId">遊戲ID</label>
+            <label htmlFor="playerId">遊戲名稱</label>
             <input
               type="text"
               id="playerId"
               name="playerId"
               value={formData.playerId}
               onChange={handleChange}
-              placeholder="輸入您的遊戲ID"
+              placeholder="輸入您的遊戲名稱"
               required
             />
           </div>

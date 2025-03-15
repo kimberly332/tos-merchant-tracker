@@ -161,6 +161,7 @@ function MerchantInputForm() {
     {
       name: '其他物品',
       items: [
+        '家園幣',
         '其他'
       ]
     }
@@ -473,7 +474,7 @@ function MerchantInputForm() {
 
       <form onSubmit={handleSubmit} className="merchant-form">
         <div className="form-group">
-          <label htmlFor="playerId">您的遊戲ID</label>
+          <label htmlFor="playerId">您的遊戲名稱</label>
           <input
             type="text"
             id="playerId"
@@ -483,7 +484,7 @@ function MerchantInputForm() {
             required
             disabled
           />
-          {/* <small>遊戲ID已從登入資訊自動填入</small> */}
+          {/* <small>遊戲名稱已從登入資訊自動填入</small> */}
         </div>
 
         <div className="form-group">
