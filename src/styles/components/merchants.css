@@ -346,7 +346,7 @@
 .merchant-card .items-list {
   animation: itemChangeFade 0.3s ease-out;
   transform-origin: top center;
-  overflow: hidden;
+  /* overflow: hidden; */
 }
 
 /* Additional class for items that are being expanded */
