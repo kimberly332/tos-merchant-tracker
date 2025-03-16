@@ -19,18 +19,14 @@ function MerchantList() {
   const [copyMessage, setCopyMessage] = useState(null);
   const [showNotification, setShowNotification] = useState(false);
   const [notificationMessage, setNotificationMessage] = useState('');
-  const handleEditMerchant = (merchantId) => {
-    navigate(`/edit-merchant/${merchantId}`);
-  };
-
-
+  
   // 排序選項 - 默認為五商優先
   const [sortOption, setSortOption] = useState('specialMerchantFirst');
 
   // 篩選選項
   const [showRegularMerchants, setShowRegularMerchants] = useState(true);
   const [showSpecialMerchants, setShowSpecialMerchants] = useState(true);
-
+  
   // 刪除中狀態
   const [deleting, setDeleting] = useState(false);
 
@@ -40,24 +36,24 @@ function MerchantList() {
   // 從所有商人數據中提取關鍵詞 (即使不使用，仍保留這個邏輯作為參考)
   const searchKeywords = useMemo(() => {
     if (!merchants || merchants.length === 0) return [];
-
+    
     const keywordsSet = new Set();
-
+    
     merchants.forEach(merchant => {
       // 添加玩家ID作為關鍵詞
       if (merchant.playerId) keywordsSet.add(merchant.playerId);
-
+      
       // 處理商人的物品
       if (merchant.items && Array.isArray(merchant.items)) {
         merchant.items.forEach(item => {
           // 添加物品名稱
           if (item.itemName) keywordsSet.add(item.itemName);
-
+          
           // 添加物品類別，如果不是「其他」
           if (item.category && item.category !== "其他") {
             keywordsSet.add(item.category);
           }
-
+          
           // 添加交換物品名稱，如果不是「其他」
           if (item.exchangeItemName && item.exchangeItemName !== "其他") {
             keywordsSet.add(item.exchangeItemName);
@@ -65,7 +61,7 @@ function MerchantList() {
         });
       }
     });
-
+    
     // 轉換為數組並排序
     return Array.from(keywordsSet).sort();
   }, [merchants]);
@@ -83,7 +79,7 @@ function MerchantList() {
         setTimeout(() => setCopyMessage(null), 3000);
       });
   };
-
+  
   // Fetch all merchants
   useEffect(() => {
     const fetchMerchants = async () => {
@@ -122,33 +118,33 @@ function MerchantList() {
       setFilteredMerchants([]);
       return;
     }
-
+    
     // Create a deep copy of merchant data
     let results = JSON.parse(JSON.stringify(merchants));
-
+    
     // If search term exists, filter items within each merchant
     if (searchTerm.trim()) {
       const term = searchTerm.toLowerCase();
-
+      
       // Create a new array with filtered merchant data
       results = results.map(merchant => {
         // Store all original items for expansion
         const allItems = [...merchant.items];
-
+        
         // If merchant has items, filter them based on search term
         if (merchant.items && merchant.items.length > 0) {
-          const filteredItems = merchant.items.filter(item =>
+          const filteredItems = merchant.items.filter(item => 
             (item.itemName && item.itemName.toLowerCase().includes(term)) ||
             (item.category && item.category.toLowerCase().includes(term)) ||
             (item.exchangeItemName && item.exchangeItemName.toLowerCase().includes(term))
           );
-
+          
           // Add a property to track if this merchant's items were filtered
           const wasFiltered = filteredItems.length < allItems.length && filteredItems.length > 0;
-
+          
           // Check if this merchant is expanded
           const isExpanded = expandedMerchants[merchant.id];
-
+          
           // Return merchant with matching items or all items if expanded
           return {
             ...merchant,
@@ -158,9 +154,9 @@ function MerchantList() {
             wasFiltered: wasFiltered // Flag to show expansion toggle
           };
         }
-
+        
         return merchant;
-      }).filter(merchant =>
+      }).filter(merchant => 
         // Keep only merchants with matching items or whose basic info matches
         (merchant.filteredItems && merchant.filteredItems.length > 0) ||
         (merchant.serverName && merchant.serverName.toLowerCase().includes(term)) ||
@@ -176,24 +172,24 @@ function MerchantList() {
         wasFiltered: false
       }));
     }
-
+    
     // Category filtering - only items that match the selected categories
     if (!selectedCategories.includes('全部') && selectedCategories.length > 0) {
       results = results.map(merchant => {
         // Already have allItems from search
         const allItems = merchant.allItems || merchant.items;
-
+        
         if (allItems && allItems.length > 0) {
           const filteredItems = allItems.filter(item => {
-            return selectedCategories.some(selectedCategory =>
-              (item.itemName && item.itemName.includes(selectedCategory)) ||
+            return selectedCategories.some(selectedCategory => 
+              (item.itemName && item.itemName.includes(selectedCategory)) || 
               (item.category && item.category.includes(selectedCategory))
             );
           });
-
+          
           const wasFiltered = filteredItems.length < allItems.length && filteredItems.length > 0;
           const isExpanded = expandedMerchants[merchant.id];
-
+          
           return {
             ...merchant,
             items: isExpanded ? allItems : filteredItems,
@@ -205,13 +201,13 @@ function MerchantList() {
         return merchant;
       }).filter(merchant => merchant.filteredItems && merchant.filteredItems.length > 0);
     }
-
+    
     // Merchant type filtering
-    results = results.filter(merchant =>
-      (showRegularMerchants && !merchant.isSpecialMerchant) ||
+    results = results.filter(merchant => 
+      (showRegularMerchants && !merchant.isSpecialMerchant) || 
       (showSpecialMerchants && merchant.isSpecialMerchant)
     );
-
+    
     // Sorting
     switch (sortOption) {
       case 'newest':
@@ -264,7 +260,7 @@ function MerchantList() {
         });
         break;
     }
-
+    
     setFilteredMerchants(results);
   }, [merchants, searchTerm, selectedCategories, showRegularMerchants, showSpecialMerchants, sortOption, expandedMerchants]);
 
@@ -280,7 +276,7 @@ function MerchantList() {
     // Reset expanded merchants when changing category filters
     setExpandedMerchants({});
   };
-
+  
   const handleSortChange = (e) => {
     setSortOption(e.target.value);
   };
@@ -296,9 +292,9 @@ function MerchantList() {
   // Format timestamp to a readable date and time
   const formatTimestamp = (timestamp) => {
     if (!timestamp) return '未知時間';
-
+    
     const date = new Date(timestamp);
-
+    
     return date.toLocaleString('zh-TW', {
       year: 'numeric',
       month: 'numeric',
@@ -313,27 +309,27 @@ function MerchantList() {
     if (!window.confirm('確定要刪除這個商人資訊嗎？此操作無法撤銷。')) {
       return;
     }
-
+    
     setDeleting(true);
     try {
       const result = await deleteMerchant(merchantId);
-
+      
       if (result.success) {
         // Update local merchant list
         const updatedMerchants = merchants.filter(m => m.id !== merchantId);
         setMerchants(updatedMerchants);
-
+        
         // Clear cart if it contains items from this merchant
         try {
           const savedCart = localStorage.getItem('shoppingCart');
           if (savedCart) {
             const cartItems = JSON.parse(savedCart);
-            const updatedCart = cartItems.filter(item =>
+            const updatedCart = cartItems.filter(item => 
               !item.merchantId || item.merchantId !== merchantId
             );
-
+            
             localStorage.setItem('shoppingCart', JSON.stringify(updatedCart));
-
+            
             // Notify shopping cart component
             const cartUpdatedEvent = new CustomEvent('cartUpdated', {
               detail: { cart: updatedCart }
@@ -343,7 +339,7 @@ function MerchantList() {
         } catch (error) {
           console.error('Error updating cart after deletion:', error);
         }
-
+        
         // Show success notification
         setNotificationMessage('商人資訊已成功刪除！');
         setShowNotification(true);
@@ -378,7 +374,7 @@ function MerchantList() {
           useRealTimeItems={false} // 不使用實時物品，而是使用固定資料庫
           allItems={searchKeywords} // 這個值不會被使用，但保留參數傳遞
         />
-
+        
         <div className="filter-options">
           <div className="merchant-type-filter">
             <label className="filter-label">
@@ -398,12 +394,12 @@ function MerchantList() {
               顯示普通商人 ({regularMerchantCount})
             </label>
           </div>
-
+          
           <div className="sort-options">
             <label htmlFor="sort-select">排序方式:</label>
-            <select
-              id="sort-select"
-              value={sortOption}
+            <select 
+              id="sort-select" 
+              value={sortOption} 
               onChange={handleSortChange}
               className="sort-select"
             >
@@ -413,21 +409,21 @@ function MerchantList() {
             </select>
           </div>
         </div>
-
-        <ItemCategoryFilter
+        
+        <ItemCategoryFilter 
           onCategorySelect={handleCategorySelect}
           selectedCategories={selectedCategories}
         />
       </div>
 
       {error && <div className="error-message">{error}</div>}
-
+      
       {loading ? (
         <div className="loading-indicator">載入中...</div>
       ) : filteredMerchants.length === 0 ? (
         <div className="no-results">
-          {searchTerm || !selectedCategories.includes('全部') ?
-            `沒有符合條件的商人資訊。` :
+          {searchTerm || !selectedCategories.includes('全部') ? 
+            `沒有符合條件的商人資訊。` : 
             `目前沒有商人資訊，請添加商人。`}
         </div>
       ) : (
@@ -435,26 +431,26 @@ function MerchantList() {
           {filteredMerchants.filter(merchant => merchant.items && merchant.items.length > 0).map((merchant, index) => {
             // Skip if expired
             if (!merchant.expiresAt || new Date() > new Date(merchant.expiresAt)) return null;
-
+            
             // Get current user playerId from localStorage
             const currentPlayerId = localStorage.getItem('submitterPlayerId');
             const isOwnMerchant = currentPlayerId === merchant.playerId;
-
+            
             // Check if this merchant is expanded
             const isExpanded = expandedMerchants[merchant.id];
-
+            
             // Determine if there are more items to show
-            const hasMoreItems = merchant.wasFiltered &&
-              merchant.allItems &&
-              merchant.filteredItems &&
-              merchant.allItems.length > merchant.filteredItems.length;
-
+            const hasMoreItems = merchant.wasFiltered && 
+                               merchant.allItems && 
+                               merchant.filteredItems && 
+                               merchant.allItems.length > merchant.filteredItems.length;
+            
             return (
               <div key={index} className={`merchant-card ${merchant.isSpecialMerchant ? 'special-merchant-card' : ''}`}>
                 <div className="merchant-header">
                   <div className="merchant-title">
-                    <h3
-                      className="player-id-copy"
+                    <h3 
+                      className="player-id-copy" 
                       onClick={() => copyToClipboard(merchant.playerId)}
                       title="點擊複製玩家ID"
                     >
@@ -468,22 +464,22 @@ function MerchantList() {
                     <p className="discount-info">折扣: {merchant.discount}</p>
                   )}
                 </div>
-
+                
                 {merchant.items && merchant.items.length > 0 ? (
                   <div className="items-section">
                     <ul className={`items-list ${merchant.wasFiltered && isExpanded ? 'items-expanding' : ''}`}>
                       {merchant.items.map((item, itemIndex) => (
-                        <MerchantItem
-                          key={itemIndex}
-                          item={{ ...item, showQuantity: true }}
-                          merchantInfo={{ ...merchant, id: merchant.id }}
+                        <MerchantItem 
+                          key={itemIndex} 
+                          item={{...item, showQuantity: true}} 
+                          merchantInfo={{...merchant, id: merchant.id}}
                         />
                       ))}
                     </ul>
-
+                    
                     {/* Show expand/collapse button at the bottom if there are more items */}
                     {hasMoreItems && (
-                      <button
+                      <button 
                         className="expand-collapse-btn"
                         onClick={() => toggleMerchantExpansion(merchant.id)}
                       >
@@ -495,43 +491,36 @@ function MerchantList() {
                 ) : (
                   <div className="no-items">此商人沒有符合搜尋條件的物品</div>
                 )}
-
-<div className="merchant-footer">
-  <div className="footer-content">
-    <div className="time-info">
-      <p className="submission-time">
-        <span className="time-label">提交時間:</span>
-        <span>{formatTimestamp(merchant.timestamp)}</span>
-      </p>
-    </div>
-    
-    {isOwnMerchant && (
-      <div className="edit-controls">
-        <button 
-          className="edit-btn"
-          onClick={() => handleEditMerchant(merchant.id)}
-          title="編輯商人資訊"
-        >
-          <span className="edit-icon">✏️</span> 編輯
-        </button>
-        <button 
-          className="delete-btn"
-          onClick={() => openDeleteDialog(merchant)}
-          title="刪除商人資訊"
-          disabled={deleting}
-        >
-          <span className="delete-icon">🗑️</span> {deleting ? '刪除中...' : '刪除'}
-        </button>
-      </div>
-    )}
-  </div>
-</div>
+                
+                <div className="merchant-footer">
+                  <div className="footer-content">
+                    <div className="time-info">
+                      <p className="submission-time">
+                        <span className="time-label">提交時間:</span>
+                        <span>{formatTimestamp(merchant.timestamp)}</span>
+                      </p>
+                    </div>
+                    
+                    {isOwnMerchant && (
+                      <div className="edit-controls">
+                        <button 
+                          className="delete-btn"
+                          onClick={() => handleDeleteMerchant(merchant.id)}
+                          title="刪除商人資訊"
+                          disabled={deleting}
+                        >
+                          <span className="delete-icon">🗑️</span> {deleting ? '刪除中...' : '刪除'}
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </div>
               </div>
             );
           }).filter(Boolean)}
         </div>
       )}
-
+      
       {/* Success notification */}
       {showNotification && (
         <SuccessNotification

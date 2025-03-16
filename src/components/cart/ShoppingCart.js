@@ -3,8 +3,6 @@ import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { checkUserAuth } from '../../firebase/userAuth';
 import { updateUserCart } from '../../firebase/userAuth';
 import { useLocation } from 'react-router-dom';
-import CartSyncService from '../../utils/CartSyncService';
-import SuccessNotification from '../common/SuccessNotification';
 import './ShoppingCart.css';
 
 const ShoppingCart = () => {
@@ -12,11 +10,8 @@ const ShoppingCart = () => {
   const [cartItems, setCartItems] = useState([]);
   const [user, setUser] = useState(null);
   const [merchantsExist, setMerchantsExist] = useState(true);
-  const [cartUpdating, setCartUpdating] = useState(false);
-  const [showNotification, setShowNotification] = useState(false);
-  const [notificationMessage, setNotificationMessage] = useState('');
-  const location = useLocation();
-
+  const location = useLocation(); // Get current location/route
+  
   // Check if the current page is the login page
   const isLoginPage = location.pathname === '/login';
 
@@ -29,7 +24,7 @@ const ShoppingCart = () => {
   // Group cart items by merchant ID
   const groupedCartItems = useMemo(() => {
     const groups = {};
-
+    
     cartItems.forEach(item => {
       const merchantId = item.playerId;
       if (!groups[merchantId]) {
@@ -37,7 +32,7 @@ const ShoppingCart = () => {
       }
       groups[merchantId].push(item);
     });
-
+    
     return groups;
   }, [cartItems]);
 
@@ -78,33 +73,6 @@ const ShoppingCart = () => {
     };
   }, [checkMerchantsExistence]);
 
-  // Listen for merchant updates and sync the cart
-  useEffect(() => {
-    const handleMerchantUpdate = (event) => {
-      const { merchantId, updatedItems } = event.detail;
-
-      if (merchantId && updatedItems) {
-        setCartUpdating(true);
-
-        // Use the CartSyncService to update cart items
-        const syncResult = CartSyncService.syncCartItems(merchantId, updatedItems);
-
-        if (syncResult.updated && syncResult.count > 0) {
-          setNotificationMessage(`已自動更新購物車中的 ${syncResult.count} 個商品`);
-          setShowNotification(true);
-        }
-
-        setCartUpdating(false);
-      }
-    };
-
-    window.addEventListener('merchantUpdated', handleMerchantUpdate);
-
-    return () => {
-      window.removeEventListener('merchantUpdated', handleMerchantUpdate);
-    };
-  }, []);
-
   // Notify components when cart changes
   useEffect(() => {
     // Don't dispatch during initial render or when cart is empty
@@ -122,14 +90,14 @@ const ShoppingCart = () => {
       const currentUser = checkUserAuth();
       setUser(currentUser);
     };
-
+    
     // Listen for the custom event
     window.addEventListener('userLoginStateChanged', handleLoginEvent);
-
+    
     // Initial check
     const currentUser = checkUserAuth();
     setUser(currentUser);
-
+    
     return () => {
       window.removeEventListener('userLoginStateChanged', handleLoginEvent);
     };
@@ -139,22 +107,22 @@ const ShoppingCart = () => {
   useEffect(() => {
     const handleRemoveItem = (event) => {
       const { itemName, playerId } = event.detail;
-
+      
       setCartItems(prevItems => {
         // Find the item and remove it
-        const updatedItems = prevItems.filter(item =>
+        const updatedItems = prevItems.filter(item => 
           !(item.itemName === itemName && item.playerId === playerId)
         );
-
+        
         // Update localStorage immediately
         localStorage.setItem('shoppingCart', JSON.stringify(updatedItems));
-
+        
         return updatedItems;
       });
     };
-
+    
     window.addEventListener('removeFromCart', handleRemoveItem);
-
+    
     return () => {
       window.removeEventListener('removeFromCart', handleRemoveItem);
     };
@@ -163,20 +131,20 @@ const ShoppingCart = () => {
   // Add to cart with strict duplication prevention
   const handleAddToCart = useCallback((event) => {
     const newItem = event.detail;
-
+  
     setCartItems(prevItems => {
       // Check if item already exists
       const existingItemIndex = prevItems.findIndex(item =>
         item.itemName === newItem.itemName &&
         item.playerId === newItem.playerId
       );
-
+  
       let updatedItems;
-
+  
       if (existingItemIndex >= 0) {
         // If item exists, update it but preserve original purchaseTimes
         const existingItem = prevItems[existingItemIndex];
-
+        
         updatedItems = [...prevItems];
         updatedItems[existingItemIndex] = {
           ...existingItem,
@@ -191,10 +159,10 @@ const ShoppingCart = () => {
           purchaseTimes: newItem.purchaseTimes
         }];
       }
-
+      
       // Update localStorage
       localStorage.setItem('shoppingCart', JSON.stringify(updatedItems));
-
+      
       return updatedItems;
     });
   }, []);
@@ -219,13 +187,13 @@ const ShoppingCart = () => {
   // Remove item from cart
   const removeFromCart = (item) => {
     setCartItems(prevItems => {
-      const updatedItems = prevItems.filter(cartItem =>
+      const updatedItems = prevItems.filter(cartItem => 
         !(cartItem.itemName === item.itemName && cartItem.playerId === item.playerId)
       );
-
+      
       // Update localStorage immediately
       localStorage.setItem('shoppingCart', JSON.stringify(updatedItems));
-
+      
       return updatedItems;
     });
   };
@@ -250,7 +218,7 @@ const ShoppingCart = () => {
         }
         return cartItem;
       });
-
+      
       // Update localStorage immediately
       localStorage.setItem('shoppingCart', JSON.stringify(updatedItems));
 
@@ -262,7 +230,7 @@ const ShoppingCart = () => {
   const clearCart = () => {
     setCartItems([]);
     localStorage.removeItem('shoppingCart');
-
+    
     // Also clear the cart in Firestore if user is logged in
     if (user && user.userId) {
       try {
@@ -272,43 +240,43 @@ const ShoppingCart = () => {
         console.error('Error clearing cart in Firestore:', error);
       }
     }
-
+    
     // Notify about empty cart
     const cartUpdatedEvent = new CustomEvent('cartUpdated', {
       detail: { cart: [] }
     });
     window.dispatchEvent(cartUpdatedEvent);
   };
-
+  
 
   // Initialize user and cart
   useEffect(() => {
     const currentUser = checkUserAuth();
     setUser(currentUser);
-
+  
     // Reset cart if no user is logged in
     if (!currentUser) {
       resetCart();
       return;
     }
-
+  
     // Load cart from localStorage
     try {
       const savedCart = localStorage.getItem('shoppingCart');
       if (savedCart) {
         const parsedCart = JSON.parse(savedCart);
-
+        
         // Validate cart items
-        const validatedCart = parsedCart.filter(item =>
-          item.itemName &&
-          item.playerId &&
+        const validatedCart = parsedCart.filter(item => 
+          item.itemName && 
+          item.playerId && 
           item.quantity > 0
         );
-
+  
         // Only set cart items if there are valid items
         if (validatedCart.length > 0) {
           setCartItems(validatedCart);
-
+          
           // Initial notification
           const cartUpdatedEvent = new CustomEvent('cartUpdated', {
             detail: { cart: validatedCart }
@@ -340,12 +308,12 @@ const ShoppingCart = () => {
   // Add event listeners for cart events
   useEffect(() => {
     window.addEventListener('addToCart', handleAddToCart);
-
+    
     return () => {
       window.removeEventListener('addToCart', handleAddToCart);
     };
   }, [handleAddToCart]);
-
+  
   // Don't render the shopping cart on login page
   if (isLoginPage) {
     return null;
@@ -364,7 +332,6 @@ const ShoppingCart = () => {
           </span>
         )}
         <i className="fas fa-shopping-cart"></i>
-        {cartUpdating && <div className="cart-updating"></div>}
       </button>
 
       {isOpen && user && (
@@ -389,7 +356,7 @@ const ShoppingCart = () => {
               <div className="cart-items">
                 {Object.entries(groupedCartItems).map(([merchantId, items]) => (
                   <div key={merchantId} className="merchant-group">
-                    <div
+                    <div 
                       className="merchant-group-header"
                       onClick={() => copyMerchantId(merchantId)}
                     >
@@ -400,7 +367,7 @@ const ShoppingCart = () => {
                         {items.reduce((total, item) => total + item.quantity, 0)} 個商品
                       </div>
                     </div>
-
+                    
                     <div className="merchant-items">
                       {items.map((item, index) => (
                         <div key={index} className="cart-item">
@@ -408,11 +375,6 @@ const ShoppingCart = () => {
                             <div className="cart-item-name">
                               <span>{item.itemName}</span>
                               <span className="cart-item-name-quantity">x{(item.itemQuantity || 1) * item.quantity}</span>
-                              {item.wasUpdated && (
-                                <span className="updated-label">
-                                  <i className="fas fa-sync-alt"></i> 已更新
-                                </span>
-                              )}
                             </div>
                             <div className="cart-item-exchange">
                               {item.allowsCoinExchange && (
@@ -482,18 +444,6 @@ const ShoppingCart = () => {
             </>
           )}
         </div>
-      )}
-
-      {/* Success notification for cart updates */}
-      {showNotification && (
-        <SuccessNotification
-          message={notificationMessage}
-          duration={3000}
-          onClose={() => {
-            setShowNotification(false);
-            setTimeout(() => setNotificationMessage(''), 300);
-          }}
-        />
       )}
     </div>
   );
