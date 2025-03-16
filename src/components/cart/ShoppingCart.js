@@ -2,7 +2,9 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { checkUserAuth } from '../../firebase/userAuth';
 import { updateUserCart } from '../../firebase/userAuth';
+import { getMerchantById } from '../../firebase/firestore';
 import { useLocation } from 'react-router-dom';
+import SuccessNotification from '../common/SuccessNotification';
 import './ShoppingCart.css';
 
 const ShoppingCart = () => {
@@ -11,6 +13,8 @@ const ShoppingCart = () => {
   const [user, setUser] = useState(null);
   const [merchantsExist, setMerchantsExist] = useState(true);
   const location = useLocation(); // Get current location/route
+  const [showNotification, setShowNotification] = useState(false);
+  const [notificationMessage, setNotificationMessage] = useState('');
   
   // Check if the current page is the login page
   const isLoginPage = location.pathname === '/login';
@@ -83,6 +87,111 @@ const ShoppingCart = () => {
       window.dispatchEvent(cartUpdatedEvent);
     }
   }, [cartItems]);
+
+  // Listen for merchant deletions that affect cart items
+useEffect(() => {
+  const handleMerchantDelete = (event) => {
+    const { merchantId } = event.detail;
+    
+    // Check if any cart items are from this deleted merchant
+    const affectedItems = cartItems.filter(item => item.merchantId === merchantId);
+    
+    if (affectedItems.length > 0) {
+      // Remove all items from this merchant
+      setCartItems(prevItems => {
+        const updatedItems = prevItems.filter(item => item.merchantId !== merchantId);
+        
+        // Save updated cart to localStorage
+        localStorage.setItem('shoppingCart', JSON.stringify(updatedItems));
+        
+        return updatedItems;
+      });
+      
+      // Show notification about cart update
+      setNotificationMessage('您的購物車已更新，因為商人資訊已被刪除。');
+      setShowNotification(true);
+    }
+  };
+  
+  window.addEventListener('merchantDeleted', handleMerchantDelete);
+  
+  return () => {
+    window.removeEventListener('merchantDeleted', handleMerchantDelete);
+  };
+}, [cartItems]);
+  
+  // Listen for merchant updates that might affect cart items
+useEffect(() => {
+  const handleMerchantUpdate = async (event) => {
+    const { merchantId } = event.detail;
+    
+    // Only process if there are cart items that might be affected
+    if (cartItems.some(item => item.merchantId === merchantId)) {
+      try {
+        // Fetch the updated merchant data
+        const updatedMerchant = await getMerchantById(merchantId);
+        
+        if (updatedMerchant && updatedMerchant.items) {
+          // Update affected cart items
+          setCartItems(prevItems => {
+            // Map through existing cart items
+            const updatedItems = prevItems.map(cartItem => {
+              // If this item belongs to the updated merchant
+              if (cartItem.merchantId === merchantId) {
+                // Find the matching item in the updated merchant data
+                const updatedMerchantItem = updatedMerchant.items.find(
+                  item => item.itemName === cartItem.itemName
+                );
+                
+                // If the item still exists in the merchant's inventory
+                if (updatedMerchantItem) {
+                  // Ensure the cart item quantity doesn't exceed the new purchaseTimes
+                  const newQuantity = Math.min(
+                    cartItem.quantity,
+                    updatedMerchantItem.purchaseTimes || 1
+                  );
+                  
+                  // Update cart item with new merchant data
+                  return {
+                    ...cartItem,
+                    purchaseTimes: updatedMerchantItem.purchaseTimes || 1,
+                    price: updatedMerchantItem.price,
+                    allowsCoinExchange: updatedMerchantItem.allowsCoinExchange,
+                    allowsBarterExchange: updatedMerchantItem.allowsBarterExchange,
+                    exchangeItemName: updatedMerchantItem.exchangeItemName,
+                    exchangeQuantity: updatedMerchantItem.exchangeQuantity || 1,
+                    quantity: newQuantity
+                  };
+                }
+                // If the item was removed from the merchant's inventory
+                return null;
+              }
+              // Return unchanged items
+              return cartItem;
+            }).filter(Boolean); // Remove null items (ones that were removed)
+            
+            // Save updated cart to localStorage
+            localStorage.setItem('shoppingCart', JSON.stringify(updatedItems));
+            
+            return updatedItems;
+          });
+          
+          // Show notification about cart update
+          setNotificationMessage('您的購物車已更新，因為商人資訊有所變更。');
+          setShowNotification(true);
+        }
+      } catch (error) {
+        console.error('更新購物車時發生錯誤:', error);
+      }
+    }
+  };
+  
+  window.addEventListener('merchantUpdated', handleMerchantUpdate);
+  
+  return () => {
+    window.removeEventListener('merchantUpdated', handleMerchantUpdate);
+  };
+}, [cartItems]);
 
   useEffect(() => {
     // Create a custom event listener for login events
@@ -444,6 +553,16 @@ const ShoppingCart = () => {
             </>
           )}
         </div>
+      )}
+      {showNotification && (
+        <SuccessNotification
+          message={notificationMessage}
+          duration={3000}
+          onClose={() => {
+            setShowNotification(false);
+            setTimeout(() => setNotificationMessage(''), 300);
+          }}
+        />
       )}
     </div>
   );

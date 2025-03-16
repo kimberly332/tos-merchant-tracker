@@ -15,7 +15,8 @@ const MerchantCardEnhanced = ({
             onClick={() => copyToClipboard(merchant.playerId)}
             title="點擊複製玩家ID"
           >
-            {merchant.playerId} <span className="copy-icon">📋 (複製ID)</span>
+            {/* {merchant.playerId} <span className="copy-icon">📋 (複製ID)</span> */}
+            {merchant.playerId} <i className="fas fa-copy copy-icon"></i>
           </h3>
           {merchant.isSpecialMerchant && (
             <span className="special-merchant-badge">五商</span>
@@ -71,7 +72,7 @@ const MerchantCardEnhanced = ({
       <div className="merchant-footer">
         <div className="time-info">
           <p className="submission-time">
-            <span className="time-label">提交時間:</span>
+            {/* <span className="time-label">提交時間:</span> */}
             <span>{formatTimestamp(merchant.timestamp)}</span>
           </p>
         </div>
@@ -83,7 +84,8 @@ const MerchantCardEnhanced = ({
               onClick={() => navigate(`/edit-merchant/${merchant.id}`)}
               title="編輯商人資訊"
             >
-              <span className="edit-icon">✏️</span> 編輯
+              {/* <span className="edit-icon">✏️</span> */}
+              編輯
             </button>
           </div>
         )}

@@ -141,7 +141,8 @@ function ItemSearch() {
                         onClick={() => copyToClipboard(merchant.playerId)}
                         title="點擊複製玩家ID"
                       >
-                        {merchant.playerId} 提供 <span className="copy-icon">📋 (複製ID)</span>
+                        {/* {merchant.playerId} 提供 <span className="copy-icon">📋 (複製ID)</span> */}
+                        {merchant.playerId} <i className="fas fa-copy copy-icon"></i>
                       </p>
                       {merchant.discount && (
                         <p className="discount-info">今日折扣: {merchant.discount}</p>

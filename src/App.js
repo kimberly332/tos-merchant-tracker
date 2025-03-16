@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import NavigationBar from './components/layout/NavigationBar';
 import HomePage from './pages/HomePage';
 import AddMerchantPage from './pages/AddMerchantPage';
+import EditMerchantPage from './pages/EditMerchantPage';
 import LoginPage from './pages/LoginPage';
 import UserGuidePage from './pages/UserGuidePage';
 // Removed CartDetailPage import
@@ -64,6 +65,12 @@ function App() {
             <Route path="/add-merchant" element={
               <ProtectedRoute>
                 <AddMerchantPage />
+              </ProtectedRoute>
+            } />
+
+            <Route path="/edit-merchant/:merchantId" element={
+              <ProtectedRoute>
+                <EditMerchantPage />
               </ProtectedRoute>
             } />
 

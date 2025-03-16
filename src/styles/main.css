@@ -804,6 +804,7 @@ body {
 .edit-controls {
   display: flex;
   align-items: center;
+  gap: 1em;
 }
 
 .edit-btn, .cancel-btn, .logout-btn {
@@ -824,6 +825,25 @@ body {
   background-color: rgba(72, 114, 123, 0.3);
   color: white;
   transform: translateY(-1px);
+}
+
+.form-buttons .edit-cancel-btn {
+  padding: 0.75rem 1rem;
+  width: 100%;
+  font-size: 1rem;
+  margin-top: 1rem;
+  text-align: center;
+  border-radius: 6px;
+  background-color: rgba(72, 114, 123, 0.1);
+  color: #D6D8D9;
+  border: 1px solid rgba(138, 186, 179, 0.25);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.form-buttons .edit-cancel-btn:hover {
+  background-color: rgba(72, 114, 123, 0.2);
+  transform: translateY(-2px);
 }
 
 .edit-icon {
