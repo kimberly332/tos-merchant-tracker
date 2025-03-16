@@ -114,7 +114,7 @@ const MerchantItem = ({ item, merchantInfo }) => {
     >
       <div className="item-name-container">
         {/* Add the ItemImage component here */}
-        <ItemImage itemName={item.itemName} size="medium" className="item-name-icon" />
+        <ItemImage itemName={item.itemName} size="large" className="item-name-icon" />
         <span className="item-name">{item.itemName || '未知物品'}</span>
         {/* Always show quantity, even when it's 1 */}
         <span className="item-quantity">x{item.quantity || 1}</span>
