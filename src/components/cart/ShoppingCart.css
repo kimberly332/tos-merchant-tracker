@@ -454,3 +454,67 @@
   color: rgba(214, 216, 217, 0.7);
   margin-top: 0.1rem;
 }
+
+/* Additional styling for updated cart items */
+
+/* Add a subtle highlight to updated cart items */
+.cart-item.updated {
+  background-color: rgba(255, 193, 7, 0.05);
+  border: 1px solid rgba(255, 193, 7, 0.2);
+  animation: highlightUpdate 1s ease-out;
+}
+
+/* Pulsing animation for highlighting updated items */
+@keyframes highlightUpdate {
+  0% {
+    background-color: rgba(255, 193, 7, 0.2);
+  }
+  100% {
+    background-color: rgba(255, 193, 7, 0.05);
+  }
+}
+
+/* Updated label for recently updated items */
+.updated-label {
+  font-size: 0.7rem;
+  background-color: rgba(255, 193, 7, 0.2);
+  color: #FFD54F;
+  padding: 0.1rem 0.3rem;
+  border-radius: 3px;
+  margin-left: 0.5rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+}
+
+.updated-label i {
+  font-size: 0.7rem;
+}
+
+/* Cart update indicator during sync */
+.cart-updating {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background-color: #FFD54F;
+  animation: pulse 1s infinite;
+  z-index: 1002;
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.5);
+    opacity: 0.7;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}

@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import NavigationBar from './components/layout/NavigationBar';
 import HomePage from './pages/HomePage';
 import AddMerchantPage from './pages/AddMerchantPage';
+import EditMerchantPage from './pages/EditMerchantPage';
 import LoginPage from './pages/LoginPage';
 import UserGuidePage from './pages/UserGuidePage';
 // Removed CartDetailPage import
@@ -43,19 +44,17 @@ function App() {
         <NavigationBar />
         <main className="main-content">
           <Routes>
-            {/* 公開路由 */}
+            {/* Public routes */}
             <Route path="/login" element={<LoginPage />} />
 
-            {/* 使用說明頁面 */}
+            {/* Guide page */}
             <Route path="/guide" element={
               <ProtectedRoute>
                 <UserGuidePage />
               </ProtectedRoute>
             } />
 
-            {/* 移除購物車詳情頁面路由 */}
-
-            {/* 受保護的路由 */}
+            {/* Protected routes */}
             <Route path="/" element={
               <ProtectedRoute>
                 <HomePage />
@@ -66,8 +65,14 @@ function App() {
                 <AddMerchantPage />
               </ProtectedRoute>
             } />
+            {/* Add new edit route */}
+            <Route path="/edit-merchant/:id" element={
+              <ProtectedRoute>
+                <EditMerchantPage />
+              </ProtectedRoute>
+            } />
 
-            {/* 找不到頁面導向登入 */}
+            {/* Fallback route */}
             <Route path="*" element={<Navigate to="/login" />} />
           </Routes>
         </main>

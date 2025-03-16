@@ -103,6 +103,93 @@ const processedItems = merchantData.items.map(item => {
   }
 };
 
+// 更新商人資料
+export const updateMerchant = async (merchantId, merchantData) => {
+  try {
+    // 導入需要的函數
+    const { doc, updateDoc, getDoc } = await import('firebase/firestore');
+    
+    // 獲取當前用戶伺服器
+    const serverId = getCurrentServerId();
+    if (!serverId) {
+      return { success: false, error: '用戶未登入或伺服器信息缺失' };
+    }
+    
+    // 獲取當前用戶ID
+    const user = checkUserAuth();
+    if (!user || !user.playerId) {
+      return { success: false, error: '用戶未登入' };
+    }
+    
+    // 引用商人文件
+    const merchantRef = doc(db, `servers/${serverId}/merchants`, merchantId);
+    
+    // 先取得商人資料，檢查是否為當前用戶所有
+    const merchantSnap = await getDoc(merchantRef);
+    if (!merchantSnap.exists()) {
+      return { success: false, error: '商人資訊不存在' };
+    }
+    
+    const merchantData_current = merchantSnap.data();
+    if (merchantData_current.playerId !== user.playerId) {
+      return { success: false, error: '您只能編輯自己提交的商人資訊' };
+    }
+    
+    // 準備更新數據
+    const processedItems = merchantData.items.map(item => {
+      // 如果沒有提供 purchaseTimes，設置為 1
+      if (!item.purchaseTimes) {
+        return {
+          ...item,
+          purchaseTimes: 1
+        };
+      }
+      return item;
+    });
+    
+    // 保持原始的 timestamp 和過期時間，只更新其他欄位
+    const updateData = {
+      ...merchantData,
+      items: processedItems,
+      // 不更新 timestamp，保持原始創建時間
+      // 不更新 expiresAt，保持原始過期時間
+      lastUpdated: serverTimestamp() // 增加最後更新時間
+    };
+    
+    // 更新文件
+    await updateDoc(merchantRef, updateData);
+    
+    // Broadcast an event that this merchant has been updated to sync cart items
+    try {
+      // Parse current cart items
+      const savedCart = localStorage.getItem('shoppingCart');
+      if (savedCart) {
+        const cartItems = JSON.parse(savedCart);
+        const itemsFromThisMerchant = cartItems.filter(item => item.merchantId === merchantId);
+        
+        if (itemsFromThisMerchant.length > 0) {
+          // If there are items from this merchant in the cart, dispatch an event
+          const merchantUpdateEvent = new CustomEvent('merchantUpdated', {
+            detail: { 
+              merchantId, 
+              updatedItems: processedItems,
+              timestamp: new Date().toISOString()
+            }
+          });
+          window.dispatchEvent(merchantUpdateEvent);
+        }
+      }
+    } catch (error) {
+      console.error('Error checking cart for merchant update:', error);
+    }
+    
+    return { success: true };
+  } catch (error) {
+    console.error('更新商人資訊時發生錯誤:', error);
+    return { success: false, error: error.message };
+  }
+};
+
 // 刪除商人資料
 export const deleteMerchant = async (merchantId) => {
   try {
