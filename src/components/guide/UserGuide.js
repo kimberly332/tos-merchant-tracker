@@ -11,17 +11,13 @@ const UserGuide = () => {
   return (
     <div className="merchant-form-container">
       <div className="guide-container">
-        {/* <div className="guide-intro">
-          本系統幫助玩家追蹤商人販售的物品資訊，方便尋找需要的物品並規劃購物清單。系統會在每日台灣時間午夜 (00:00) 自動重置所有商人資訊。
-        </div> */}
-        
-        {/* 目錄 */}
         <div className="guide-menu">
           {[
             { id: 'introduction', title: '系統介紹', icon: '📋' },
             { id: 'login', title: '登入與開始', icon: '🔑' },
             { id: 'search', title: '搜尋商品', icon: '🔍' },
             { id: 'merchant', title: '添加商人資訊', icon: '👤' },
+            { id: 'edit', title: '編輯商人資訊', icon: '✏️' },
             { id: 'cart', title: '使用購物車', icon: '🛒' },
             { id: 'delete', title: '刪除商人資訊', icon: '🗑️' }
           ].map(section => (
@@ -47,6 +43,7 @@ const UserGuide = () => {
                 <ul className="guide-list">
                   <li>搜尋其他玩家提交的商人販售物品</li>
                   <li>添加您所遇到的商人資訊，分享給其他玩家</li>
+                  <li>編輯您提交的商人資訊，無需刪除後重新添加</li>
                   <li>使用購物車功能，規劃您的購物清單及所需材料</li>
                   <li>刪除您提交的商人資訊</li>
                   <li>查看特殊商人（五商）資訊</li>
@@ -156,6 +153,41 @@ const UserGuide = () => {
             </div>
           )}
           
+          {/* 編輯商人資訊 */}
+          {activeSection === 'edit' && (
+            <div className="guide-section">
+              <h2 className="guide-section-title">編輯商人資訊</h2>
+              <div className="guide-section-content">
+                <p>您可以編輯已提交的商人資訊，而無需刪除後重新添加：</p>
+                <ol className="guide-list numbered">
+                  <li>
+                    <strong>找到您的商人資訊</strong>
+                    <p>在首頁商人列表中找到您提交的商人資訊。只有您自己提交的商人才會顯示編輯按鈕。</p>
+                  </li>
+                  <li>
+                    <strong>點擊編輯按鈕</strong>
+                    <p>在商人資訊卡片底部找到「編輯」按鈕，點擊進入編輯頁面。</p>
+                  </li>
+                  <li>
+                    <strong>修改商人資訊</strong>
+                    <p>您可以修改折扣、物品數量、可購入次數、價格或交換要求等資訊。</p>
+                  </li>
+                  <li>
+                    <strong>添加或移除物品</strong>
+                    <p>使用「添加更多商品」或「移除」按鈕來調整物品清單。</p>
+                  </li>
+                  <li>
+                    <strong>保存更改</strong>
+                    <p>完成編輯後，點擊「更新商人資訊」按鈕保存您的修改。</p>
+                  </li>
+                </ol>
+                <div className="guide-tip">
+                  <p>提示：當您更新商人資訊時，已將此商人物品加入購物車的用戶會收到通知，他們的購物車會自動更新以反映您的變更。</p>
+                </div>
+              </div>
+            </div>
+          )}
+          
           {/* 使用購物車 */}
           {activeSection === 'cart' && (
             <div className="guide-section">
@@ -185,7 +217,7 @@ const UserGuide = () => {
                   </li>
                 </ol>
                 <div className="guide-tip">
-                  <p>提示：購物車內容會在您登出後保存，下次登入時仍然可以看到，但會在每日重置時清空。</p>
+                  <p>提示：如果商人資訊被更新或刪除，您的購物車會自動調整並顯示通知。購物車內容會在您登出後保存，下次登入時仍然可以看到。</p>
                 </div>
               </div>
             </div>
@@ -212,7 +244,7 @@ const UserGuide = () => {
                   </li>
                 </ol>
                 <div className="guide-tip">
-                  <p>提示：刪除商人資訊後，您可以在當天提交新的商人資訊。請注意，刪除操作無法撤銷。</p>
+                  <p>提示：刪除商人資訊後，您可以在當天提交新的商人資訊。已將此商人物品加入購物車的用戶會收到通知，相關物品會自動從他們的購物車中移除。請注意，刪除操作無法撤銷。</p>
                 </div>
               </div>
             </div>
