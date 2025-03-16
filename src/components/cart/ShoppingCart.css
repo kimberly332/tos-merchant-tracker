@@ -363,6 +363,41 @@
   color: var(--color-light-accent);
 }
 
+/* Material item display with image */
+.material-item {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+  font-size: 0.9rem;
+  align-items: center;
+}
+
+.material-item .summary-label {
+  display: flex;
+  align-items: center;
+  color: var(--color-neutral-light);
+}
+
+.material-icon {
+  width: 20px !important;
+  height: 20px !important;
+  background-color: rgba(72, 114, 123, 0.2);
+  padding: 2px;
+  border-radius: 4px;
+  margin-right: 0.35rem;
+  object-fit: contain;
+}
+
+.material-item .summary-value {
+  font-weight: 600;
+  color: white;
+}
+
+/* Style adjustments for the cart item exchange text */
+.cart-item-exchange-material {
+  color: #8ABAB3;
+}
+
 .clear-cart {
   width: 100%;
   margin-top: 1rem;

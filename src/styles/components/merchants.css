@@ -407,3 +407,70 @@
     justify-content: center;
   }
 }
+
+/* Item Icon Styles */
+.item-icon {
+  display: inline-block;
+  object-fit: contain;
+  border-radius: 4px;
+  background-color: rgba(72, 114, 123, 0.2);
+  padding: 2px;
+  vertical-align: middle;
+  flex-shrink: 0;
+}
+
+/* Style for the icon in the item name container */
+.item-name-icon {
+  margin-top: -2px;
+}
+
+/* Improve item name container to handle the image */
+.item-name-container {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+/* Adjust the name to align properly with the icon */
+.item-name {
+  display: inline-flex;
+  align-items: center;
+}
+
+/* Make sure the item-quantity and item-available-quantity work with icon */
+.item-quantity,
+.item-available-quantity {
+  display: inline-flex;
+  align-items: center;
+}
+
+/* For the Shopping Cart Item display */
+.cart-item-name .item-icon {
+  margin-right: 0.35rem;
+  width: 18px;
+  height: 18px;
+}
+
+/* Add icon to exchange tag if necessary */
+.exchange-tag .item-icon {
+  width: 16px;
+  height: 16px;
+  margin-right: 0.25rem;
+  padding: 1px;
+}
+
+/* For search result items */
+.search-results .item .item-icon {
+  margin-right: 0.35rem;
+}
+
+/* Add a hover effect to make icons pop slightly */
+.item:hover .item-icon {
+  background-color: rgba(72, 114, 123, 0.4);
+}
+
+/* Make in-cart items have a different background on icons */
+.item.in-cart .item-icon {
+  background-color: rgba(138, 186, 179, 0.3);
+}

@@ -1,5 +1,6 @@
-// src/components/merchants/MerchantItem.js
+// src/components/merchants/MerchantItem.js - Updated with item images
 import React, { useState, useEffect } from 'react';
+import ItemImage from '../common/ItemImage'; // Import the new component
 
 const MerchantItem = ({ item, merchantInfo }) => {
   const [isInCart, setIsInCart] = useState(false);
@@ -112,6 +113,8 @@ const MerchantItem = ({ item, merchantInfo }) => {
       onClick={handleToggleCart}
     >
       <div className="item-name-container">
+        {/* Add the ItemImage component here */}
+        <ItemImage itemName={item.itemName} size="medium" className="item-name-icon" />
         <span className="item-name">{item.itemName || '未知物品'}</span>
         {/* Always show quantity, even when it's 1 */}
         <span className="item-quantity">x{item.quantity || 1}</span>
