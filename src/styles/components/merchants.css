@@ -7,6 +7,13 @@
 .merchant-list {
     width: 100%;
   }
+
+  .merchant-title {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.5rem; /* Creates space between the name and badge */
+  }
   
   /* Individual merchant cards */
   .merchant-item {
@@ -44,28 +51,35 @@
   }
   
   .special-merchant-badge {
-    position: absolute;
-    top: var(--spacing-sm);
-    right: var(--spacing-sm);
-    background-color: var(--color-special);
-    color: white;
-    padding: 2px var(--spacing-sm);
-    border-radius: var(--border-radius-sm);
-    font-size: var(--font-size-xs);
-    font-weight: var(--font-weight-bold);
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-  }
+    display: inline-flex;
+  align-items: center;
+  background-color: #b58c38;
+  color: white;
+  font-weight: bold;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin: 0; /* Reset any margins */
+  height: fit-content;
+  white-space: nowrap; /* Prevent the badge text from wrapping */
+}
   
   /* Merchant header section */
   .merchant-header {
+    padding: 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+  .player-id-copy {
+    margin: 0; /* Remove any default margins */
     display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    margin-bottom: var(--spacing-md);
-    padding-bottom: var(--spacing-sm);
-    border-bottom: 1px solid var(--divider-color);
-    position: relative;
+    align-items: center;
   }
   
   .player-info-copy {
