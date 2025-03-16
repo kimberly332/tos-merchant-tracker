@@ -73,6 +73,9 @@ function LoginPage() {
           serverId: result.serverId,
           playerId: result.playerId
         }));
+
+        const loginEvent = new CustomEvent('userLoginStateChanged');
+        window.dispatchEvent(loginEvent);
         
         // 儲存提交者ID以便在創建商人記錄時使用
         localStorage.setItem('submitterPlayerId', result.playerId);

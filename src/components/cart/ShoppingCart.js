@@ -84,6 +84,25 @@ const ShoppingCart = () => {
     }
   }, [cartItems]);
 
+  useEffect(() => {
+    // Create a custom event listener for login events
+    const handleLoginEvent = () => {
+      const currentUser = checkUserAuth();
+      setUser(currentUser);
+    };
+    
+    // Listen for the custom event
+    window.addEventListener('userLoginStateChanged', handleLoginEvent);
+    
+    // Initial check
+    const currentUser = checkUserAuth();
+    setUser(currentUser);
+    
+    return () => {
+      window.removeEventListener('userLoginStateChanged', handleLoginEvent);
+    };
+  }, []);
+
   // Listen for direct remove events (from clicking items)
   useEffect(() => {
     const handleRemoveItem = (event) => {
@@ -212,24 +231,35 @@ const ShoppingCart = () => {
     setCartItems([]);
     localStorage.removeItem('shoppingCart');
     
+    // Also clear the cart in Firestore if user is logged in
+    if (user && user.userId) {
+      try {
+        // Update user's cart in Firestore with empty array
+        updateUserCart(user.userId, []);
+      } catch (error) {
+        console.error('Error clearing cart in Firestore:', error);
+      }
+    }
+    
     // Notify about empty cart
     const cartUpdatedEvent = new CustomEvent('cartUpdated', {
       detail: { cart: [] }
     });
     window.dispatchEvent(cartUpdatedEvent);
   };
+  
 
   // Initialize user and cart
   useEffect(() => {
     const currentUser = checkUserAuth();
     setUser(currentUser);
-
+  
     // Reset cart if no user is logged in
     if (!currentUser) {
       resetCart();
       return;
     }
-
+  
     // Load cart from localStorage
     try {
       const savedCart = localStorage.getItem('shoppingCart');
@@ -242,14 +272,20 @@ const ShoppingCart = () => {
           item.playerId && 
           item.quantity > 0
         );
-
-        setCartItems(validatedCart);
-        
-        // Initial notification
-        const cartUpdatedEvent = new CustomEvent('cartUpdated', {
-          detail: { cart: validatedCart }
-        });
-        window.dispatchEvent(cartUpdatedEvent);
+  
+        // Only set cart items if there are valid items
+        if (validatedCart.length > 0) {
+          setCartItems(validatedCart);
+          
+          // Initial notification
+          const cartUpdatedEvent = new CustomEvent('cartUpdated', {
+            detail: { cart: validatedCart }
+          });
+          window.dispatchEvent(cartUpdatedEvent);
+        } else {
+          // If no valid items, ensure cart is emptied in Firebase too
+          updateUserCart(currentUser.userId, []);
+        }
       }
     } catch (error) {
       console.error('Error loading cart:', error);
