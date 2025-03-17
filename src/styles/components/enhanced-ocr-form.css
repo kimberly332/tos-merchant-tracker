@@ -177,7 +177,7 @@
     cursor: pointer;
     transition: all 0.15s ease;
     white-space: nowrap;
-    min-width: 80px;
+    /* min-width: 80px; */
     text-align: center;
   }
   
@@ -264,6 +264,6 @@
     .form-tab {
       padding: 0.4rem 0.5rem;
       font-size: 0.85rem;
-      min-width: 70px;
+      /* min-width: 70px; */
     }
   }
