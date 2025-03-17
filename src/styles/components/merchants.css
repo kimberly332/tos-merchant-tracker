@@ -474,3 +474,299 @@
 .item.in-cart .item-icon {
   background-color: rgba(138, 186, 179, 0.3);
 }
+
+/* Adding styles for honey merchant cards and badges */
+
+/* Honey merchant card styling */
+.honey-merchant-card {
+  background-color: rgba(244, 208, 63, 0.15);
+  border: 1px solid rgba(244, 208, 63, 0.6);
+  position: relative;
+  overflow: hidden;
+}
+
+.honey-merchant-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(circle at top right, rgba(244, 208, 63, 0.1), transparent 70%);
+  pointer-events: none;
+}
+
+/* Honey merchant badge */
+.honey-merchant-badge {
+  display: inline-flex;
+  align-items: center;
+  background-color: #f4d03f;
+  color: #2c3e50;
+  font-weight: bold;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin: 0;
+  height: fit-content;
+  white-space: nowrap;
+}
+
+/* Fancy effect for honey merchant cards */
+.honey-merchant-card::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background-color: #f4d03f;
+  opacity: 0.3;
+  animation: lightning 15s infinite;
+}
+
+/* Ensure honey merchant cards have nice hover effects */
+.honey-merchant-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+}
+
+/* Responsive adjustments for filter labels */
+@media (max-width: 768px) {
+  .merchant-type-filter {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .filter-label {
+    margin-bottom: 0.5rem;
+  }
+}
+
+/* Merchant Filter Styles - Mobile tab view and desktop checkbox view */
+
+/* Common styles */
+.honey-merchant-card {
+  background-color: rgba(244, 208, 63, 0.15);
+  border: 1px solid rgba(244, 208, 63, 0.6);
+  position: relative;
+  overflow: hidden;
+}
+
+.honey-merchant-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(circle at top right, rgba(244, 208, 63, 0.1), transparent 70%);
+  pointer-events: none;
+}
+
+/* Honey merchant badge */
+.honey-merchant-badge {
+  display: inline-flex;
+  align-items: center;
+  background-color: #f4d03f;
+  color: #2c3e50;
+  font-weight: bold;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin: 0;
+  height: fit-content;
+  white-space: nowrap;
+}
+
+/* Fancy effect for honey merchant cards */
+.honey-merchant-card::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background-color: #f4d03f;
+  opacity: 0.3;
+  animation: lightning 15s infinite;
+}
+
+/* Honey exchange item styling */
+.honey-exchange-item {
+  background-color: rgba(244, 208, 63, 0.1);
+  border: 1px solid rgba(244, 208, 63, 0.4);
+}
+
+.honey-exchange-item:hover {
+  background-color: rgba(244, 208, 63, 0.15);
+}
+
+.honey-exchange-tag {
+  background-color: rgba(244, 208, 63, 0.2) !important;
+  color: #f39c12 !important;
+  border: 1px solid rgba(244, 208, 63, 0.5);
+}
+
+/* Item in cart that's also honey exchange */
+.item.in-cart.honey-exchange-item {
+  background-color: rgba(244, 208, 63, 0.2);
+  border: 1px solid rgba(244, 208, 63, 0.8);
+}
+
+/* Mobile-specific styles - only apply below 768px */
+@media (max-width: 767px) {
+  /* Hide the checkbox filters on mobile */
+  .filter-options {
+    display: none !important;
+  }
+  
+  /* Show the tab filters on mobile */
+  .filter-row {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+  }
+  
+  .merchant-type-tabs {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+    width: 100%;
+  }
+  
+  .merchant-type-tab {
+    background-color: rgba(72, 114, 123, 0.1);
+    border: 1px solid rgba(138, 186, 179, 0.3);
+    color: #D6D8D9;
+    padding: 0.5rem 0.35rem;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    font-size: 0.85rem;
+    text-align: center;
+    white-space: nowrap;
+  }
+  
+  .merchant-type-tab:hover {
+    background-color: rgba(72, 114, 123, 0.2);
+  }
+  
+  .merchant-type-tab.active {
+    background-color: rgba(72, 114, 123, 0.4);
+    border-color: var(--color-light-accent);
+    color: white;
+  }
+  
+  /* Adjust the special and honey tabs to make them distinctive */
+  .merchant-type-tab.active[class*="special"] {
+    background-color: rgba(156, 108, 44, 0.3);
+    border-color: rgba(156, 108, 44, 0.8);
+  }
+  
+  .merchant-type-tab.active[class*="honey"] {
+    background-color: rgba(244, 208, 63, 0.3);
+    border-color: rgba(244, 208, 63, 0.8);
+    color: #2c3e50;
+  }
+  
+  .sort-options {
+    margin-top: 0.5rem;
+    width: 100%;
+    align-self: center;  
+  }
+
+  /* Style the dropdown to match the tab buttons */
+  .sort-select {
+    width: 100%;
+    background-color: rgba(16, 24, 35, 0.6);
+    border: 1px solid rgba(138, 186, 179, 0.3);
+    border-radius: 4px;
+    color: #D6D8D9;
+    padding: 0.75rem 0.5rem;
+    padding-right: 2rem;
+    font-size: 0.95rem;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%238ABAB3' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.75rem center;
+    background-size: 16px;
+    cursor: pointer;
+    transition: border-color 0.2s ease, background-color 0.2s ease;
+  }
+  
+  .sort-select:focus {
+    outline: none;
+    border-color: #8ABAB3;
+    box-shadow: 0 0 0 1px rgba(138, 186, 179, 0.3);
+  }
+  
+  /* Hide the label on mobile since the dropdown is more self-explanatory */
+  .sort-options label {
+    display: none;
+  }
+  
+  /* Adjust the layout of the filter row to match screenshot */
+  .filter-row {
+    display: block;
+    margin-bottom: 0.5rem;
+  }
+  
+  /* Make the merchant tabs look more like the screenshot */
+  .merchant-type-tabs {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+    margin-bottom: 0.75rem;
+  }
+  
+  .merchant-type-tab {
+    background-color: rgba(16, 24, 35, 0.6);
+    border: 1px solid rgba(138, 186, 179, 0.3);
+    color: #D6D8D9;
+    padding: 0.75rem 0.5rem;
+    border-radius: 4px;
+    text-align: center;
+    font-size: 0.95rem;
+  }
+  
+  .merchant-type-tab.active {
+    background-color: rgba(72, 114, 123, 0.4);
+    border-color: #8ABAB3;
+  }
+}
+
+/* Desktop-specific styles - only apply above 768px */
+@media (min-width: 768px) {
+  /* Hide the tab filters on desktop */
+  .filter-row, .merchant-type-tabs {
+    display: none !important;
+  }
+  
+  /* Show the checkbox filters on desktop */
+  .filter-options {
+    display: flex !important;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+  }
+  
+  .merchant-type-filter {
+    display: flex;
+    gap: 1rem;
+  }
+  
+  /* Add honey filter label styling */
+  .filter-label {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    color: #D6D8D9;
+    font-size: 0.9rem;
+  }
+}

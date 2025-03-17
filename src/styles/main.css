@@ -162,11 +162,6 @@ body {
     border: 1px solid rgba(138, 186, 179, 0.2);
   }
   
-  .search-input-container {
-    display: flex;
-    margin-bottom: 1rem;
-  }
-  
   .search-input {
     width: 100%;
     padding: 0.75rem 1rem;

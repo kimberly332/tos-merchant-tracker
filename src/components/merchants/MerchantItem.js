@@ -1,9 +1,12 @@
-// src/components/merchants/MerchantItem.js - Updated with item images
+// src/components/merchants/MerchantItem.js - Updated with honey item highlight
 import React, { useState, useEffect } from 'react';
-import ItemImage from '../common/ItemImage'; // Import the new component
+import ItemImage from '../common/ItemImage';
 
 const MerchantItem = ({ item, merchantInfo }) => {
   const [isInCart, setIsInCart] = useState(false);
+  
+  // Check if this item requires honey for exchange
+  const isHoneyExchange = item.allowsBarterExchange && item.exchangeItemName === '蜂蜜';
   
   // Check initial cart status when component mounts
   useEffect(() => {
@@ -109,7 +112,7 @@ const MerchantItem = ({ item, merchantInfo }) => {
 
   return (
     <li 
-      className={`item ${isInCart ? 'in-cart' : ''}`}
+      className={`item ${isInCart ? 'in-cart' : ''} ${isHoneyExchange ? 'honey-exchange-item' : ''}`}
       onClick={handleToggleCart}
     >
       <div className="item-name-container">
@@ -138,7 +141,7 @@ const MerchantItem = ({ item, merchantInfo }) => {
         
         {/* 交換物品顯示，如果允許以物易物交易 */}
         {item.allowsBarterExchange && item.exchangeItemName && (
-          <div className="exchange-tag">
+          <div className={`exchange-tag ${isHoneyExchange ? 'honey-exchange-tag' : ''}`}>
             <span className="exchange-icon">🔄</span>
             <span>{item.exchangeQuantity || 1} {item.exchangeItemName}</span>
           </div>
