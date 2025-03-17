@@ -1,4 +1,7 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
+import { createWorker } from 'tesseract.js';
+import { preprocessImageForOcr } from './OcrImageProcessor';
+import { parseMerchantOcrText } from './MerchantOcrParser';
 
 const ImageOCRMerchantInput = ({ 
   onItemsDetected, 
@@ -10,20 +13,63 @@ const ImageOCRMerchantInput = ({
   const [ocrResults, setOcrResults] = useState(null);
   const [error, setError] = useState(null);
   const [showExampleModal, setShowExampleModal] = useState(false);
+  const [ocrProgress, setOcrProgress] = useState(0);
+  const [workerStatus, setWorkerStatus] = useState('initializing');
   const fileInputRef = useRef(null);
+  const workerRef = useRef(null);
 
-  // 處理圖片上傳
+  // Initialize Tesseract.js worker
+  useEffect(() => {
+    const initWorker = async () => {
+      try {
+        setWorkerStatus('loading');
+        // Create worker with progress logger
+        const worker = await createWorker({
+          logger: progress => {
+            console.log('OCR Progress:', progress);
+            if (progress.status === 'recognizing text') {
+              setOcrProgress(parseInt(progress.progress * 100));
+            }
+            setWorkerStatus(progress.status);
+          },
+        });
+        
+        // Load language data - Chinese Traditional + English
+        await worker.loadLanguage('chi_tra+eng');
+        await worker.initialize('chi_tra+eng');
+        
+        // Store worker in ref to avoid recreating it
+        workerRef.current = worker;
+        setWorkerStatus('ready');
+      } catch (err) {
+        console.error('Failed to initialize Tesseract worker:', err);
+        setError('OCR引擎初始化失敗。請稍後再試。');
+        setWorkerStatus('failed');
+      }
+    };
+
+    initWorker();
+
+    // Cleanup worker on component unmount
+    return () => {
+      if (workerRef.current) {
+        workerRef.current.terminate();
+      }
+    };
+  }, []);
+
+  // Handle image upload
   const handleImageUpload = (e) => {
     const file = e.target.files[0];
     if (!file) return;
 
-    // 檢查檔案類型
+    // Check file type
     if (!file.type.match('image.*')) {
       setError('請上傳圖片檔案');
       return;
     }
 
-    // 顯示圖片預覽
+    // Display image preview
     const reader = new FileReader();
     reader.onload = (e) => {
       setPreviewUrl(e.target.result);
@@ -32,151 +78,67 @@ const ImageOCRMerchantInput = ({
     reader.readAsDataURL(file);
   };
 
-  // 處理圖片識別
+  // Process image with OCR
   const processImage = async (imageData) => {
+    if (!workerRef.current || workerStatus !== 'ready') {
+      setError('OCR引擎尚未就緒，請稍候再試。');
+      return;
+    }
+
     setIsProcessing(true);
     setError(null);
+    setOcrProgress(0);
     
     try {
-      // 演示用：模擬從圖片中提取的數據
-      // 根據當前掃描索引生成不同的模擬數據
-      setTimeout(() => {
-        // 第一次掃描的模擬數據 (普通商人全部或五商前6個)
-        const firstScanItems = [
-          {
-            category: '明黃木門碎片',
-            quantity: '2',
-            purchaseTimes: '2',
-            price: '4750',
-            allowsCoinExchange: true,
-            allowsBarterExchange: false
-          },
-          {
-            category: '小小西瓜羹',
-            quantity: '1',
-            purchaseTimes: '1',
-            price: '8550',
-            allowsCoinExchange: true,
-            allowsBarterExchange: false
-          },
-          {
-            category: '小小奇異果羹',
-            quantity: '1',
-            purchaseTimes: '1',
-            price: '8550',
-            allowsCoinExchange: true,
-            allowsBarterExchange: false
-          },
-          {
-            category: '飛雲菇',
-            quantity: '30',
-            purchaseTimes: '2',
-            price: '',
-            allowsCoinExchange: false,
-            allowsBarterExchange: true,
-            exchangeItemName: '藍色漿果',
-            exchangeQuantity: '39'
-          },
-          {
-            category: '番茄汁',
-            quantity: '2',
-            purchaseTimes: '3',
-            price: '',
-            allowsCoinExchange: false,
-            allowsBarterExchange: true,
-            exchangeItemName: '番茄',
-            exchangeQuantity: '8'
-          },
-          {
-            category: '披薩醬',
-            quantity: '2',
-            purchaseTimes: '3',
-            price: '',
-            allowsCoinExchange: false,
-            allowsBarterExchange: true,
-            exchangeItemName: '草莓',
-            exchangeQuantity: '8'
-          }
-        ];
-        
-        // 第二次掃描的模擬數據 (五商後3個)
-        const secondScanItems = [
-          {
-            category: '家園幣',
-            quantity: '1200',
-            purchaseTimes: '1',
-            price: '',
-            allowsCoinExchange: false,
-            allowsBarterExchange: true,
-            exchangeItemName: '蜂蜜',
-            exchangeQuantity: '19'
-          },
-          {
-            category: '家園幣',
-            quantity: '1500',
-            purchaseTimes: '1',
-            price: '',
-            allowsCoinExchange: false,
-            allowsBarterExchange: true,
-            exchangeItemName: '牛奶',
-            exchangeQuantity: '8'
-          },
-          {
-            category: '家園幣',
-            quantity: '1000',
-            purchaseTimes: '1',
-            price: '',
-            allowsCoinExchange: false,
-            allowsBarterExchange: true,
-            exchangeItemName: '草莓',
-            exchangeQuantity: '13'
-          }
-        ];
-        
-        // 根據掃描索引決定要使用哪組數據
-        const mockDetectedItems = scanIndex === 2 ? secondScanItems : firstScanItems;
-        
-        setOcrResults({
-          merchantName: 'How耳包U和花生',
-          discount: '-5%',
-          items: mockDetectedItems
-        });
-        
-        // 傳遞檢測到的商品資訊給父元件
-        onItemsDetected(mockDetectedItems);
-        
-        setIsProcessing(false);
-      }, 1500);
+      // Preprocess image to enhance OCR quality
+      console.log('Preprocessing image...');
+      const processedImageData = await preprocessImageForOcr(imageData);
+      
+      // Perform OCR on the enhanced image
+      console.log('Running OCR...');
+      const { data } = await workerRef.current.recognize(processedImageData);
+      console.log('OCR Result Text:', data.text);
+      
+      // Parse the OCR text to extract structured merchant data
+      const parsedData = parseMerchantOcrText(data.text, scanIndex, merchantType);
+      console.log('Parsed Merchant Data:', parsedData);
+      
+      setOcrResults(parsedData);
+      
+      // Pass detected items to parent component
+      onItemsDetected(parsedData.items);
+      
     } catch (err) {
-      console.error('OCR處理錯誤:', err);
-      setError('圖片處理失敗: ' + err.message);
+      console.error('OCR processing error:', err);
+      setError(`圖片處理失敗: ${err.message || '未知錯誤'}`);
+    } finally {
       setIsProcessing(false);
     }
   };
 
-  // 手動觸發檔案選擇
+  // Trigger file input
   const triggerFileInput = () => {
     fileInputRef.current.click();
   };
 
-  // 從相機捕獲圖像
+  // Capture from camera
   const captureFromCamera = () => {
     fileInputRef.current.accept = 'image/*';
     fileInputRef.current.capture = 'camera';
     fileInputRef.current.click();
   };
 
-  // 顯示範例截圖
+  // Show example screenshot
   const showExampleScreenshot = () => {
     setShowExampleModal(true);
   };
 
-  // 關閉範例截圖模態視窗
+  // Close example screenshot modal
   const closeExampleModal = () => {
     setShowExampleModal(false);
   };
 
-  // 獲取對應的範例截圖路徑
+  // Get appropriate example image path
   const getExampleImagePath = () => {
     if (merchantType === 'regular') {
         // Single screenshot for regular merchant
@@ -186,6 +148,21 @@ const ImageOCRMerchantInput = ({
         return scanIndex === 2 
             ? '/examples/special-merchant-second-scan.jpg' 
             : '/examples/special-merchant-first-scan.jpg';
+    }
+  };
+
+  // Get button text based on worker status
+  const getButtonText = () => {
+    switch (workerStatus) {
+      case 'initializing':
+      case 'loading':
+        return '初始化OCR引擎...';
+      case 'ready':
+        return isProcessing ? '處理中...' : '上傳截圖';
+      case 'failed':
+        return 'OCR引擎初始化失敗';
+      default:
+        return '上傳截圖';
     }
   };
 
@@ -205,16 +182,16 @@ const ImageOCRMerchantInput = ({
             type="button"
             className="ocr-upload-btn"
             onClick={triggerFileInput}
-            disabled={isProcessing}
+            disabled={isProcessing || workerStatus !== 'ready'}
           >
-            <i className="fas fa-image"></i> 上傳截圖
+            <i className="fas fa-image"></i> {getButtonText()}
           </button>
           
           <button
             type="button" 
             className="ocr-camera-btn"
             onClick={captureFromCamera}
-            disabled={isProcessing}
+            disabled={isProcessing || workerStatus !== 'ready'}
           >
             <i className="fas fa-camera"></i> 拍照識別
           </button>
@@ -227,11 +204,18 @@ const ImageOCRMerchantInput = ({
             <i className="fas fa-question-circle"></i> 查看範例截圖
           </button>
         </div>
+
+        {workerStatus === 'loading' && (
+          <div className="ocr-processing">
+            <div className="ocr-spinner"></div>
+            <span>正在加載OCR引擎... 請稍候</span>
+          </div>
+        )}
         
         {isProcessing && (
           <div className="ocr-processing">
             <div className="ocr-spinner"></div>
-            <span>正在識別商品資訊...</span>
+            <span>正在識別商品資訊... {ocrProgress}%</span>
           </div>
         )}
         
@@ -250,29 +234,39 @@ const ImageOCRMerchantInput = ({
             <div className="ocr-results">
               <h4>識別結果:</h4>
               <div className="ocr-merchant-info">
-                <p><strong>商人名稱:</strong> {ocrResults.merchantName}</p>
+                {ocrResults.merchantName && (
+                  <p><strong>商人名稱:</strong> {ocrResults.merchantName}</p>
+                )}
                 {ocrResults.discount && (
                   <p><strong>折扣:</strong> {ocrResults.discount}</p>
                 )}
               </div>
               
               <div className="ocr-detected-items">
-                <h5>檢測到 {ocrResults.items.length} 個商品:</h5>
+                <h5>檢測到 {ocrResults.items.filter(item => item.category).length} 個商品:</h5>
                 <ul>
-                  {ocrResults.items.map((item, index) => (
+                  {ocrResults.items.filter(item => item.category).map((item, index) => (
                     <li key={index}>
                       <span className="item-name">{item.category}</span>
-                      {item.allowsCoinExchange ? (
+                      {item.allowsCoinExchange && item.price ? (
                         <span className="item-price">💰 {item.price}</span>
-                      ) : (
+                      ) : item.allowsBarterExchange && item.exchangeItemName ? (
                         <span className="item-exchange">
                           🔄 {item.exchangeQuantity} {item.exchangeItemName}
                         </span>
-                      )}
+                      ) : null}
                       <span className="item-quantity">x{item.quantity}</span>
                     </li>
                   ))}
                 </ul>
+              </div>
+
+              {/* Manual edit hint */}
+              <div className="ocr-edit-hint">
+                <p>
+                  <i className="fas fa-info-circle"></i> 
+                  識別完成後請檢查結果是否正確，您可以在下一步手動修正任何不準確的資訊。
+                </p>
               </div>
             </div>
           )}

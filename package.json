@@ -8,15 +8,19 @@
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.2.0",
     "@testing-library/user-event": "^13.5.0",
+    "css-select": "^5.1.0",
     "firebase": "^11.4.0",
+    "nth-check": "^2.1.1",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-router-dom": "^7.3.0",
-    "react-scripts": "5.0.1",
-    "tesseract.js": "^6.0.0",
+    "react-scripts": "^5.0.1",
+    "svgo": "^3.3.2",
+    "tesseract.js": "^4.1.4",
     "web-vitals": "^2.1.4"
   },
   "scripts": {
+    "preinstall": "npx npm-force-resolutions",
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
@@ -39,5 +43,19 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "overrides": {
+    "postcss": "^8.4.31",
+    "nth-check": "^2.1.1",
+    "css-select": "^5.1.0",
+    "svgo": "^3.3.2"
+  },
+  "resolutions": {
+    "nth-check": "^2.1.1",
+    "css-select": "^5.1.0",
+    "svgo": "^3.3.2"
+  },
+  "devDependencies": {
+    "npm-force-resolutions": "^0.0.10"
   }
 }
