@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { getAllMerchants, deleteMerchant } from '../../firebase/firestore';
+import { getAllMerchants, deleteMerchant, isDateExpired } from '../../firebase/firestore';
 import ItemCategoryFilter from '../search/ItemCategoryFilter';
 import { useNavigate } from 'react-router-dom';
 import MerchantItem from './MerchantItem';
@@ -508,114 +508,120 @@ function MerchantList() {
         </div>
       ) : (
         <div className="merchants-grid">
-          {filteredMerchants.filter(merchant => merchant.items && merchant.items.length > 0).map((merchant, index) => {
-            // Skip if expired
-            if (!merchant.expiresAt || new Date() > new Date(merchant.expiresAt)) return null;
+  {filteredMerchants.length === 0 ? (
+    <div className="no-results">
+      {searchTerm || !selectedCategories.includes('全部') ? 
+        `沒有符合條件的商人資訊。` : 
+        `目前沒有商人資訊，請添加商人。`}
+    </div>
+  ) : (
+    filteredMerchants.map((merchant, index) => {
+      // Skip merchants without items
+      if (!merchant.items || merchant.items.length === 0) return null;
+      
+      // Current user check
+      const currentPlayerId = localStorage.getItem('submitterPlayerId');
+      const isOwnMerchant = currentPlayerId === merchant.playerId;
 
-            // Get current user playerId from localStorage
-            const currentPlayerId = localStorage.getItem('submitterPlayerId');
-            const isOwnMerchant = currentPlayerId === merchant.playerId;
+      // Determine merchant card class
+      const merchantCardClass = merchant.isSpecialMerchant 
+        ? 'merchant-card special-merchant-card' 
+        : merchant.hasHoneyTrade 
+          ? 'merchant-card honey-merchant-card' 
+          : 'merchant-card';
 
-            // Check if this merchant is expanded
-            const isExpanded = expandedMerchants[merchant.id];
+      // Get expansion state
+      const isExpanded = expandedMerchants[merchant.id];
+      const hasMoreItems = merchant.wasFiltered &&
+        merchant.allItems &&
+        merchant.filteredItems &&
+        merchant.allItems.length > merchant.filteredItems.length;
 
-            // Determine if there are more items to show
-            const hasMoreItems = merchant.wasFiltered &&
-              merchant.allItems &&
-              merchant.filteredItems &&
-              merchant.allItems.length > merchant.filteredItems.length;
+      return (
+        <div key={merchant.id || index} className={merchantCardClass}>
+          <div className="merchant-header">
+            <div className="merchant-title">
+              <h3
+                className="player-id-copy"
+                onClick={() => copyToClipboard(merchant.playerId)}
+                title="點擊複製玩家ID"
+              >
+                {merchant.playerId} <i className="fas fa-copy copy-icon"></i>
+              </h3>
+              {merchant.isSpecialMerchant && (
+                <span className="special-merchant-badge">五商</span>
+              )}
+              {merchant.hasHoneyTrade && !merchant.isSpecialMerchant && (
+                <span className="honey-merchant-badge">蜂蜜交易</span>
+              )}
+            </div>
+            {merchant.discount && (
+              <p className="discount-info">折扣: {merchant.discount}</p>
+            )}
+          </div>
 
-            // Determine merchant card class based on merchant type
-            const merchantCardClass = merchant.isSpecialMerchant 
-              ? 'merchant-card special-merchant-card' 
-              : merchant.hasHoneyTrade 
-                ? 'merchant-card honey-merchant-card' 
-                : 'merchant-card';
+          {merchant.items && merchant.items.length > 0 ? (
+            <div className="items-section">
+              <ul className={`items-list ${merchant.wasFiltered && isExpanded ? 'items-expanding' : ''}`}>
+                {merchant.items.map((item, itemIndex) => (
+                  <MerchantItem
+                    key={itemIndex}
+                    item={{ ...item, showQuantity: true }}
+                    merchantInfo={{ ...merchant, id: merchant.id }}
+                  />
+                ))}
+              </ul>
 
-            return (
-              <div key={index} className={merchantCardClass}>
-                <div className="merchant-header">
-                  <div className="merchant-title">
-                    <h3
-                      className="player-id-copy"
-                      onClick={() => copyToClipboard(merchant.playerId)}
-                      title="點擊複製玩家ID"
-                    >
-                      {merchant.playerId} <i className="fas fa-copy copy-icon"></i>
-                    </h3>
-                    {merchant.isSpecialMerchant && (
-                      <span className="special-merchant-badge">五商</span>
-                    )}
-                    {merchant.hasHoneyTrade && !merchant.isSpecialMerchant && (
-                      <span className="honey-merchant-badge">蜂蜜交易</span>
-                    )}
-                  </div>
-                  {merchant.discount && (
-                    <p className="discount-info">折扣: {merchant.discount}</p>
-                  )}
-                </div>
+              {/* Show expand/collapse button if needed */}
+              {hasMoreItems && (
+                <button
+                  className="expand-collapse-btn"
+                  onClick={() => toggleMerchantExpansion(merchant.id)}
+                >
+                  {isExpanded ? '收起顯示' : '顯示所有商品'}
+                  <i className={`fas ${isExpanded ? 'fa-chevron-up' : 'fa-chevron-down'}`}></i>
+                </button>
+              )}
+            </div>
+          ) : (
+            <div className="no-items">此商人沒有符合搜尋條件的物品</div>
+          )}
 
-                {merchant.items && merchant.items.length > 0 ? (
-                  <div className="items-section">
-                    <ul className={`items-list ${merchant.wasFiltered && isExpanded ? 'items-expanding' : ''}`}>
-                      {merchant.items.map((item, itemIndex) => (
-                        <MerchantItem
-                          key={itemIndex}
-                          item={{ ...item, showQuantity: true }}
-                          merchantInfo={{ ...merchant, id: merchant.id }}
-                        />
-                      ))}
-                    </ul>
-
-                    {/* Show expand/collapse button at the bottom if there are more items */}
-                    {hasMoreItems && (
-                      <button
-                        className="expand-collapse-btn"
-                        onClick={() => toggleMerchantExpansion(merchant.id)}
-                      >
-                        {isExpanded ? '收起顯示' : '顯示所有商品'}
-                        <i className={`fas ${isExpanded ? 'fa-chevron-up' : 'fa-chevron-down'}`}></i>
-                      </button>
-                    )}
-                  </div>
-                ) : (
-                  <div className="no-items">此商人沒有符合搜尋條件的物品</div>
-                )}
-
-                <div className="merchant-footer">
-                  <div className="footer-content">
-                    <div className="time-info">
-                      <p className="submission-time">
-                        <span>{formatTimestamp(merchant.timestamp)}</span>
-                      </p>
-                    </div>
-
-                    {isOwnMerchant && (
-                      <div className="edit-controls">
-                        <button
-                          className="edit-btn"
-                          onClick={() => navigate(`/edit-merchant/${merchant.id}`)}
-                          title="編輯商人資訊"
-                          disabled={deleting}
-                        >
-                          編輯
-                        </button>
-                        <button
-                          className="delete-btn"
-                          onClick={() => handleDeleteMerchant(merchant.id)}
-                          title="刪除商人資訊"
-                          disabled={deleting}
-                        >
-                          {deleting ? '刪除中...' : '刪除'}
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                </div>
+          <div className="merchant-footer">
+            <div className="footer-content">
+              <div className="time-info">
+                <p className="submission-time">
+                  <span>{formatTimestamp(merchant.timestamp)}</span>
+                </p>
               </div>
-            );
-          }).filter(Boolean)}
+
+              {isOwnMerchant && (
+                <div className="edit-controls">
+                  <button
+                    className="edit-btn"
+                    onClick={() => navigate(`/edit-merchant/${merchant.id}`)}
+                    title="編輯商人資訊"
+                    disabled={deleting}
+                  >
+                    編輯
+                  </button>
+                  <button
+                    className="delete-btn"
+                    onClick={() => handleDeleteMerchant(merchant.id)}
+                    title="刪除商人資訊"
+                    disabled={deleting}
+                  >
+                    {deleting ? '刪除中...' : '刪除'}
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
         </div>
+      );
+    })
+  )}
+</div>
       )}
 
       {/* Success notification */}
