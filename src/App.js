@@ -6,7 +6,6 @@ import AddMerchantPage from './pages/AddMerchantPage';
 import EditMerchantPage from './pages/EditMerchantPage';
 import LoginPage from './pages/LoginPage';
 import UserGuidePage from './pages/UserGuidePage';
-import DebugPanel from './components/debug/DebugPanel';
 // Removed CartDetailPage import
 import ShoppingCart from './components/cart/ShoppingCart';
 import { checkUserAuth } from './firebase/userAuth';
@@ -79,7 +78,6 @@ function App() {
             <Route path="*" element={<Navigate to="/login" />} />
           </Routes>
         </main>
-        {/* {process.env.NODE_ENV !== 'production' && <DebugPanel />} */}
       </div>
       <ShoppingCart />
     </Router>
