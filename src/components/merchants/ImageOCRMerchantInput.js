@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { createWorker } from 'tesseract.js';
-import { preprocessImageForOcr } from './OcrImageProcessor';
-import { parseMerchantOcrText } from './MerchantOcrParser';
+import { preprocessImageForOcr } from '../../utils/OcrImageProcessor';
+import { parseMerchantOcrText } from '../../utils/MerchantOcrParser';
 
 const ImageOCRMerchantInput = ({ 
   onItemsDetected, 
