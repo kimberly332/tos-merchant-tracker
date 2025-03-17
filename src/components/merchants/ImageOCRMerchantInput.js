@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
 
-const ImageOCRMerchantInput = ({ onItemsDetected }) => {
+const ImageOCRMerchantInput = ({ onItemsDetected, scanIndex }) => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [previewUrl, setPreviewUrl] = useState(null);
   const [ocrResults, setOcrResults] = useState(null);
@@ -62,9 +62,10 @@ const ImageOCRMerchantInput = ({ onItemsDetected }) => {
       */
       
       // 演示用：模擬從圖片中提取的數據
-      // 在實際應用中，這部分會由您的OCR服務返回
+      // 根據當前掃描索引生成不同的模擬數據
       setTimeout(() => {
-        const mockDetectedItems = [
+        // 第一次掃描的模擬數據 (普通商人全部或五商前6個)
+        const firstScanItems = [
           {
             category: '明黃木門碎片',
             quantity: '2',
@@ -120,6 +121,43 @@ const ImageOCRMerchantInput = ({ onItemsDetected }) => {
             exchangeQuantity: '8'
           }
         ];
+        
+        // 第二次掃描的模擬數據 (五商後3個)
+const secondScanItems = [
+    {
+      category: '家園幣',
+      quantity: '1200',
+      purchaseTimes: '1',
+      price: '',
+      allowsCoinExchange: false,
+      allowsBarterExchange: true,
+      exchangeItemName: '蜂蜜',
+      exchangeQuantity: '19'
+    },
+    {
+      category: '家園幣',
+      quantity: '1500',
+      purchaseTimes: '1',
+      price: '',
+      allowsCoinExchange: false,
+      allowsBarterExchange: true,
+      exchangeItemName: '牛奶',
+      exchangeQuantity: '8'
+    },
+    {
+      category: '家園幣',
+      quantity: '1000',
+      purchaseTimes: '1',
+      price: '',
+      allowsCoinExchange: false,
+      allowsBarterExchange: true,
+      exchangeItemName: '草莓',
+      exchangeQuantity: '13'
+    }
+  ];
+        
+        // 根據掃描索引決定要使用哪組數據
+        const mockDetectedItems = scanIndex === 2 ? secondScanItems : firstScanItems;
         
         setOcrResults({
           merchantName: 'How耳包U和花生',
@@ -190,10 +228,10 @@ const ImageOCRMerchantInput = ({ onItemsDetected }) => {
         )}
         
         {error && (
-  <div className="ocr-error">
-    {typeof error === 'object' ? error.message : error}
-  </div>
-)}
+          <div className="ocr-error">
+            {typeof error === 'object' ? error.message : error}
+          </div>
+        )}
       </div>
       
       {previewUrl && (
