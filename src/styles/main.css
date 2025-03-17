@@ -1001,3 +1001,4 @@ body {
   @import './components/required-fields.css'; 
   @import './components/ocr-merchant.css';
   @import './components/enhanced-ocr-form.css';
+  @import './components/example-screenshot-modal.css';

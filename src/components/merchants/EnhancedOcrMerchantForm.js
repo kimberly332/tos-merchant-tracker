@@ -724,10 +724,12 @@ const EnhancedOcrMerchantForm = () => {
                         <div className="ocr-section">
                             <h3>第二次截圖 (後3種商品)</h3>
                             <p className="ocr-description">
-                                請上傳第二張截圖，含後3種商品
+                                請上傳第二張截圖，含後3種商品（家園幣交易）
                             </p>
 
-                            <ImageOCRMerchantInput onItemsDetected={handleSecondScanItems} scanIndex={2} /><div className="ocr-skip-container">
+                            <ImageOCRMerchantInput onItemsDetected={handleSecondScanItems} scanIndex={2} />
+
+                            <div className="ocr-skip-container">
                                 <button
                                     type="button"
                                     className="ocr-skip-btn"

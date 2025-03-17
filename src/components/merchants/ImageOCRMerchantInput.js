@@ -1,10 +1,11 @@
 import React, { useState, useRef } from 'react';
 
-const ImageOCRMerchantInput = ({ onItemsDetected, scanIndex }) => {
+const ImageOCRMerchantInput = ({ onItemsDetected, scanIndex = 1 }) => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [previewUrl, setPreviewUrl] = useState(null);
   const [ocrResults, setOcrResults] = useState(null);
   const [error, setError] = useState(null);
+  const [showExampleModal, setShowExampleModal] = useState(false);
   const fileInputRef = useRef(null);
 
   // 處理圖片上傳
@@ -123,38 +124,38 @@ const ImageOCRMerchantInput = ({ onItemsDetected, scanIndex }) => {
         ];
         
         // 第二次掃描的模擬數據 (五商後3個)
-const secondScanItems = [
-    {
-      category: '家園幣',
-      quantity: '1200',
-      purchaseTimes: '1',
-      price: '',
-      allowsCoinExchange: false,
-      allowsBarterExchange: true,
-      exchangeItemName: '蜂蜜',
-      exchangeQuantity: '19'
-    },
-    {
-      category: '家園幣',
-      quantity: '1500',
-      purchaseTimes: '1',
-      price: '',
-      allowsCoinExchange: false,
-      allowsBarterExchange: true,
-      exchangeItemName: '牛奶',
-      exchangeQuantity: '8'
-    },
-    {
-      category: '家園幣',
-      quantity: '1000',
-      purchaseTimes: '1',
-      price: '',
-      allowsCoinExchange: false,
-      allowsBarterExchange: true,
-      exchangeItemName: '草莓',
-      exchangeQuantity: '13'
-    }
-  ];
+        const secondScanItems = [
+          {
+            category: '家園幣',
+            quantity: '1200',
+            purchaseTimes: '1',
+            price: '',
+            allowsCoinExchange: false,
+            allowsBarterExchange: true,
+            exchangeItemName: '蜂蜜',
+            exchangeQuantity: '19'
+          },
+          {
+            category: '家園幣',
+            quantity: '1500',
+            purchaseTimes: '1',
+            price: '',
+            allowsCoinExchange: false,
+            allowsBarterExchange: true,
+            exchangeItemName: '牛奶',
+            exchangeQuantity: '8'
+          },
+          {
+            category: '家園幣',
+            quantity: '1000',
+            purchaseTimes: '1',
+            price: '',
+            allowsCoinExchange: false,
+            allowsBarterExchange: true,
+            exchangeItemName: '草莓',
+            exchangeQuantity: '13'
+          }
+        ];
         
         // 根據掃描索引決定要使用哪組數據
         const mockDetectedItems = scanIndex === 2 ? secondScanItems : firstScanItems;
@@ -189,6 +190,23 @@ const secondScanItems = [
     fileInputRef.current.click();
   };
 
+  // 顯示範例截圖
+  const showExampleScreenshot = () => {
+    setShowExampleModal(true);
+  };
+
+  // 關閉範例截圖模態視窗
+  const closeExampleModal = () => {
+    setShowExampleModal(false);
+  };
+
+  // 獲取對應的範例截圖路徑
+  const getExampleImagePath = () => {
+    return scanIndex === 2 
+      ? '/examples/special-merchant-2.jpg' 
+      : '/examples/merchant-screenshot.jpg';
+  };
+
   return (
     <div className="ocr-merchant-input">
       <div className="ocr-controls">
@@ -217,6 +235,14 @@ const secondScanItems = [
             disabled={isProcessing}
           >
             <i className="fas fa-camera"></i> 拍照識別
+          </button>
+          
+          <button
+            type="button"
+            className="ocr-example-btn"
+            onClick={showExampleScreenshot}
+          >
+            <i className="fas fa-question-circle"></i> 查看範例截圖
           </button>
         </div>
         
@@ -275,8 +301,53 @@ const secondScanItems = [
         <p>
           <i className="fas fa-info-circle"></i> 
           提示：請確保截圖清晰可見，包含完整的商人物品資訊。
+          {scanIndex === 2 ? (
+            <span className="special-tip"> 這是五商的第二張截圖，請上傳包含家園幣交易的部分。</span>
+          ) : (
+            <span className="special-tip"> 點擊「查看範例截圖」可以看到正確的截圖方式。</span>
+          )}
         </p>
       </div>
+      
+      {/* 範例截圖模態視窗 */}
+      {showExampleModal && (
+        <div className="example-modal-overlay" onClick={closeExampleModal}>
+          <div className="example-modal-content" onClick={e => e.stopPropagation()}>
+            <div className="example-modal-header">
+              <h3>{scanIndex === 2 ? '五商第二張截圖範例' : '商人截圖範例'}</h3>
+              <button className="example-modal-close" onClick={closeExampleModal}>×</button>
+            </div>
+            <div className="example-modal-body">
+              <img src={getExampleImagePath()} alt="範例截圖" className="example-screenshot" />
+              <p className="example-description">
+                {scanIndex === 2 ? (
+                  '上傳五商的第二部分截圖，應該包含家園幣交易的內容（通常是底部的3個項目）。'
+                ) : (
+                  '商人截圖應該清晰顯示所有販售物品，包括物品名稱、數量、價格或交換材料。'
+                )}
+              </p>
+              
+              <div className="example-tips">
+                <h4>截圖要點：</h4>
+                <ul>
+                  <li>確保商人視窗完全展開</li>
+                  <li>所有物品信息清晰可見</li>
+                  <li>避免遊戲界面上其他干擾元素</li>
+                  <li>截圖包含商人名稱和折扣（如果有的話）</li>
+                  {scanIndex === 2 && (
+                    <li><strong>五商第二張截圖應包含剩餘的3個家園幣交易項目</strong></li>
+                  )}
+                </ul>
+              </div>
+            </div>
+            <div className="example-modal-footer">
+              <button className="example-modal-btn" onClick={closeExampleModal}>
+                我明白了
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
