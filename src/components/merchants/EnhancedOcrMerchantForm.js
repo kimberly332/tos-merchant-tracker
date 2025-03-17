@@ -8,7 +8,7 @@ import '../common/SearchableSelect.css';
 
 const EnhancedOcrMerchantForm = () => {
     const [activeTab, setActiveTab] = useState(0);
-    const [merchantType, setMerchantType] = useState('regular'); // 'regular' or 'special'
+    const [merchantType, setmerchantType] = useState('regular'); // 'regular' or 'special'
     const [formData, setFormData] = useState({
         playerId: '',
         discount: '',
@@ -413,7 +413,7 @@ const EnhancedOcrMerchantForm = () => {
                 exchangeQuantity: ''
             }))
         });
-        setMerchantType('regular');
+        setmerchantType('regular');
         setIsSpecialMerchant(false);
         setActiveTab(0);
         setFirstScanComplete(false);
@@ -421,8 +421,8 @@ const EnhancedOcrMerchantForm = () => {
     };
 
     // 處理商人類型變更
-    const handleMerchantTypeChange = (type) => {
-        setMerchantType(type);
+    const handlemerchantTypeChange = (type) => {
+        setmerchantType(type);
 
         // 如果從五商變成普通商人，重置第一次掃描完成狀態
         if (type === 'regular') {
@@ -670,7 +670,7 @@ const EnhancedOcrMerchantForm = () => {
                                     name="merchantType"
                                     value="regular"
                                     checked={merchantType === 'regular'}
-                                    onChange={() => handleMerchantTypeChange('regular')}
+                                    onChange={() => handlemerchantTypeChange('regular')}
                                 />
                                 普通商人 (6種商品)
                             </label>
@@ -680,7 +680,7 @@ const EnhancedOcrMerchantForm = () => {
                                     name="merchantType"
                                     value="special"
                                     checked={merchantType === 'special'}
-                                    onChange={() => handleMerchantTypeChange('special')}
+                                    onChange={() => handlemerchantTypeChange('special')}
                                 />
                                 五商 (9種商品)
                             </label>
@@ -697,7 +697,7 @@ const EnhancedOcrMerchantForm = () => {
                                     : '上傳遊戲商人截圖，自動識別商品資訊'}
                             </p>
 
-                            <ImageOCRMerchantInput onItemsDetected={handleFirstScanItems} scanIndex={1} />
+                            <ImageOCRMerchantInput onItemsDetected={handleFirstScanItems} scanIndex={1} merchantType={merchantType} />
 
                             <div className="ocr-skip-container">
                                 {merchantType === 'special' && (
@@ -727,7 +727,7 @@ const EnhancedOcrMerchantForm = () => {
                                 請上傳第二張截圖，含後3種商品（家園幣交易）
                             </p>
 
-                            <ImageOCRMerchantInput onItemsDetected={handleSecondScanItems} scanIndex={2} />
+                            <ImageOCRMerchantInput onItemsDetected={handleSecondScanItems} scanIndex={2} merchantType={merchantType}/>
 
                             <div className="ocr-skip-container">
                                 <button

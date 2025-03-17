@@ -1,6 +1,10 @@
 import React, { useState, useRef } from 'react';
 
-const ImageOCRMerchantInput = ({ onItemsDetected, scanIndex = 1 }) => {
+const ImageOCRMerchantInput = ({ 
+  onItemsDetected, 
+  scanIndex = 1, 
+  merchantType = 'regular' 
+}) => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [previewUrl, setPreviewUrl] = useState(null);
   const [ocrResults, setOcrResults] = useState(null);
@@ -34,34 +38,6 @@ const ImageOCRMerchantInput = ({ onItemsDetected, scanIndex = 1 }) => {
     setError(null);
     
     try {
-      // 這裡是調用OCR API的地方
-      // 實際實現中，您需要整合適合的OCR服務，例如:
-      // - 自己的後端API (推薦，可以受控和優化針對遊戲UI的識別)
-      // - 第三方OCR服務 (需API金鑰配置)
-      
-      // 示意：使用fetch調用您的OCR API
-      /*
-      const response = await fetch('/api/ocr', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ imageData }),
-      });
-      
-      if (!response.ok) {
-        throw new Error('OCR服務請求失敗');
-      }
-      
-      const data = await response.json();
-      setOcrResults(data);
-      
-      // 提取並傳遞檢測到的商品資訊
-      if (data.items && data.items.length > 0) {
-        onItemsDetected(data.items);
-      }
-      */
-      
       // 演示用：模擬從圖片中提取的數據
       // 根據當前掃描索引生成不同的模擬數據
       setTimeout(() => {
@@ -202,9 +178,15 @@ const ImageOCRMerchantInput = ({ onItemsDetected, scanIndex = 1 }) => {
 
   // 獲取對應的範例截圖路徑
   const getExampleImagePath = () => {
-    return scanIndex === 2 
-      ? '/examples/special-merchant-2.jpg' 
-      : '/examples/merchant-screenshot.jpg';
+    if (merchantType === 'regular') {
+        // Single screenshot for regular merchant
+        return '/examples/merchant-screenshot.jpg';
+    } else {
+        // Two screenshots for special merchant
+        return scanIndex === 2 
+            ? '/examples/special-merchant-second-scan.jpg' 
+            : '/examples/special-merchant-first-scan.jpg';
+    }
   };
 
   return (
@@ -312,42 +294,54 @@ const ImageOCRMerchantInput = ({ onItemsDetected, scanIndex = 1 }) => {
       {/* 範例截圖模態視窗 */}
       {showExampleModal && (
         <div className="example-modal-overlay" onClick={closeExampleModal}>
-          <div className="example-modal-content" onClick={e => e.stopPropagation()}>
-            <div className="example-modal-header">
-              <h3>{scanIndex === 2 ? '五商第二張截圖範例' : '商人截圖範例'}</h3>
-              <button className="example-modal-close" onClick={closeExampleModal}>×</button>
+            <div className="example-modal-content" onClick={e => e.stopPropagation()}>
+                <div className="example-modal-header">
+                    <h3>
+                        {merchantType === 'regular' 
+                            ? '商人截圖範例'
+                            : (scanIndex === 2 
+                                ? '五商第二張截圖範例' 
+                                : '五商第一張截圖範例')
+                        }
+                    </h3>
+                    <button className="example-modal-close" onClick={closeExampleModal}>×</button>
+                </div>
+                <div className="example-modal-body">
+                    <img src={getExampleImagePath()} alt="範例截圖" className="example-screenshot" />
+                    <p className="example-description">
+                        {merchantType === 'regular' ? (
+                            '商人截圖應該清晰顯示所有販售物品，包括物品名稱、數量、價格或交換材料。'
+                        ) : (scanIndex === 2 ? (
+                            '上傳五商的第二部分截圖，應該包含家園幣交易的內容（通常是底部的3個項目）。'
+                        ) : (
+                            '上傳五商的第一部分截圖，包含前6種商品的資訊。'
+                        ))}
+                    </p>
+                    
+                    <div className="example-tips">
+                        <h4>截圖要點：</h4>
+                        <ul>
+                            <li>確保商人視窗完全展開</li>
+                            <li>所有物品信息清晰可見</li>
+                            <li>避免遊戲界面上其他干擾元素</li>
+                            <li>截圖包含商人名稱和折扣（如果有的話）</li>
+                            {merchantType === 'special' && scanIndex === 1 && (
+                                <li><strong>第一張截圖包含前6種商品</strong></li>
+                            )}
+                            {merchantType === 'special' && scanIndex === 2 && (
+                                <li><strong>第二張截圖應包含剩餘的3個家園幣交易項目</strong></li>
+                            )}
+                        </ul>
+                    </div>
+                </div>
+                <div className="example-modal-footer">
+                    <button className="example-modal-btn" onClick={closeExampleModal}>
+                        我明白了
+                    </button>
+                </div>
             </div>
-            <div className="example-modal-body">
-              <img src={getExampleImagePath()} alt="範例截圖" className="example-screenshot" />
-              <p className="example-description">
-                {scanIndex === 2 ? (
-                  '上傳五商的第二部分截圖，應該包含家園幣交易的內容（通常是底部的3個項目）。'
-                ) : (
-                  '商人截圖應該清晰顯示所有販售物品，包括物品名稱、數量、價格或交換材料。'
-                )}
-              </p>
-              
-              <div className="example-tips">
-                <h4>截圖要點：</h4>
-                <ul>
-                  <li>確保商人視窗完全展開</li>
-                  <li>所有物品信息清晰可見</li>
-                  <li>避免遊戲界面上其他干擾元素</li>
-                  <li>截圖包含商人名稱和折扣（如果有的話）</li>
-                  {scanIndex === 2 && (
-                    <li><strong>五商第二張截圖應包含剩餘的3個家園幣交易項目</strong></li>
-                  )}
-                </ul>
-              </div>
-            </div>
-            <div className="example-modal-footer">
-              <button className="example-modal-btn" onClick={closeExampleModal}>
-                我明白了
-              </button>
-            </div>
-          </div>
         </div>
-      )}
+    )}
     </div>
   );
 };
