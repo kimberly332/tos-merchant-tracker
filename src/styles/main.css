@@ -948,7 +948,7 @@ body {
   .item-entry-container {
     flex: 0 0 90%;
     scroll-snap-align: start;
-    margin-right: 1rem;
+    /* margin-right: 1rem; */
     min-width: 280px;
   }
   
@@ -999,3 +999,6 @@ body {
   @import './components/guide.css'; 
   @import './components/delete-confirmation.css'; 
   @import './components/required-fields.css'; 
+  @import './components/ocr-merchant.css';
+  @import './components/enhanced-ocr-form.css';
+  @import './components/example-screenshot-modal.css';

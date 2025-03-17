@@ -74,32 +74,48 @@ export const addMerchant = async (merchantData) => {
     // 設置過期時間為台灣午夜
     const expiresAt = getTaiwanEndOfDay();
 
-    // 確保每個物品有 purchaseTimes 屬性
+    // 確保每個物品有 purchaseTimes 屬性，並且沒有 undefined 值
     const processedItems = merchantData.items.map(item => {
       // 如果沒有提供 purchaseTimes，設置為 1
-      if (!item.purchaseTimes) {
-        return {
-          ...item,
-          purchaseTimes: 1
-        };
+      const processedItem = {
+        ...item,
+        purchaseTimes: item.purchaseTimes || 1
+      };
+      
+      // 將所有 undefined 值替換為 null
+      Object.keys(processedItem).forEach(key => {
+        if (processedItem[key] === undefined) {
+          processedItem[key] = null;
+        }
+      });
+      
+      return processedItem;
+    });
+
+    // 創建一個清理過的商人數據對象
+    const cleanMerchantData = {
+      ...merchantData,
+      items: processedItems,
+      serverId, // 添加伺服器ID
+      timestamp: serverTimestamp(),
+      expiresAt
+    };
+    
+    // 將所有 undefined 值替換為 null (頂層屬性)
+    Object.keys(cleanMerchantData).forEach(key => {
+      if (cleanMerchantData[key] === undefined) {
+        cleanMerchantData[key] = null;
       }
-      return item;
     });
 
     // 使用伺服器子集合添加商人資料
     const serverMerchantsRef = collection(db, `servers/${serverId}/merchants`);
-    const docRef = await addDoc(serverMerchantsRef, {
-      ...merchantData,
-      serverId, // 添加伺服器ID
-      items: processedItems,
-      timestamp: serverTimestamp(),
-      expiresAt
-    });
+    const docRef = await addDoc(serverMerchantsRef, cleanMerchantData);
 
     return { success: true, id: docRef.id };
   } catch (error) {
     console.error('添加商人時發生錯誤:', error);
-    return { success: false, error };
+    return { success: false, error: error.message || '添加商人時發生錯誤' };
   }
 };
 
