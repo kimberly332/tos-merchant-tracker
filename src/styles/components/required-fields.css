@@ -1,0 +1,67 @@
+/* 
+ * required-fields.css
+ * Styling for required form fields with asterisk indicator
+ */
+
+/* Required field indicator styling */
+.form-group label.required::after {
+    content: " *";
+    color: #ff8a80;
+    font-weight: bold;
+  }
+  
+  /* Special styling for required field inputs */
+  .form-group.required-field input:invalid,
+  .form-group.required-field select:invalid,
+  .form-group.required-field .searchable-select-container input:invalid {
+    border-color: rgba(244, 67, 54, 0.4);
+  }
+  
+  /* Focus state for required fields */
+  .form-group.required-field input:focus:invalid,
+  .form-group.required-field select:focus:invalid,
+  .form-group.required-field .searchable-select-container input:focus:invalid {
+    box-shadow: 0 0 0 2px rgba(244, 67, 54, 0.2);
+  }
+  
+  /* Styling for the exchange option required for 家園幣 */
+  .exchange-option input[type="radio"]:required {
+    outline: 2px solid rgba(244, 67, 54, 0.4);
+  }
+  
+  /* Add a subtle background to required field labels */
+  .form-group.required-field label {
+    position: relative;
+  }
+  
+  /* Remove the required tag since we're using asterisks now */
+  .required-tag {
+    display: none;
+  }
+  
+  /* Optional: Add an extra visual hint for required fields in the form groups */
+  .form-group.required-field {
+    position: relative;
+  }
+  
+  .form-group.required-field::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: -8px;
+    height: 100%;
+    width: 3px;
+    background-color: rgba(244, 67, 54, 0.3);
+    border-radius: 2px;
+  }
+  
+  /* Add a helper text about required fields at the top of the form */
+  .merchant-form::before,
+  .special-merchant-form::before {
+    content: "* 表示必填欄位";
+    display: block;
+    color: #ff8a80;
+    font-size: 0.85rem;
+    margin-bottom: 1rem;
+    font-style: italic;
+  }

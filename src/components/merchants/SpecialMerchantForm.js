@@ -4,9 +4,7 @@ import { addSpecialMerchant } from '../../firebase/firestore';
 function SpecialMerchantForm() {
   const [formData, setFormData] = useState({
     playerId: '',
-    // serverName: '',
     notes: ''
-    // Removed: location, exchangeRate, totalAmount
   });
   const [submitting, setSubmitting] = useState(false);
   const [submitResult, setSubmitResult] = useState(null);
@@ -64,8 +62,8 @@ function SpecialMerchantForm() {
       )}
       
       <form onSubmit={handleSubmit} className="special-merchant-form">
-        <div className="form-group">
-          <label htmlFor="playerId">您的遊戲名稱</label>
+        <div className="form-group required-field">
+          <label htmlFor="playerId" className="required">您的遊戲名稱</label>
           <input
             type="text"
             id="playerId"
@@ -75,8 +73,6 @@ function SpecialMerchantForm() {
             required
           />
         </div>
-        
-        {/* Removed location, exchangeRate, and totalAmount fields */}
         
         <div className="form-group">
           <label htmlFor="notes">備註</label>

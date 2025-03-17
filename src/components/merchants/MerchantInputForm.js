@@ -455,7 +455,7 @@ function MerchantInputForm() {
 
       <form onSubmit={handleSubmit} className="merchant-form">
         <div className="form-group">
-          <label htmlFor="playerId">您的遊戲名稱</label>
+          <label htmlFor="playerId" className="required">您的遊戲名稱</label>
           <input
             type="text"
             id="playerId"
@@ -492,8 +492,8 @@ function MerchantInputForm() {
               <div className="item-section">
                 <h4 className="item-section-title">物品資訊 {index + 1}</h4>
                 <div className="item-entry">
-                  <div className="form-group">
-                    <label htmlFor={`category-${index}`}>物品名稱</label>
+                  <div className="form-group required-field">
+                    <label htmlFor={`category-${index}`} className="required">物品名稱</label>
                     <SearchableSelect
                       groups={categoryGroups}
                       value={item.category}
@@ -511,8 +511,8 @@ function MerchantInputForm() {
 
                   {/* 當選擇「其他」時顯示自定義輸入框 */}
                   {item.category === '其他' && (
-                    <div className="form-group">
-                      <label htmlFor={`customItem-${index}`}>自定義物品名稱</label>
+                    <div className="form-group required-field">
+                      <label htmlFor={`customItem-${index}`} className="required">自定義物品名稱</label>
                       <input
                         type="text"
                         id={`customItem-${index}`}
@@ -525,8 +525,8 @@ function MerchantInputForm() {
                     </div>
                   )}
 
-                  <div className="form-group form-group-spacing">
-                    <label htmlFor={`quantity-${index}`}>物品數量</label>
+                  <div className="form-group form-group-spacing required-field">
+                    <label htmlFor={`quantity-${index}`} className="required">物品數量</label>
                     <input
                       type="number"
                       id={`quantity-${index}`}
@@ -539,8 +539,8 @@ function MerchantInputForm() {
                   </div>
 
                   {/* 可購買數量欄位的更新 */}
-                  <div className="form-group form-group-spacing">
-                    <label htmlFor={`purchaseTimes-${index}`}>本攤位可購入次數</label>
+                  <div className="form-group form-group-spacing required-field">
+                    <label htmlFor={`purchaseTimes-${index}`} className="required">本攤位可購入次數</label>
                     <input
                       type="number"
                       id={`purchaseTimes-${index}`}
@@ -588,8 +588,8 @@ function MerchantInputForm() {
                 {/* 家園幣價格輸入 (當啟用家園幣交易時顯示) */}
                 {item.allowsCoinExchange && (
                   <div className="exchange-fields">
-                    <div className="form-group">
-                      <label htmlFor={`price-${index}`}>單價 (家園幣)</label>
+                    <div className="form-group required-field">
+                      <label htmlFor={`price-${index}`} className="required">單價 (家園幣)</label>
                       <input
                         type="number"
                         id={`price-${index}`}
@@ -609,8 +609,8 @@ function MerchantInputForm() {
                 {item.allowsBarterExchange && (
                   <div className="exchange-fields">
                     <div className="barter-item-entry">
-                      <div className="form-group">
-                        <label htmlFor={`exchange-item-${index}`}>交換物品名稱</label>
+                      <div className="form-group required-field">
+                        <label htmlFor={`exchange-item-${index}`} className="required">交換物品名稱</label>
                         <SearchableSelect
                           groups={exchangeCategoryGroups}
                           value={item.exchangeItemName}
@@ -628,8 +628,8 @@ function MerchantInputForm() {
 
                       {/* 當選擇「其他」作為交換物品時顯示自定義輸入框 */}
                       {item.exchangeItemName === '其他' && (
-                        <div className="form-group">
-                          <label htmlFor={`customExchangeItem-${index}`}>自定義交換物品名稱</label>
+                        <div className="form-group required-field">
+                          <label htmlFor={`customExchangeItem-${index}`} className="required">自定義交換物品名稱</label>
                           <input
                             type="text"
                             id={`customExchangeItem-${index}`}
@@ -643,8 +643,8 @@ function MerchantInputForm() {
                       )}
 
                       {/* 交換數量輸入欄位的更新 */}
-                      <div className="form-group">
-                        <label htmlFor={`exchange-quantity-${index}`}>交換數量</label>
+                      <div className="form-group required-field">
+                        <label htmlFor={`exchange-quantity-${index}`} className="required">交換數量</label>
                         <input
                           type="number"
                           id={`exchange-quantity-${index}`}
