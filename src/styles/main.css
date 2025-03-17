@@ -999,3 +999,4 @@ body {
   @import './components/guide.css'; 
   @import './components/delete-confirmation.css'; 
   @import './components/required-fields.css'; 
+  @import './components/ocr-merchant.css';

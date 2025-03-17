@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import MerchantInputForm from '../components/merchants/MerchantInputForm';
+import OcrMerchantForm from '../components/merchants/OcrMerchantForm';
 import { checkUserAuth } from '../firebase/userAuth';
 import { checkUserHasSubmittedToday, deleteMerchant } from '../firebase/firestore';
 import SuccessNotification from '../components/common/SuccessNotification';
@@ -181,7 +182,7 @@ function AddMerchantPage() {
       <p className="description">
         分享你今天所遇到的商人資訊，幫助其他玩家。
       </p>
-      <MerchantInputForm />
+      <OcrMerchantForm />
       
       {/* 成功提示訊息 */}
       {showNotification && (
