@@ -4,27 +4,98 @@ import { parseMerchantOcrText } from './MerchantOcrParser';
 // Function to process an image with Google Cloud Vision API
 export const processImageWithVision = async (imageData) => {
   try {
-    // Your deployed function URL
-    const apiUrl = 'https://console.firebase.google.com/project/tos-merchant-tracker/overview';
+    // Remove data:image/jpeg;base64, prefix if present
+    const base64Image = imageData.includes('base64,') 
+      ? imageData.split('base64,')[1] 
+      : imageData;
 
-    const response = await fetch(apiUrl, {
+    // Get API key from environment variable
+    const apiKey = process.env.REACT_APP_GOOGLE_VISION_API_KEY;
+    
+    // Get credentials from environment variable
+    let credentials;
+    try {
+      credentials = JSON.parse(process.env.REACT_APP_GOOGLE_VISION_CREDENTIALS);
+    } catch (e) {
+      console.error('Error parsing credentials from environment variable', e);
+    }
+    
+    // Log for debugging (remove in production)
+    console.log('Using API key and credentials:', { 
+      apiKey: apiKey ? 'Available' : 'Missing',
+      credentials: credentials ? 'Available' : 'Missing'
+    });
+
+    // Prepare request body for Google Cloud Vision API
+    const requestBody = {
+      requests: [
+        {
+          image: {
+            content: base64Image
+          },
+          features: [
+            {
+              type: 'TEXT_DETECTION'
+            }
+          ],
+          imageContext: {
+            languageHints: ['zh-Hant', 'en'] // Chinese Traditional + English
+          }
+        }
+      ]
+    };
+    
+    // Create URL with API key from environment variable
+    const apiKeyUrl = `https://vision.googleapis.com/v1/images:annotate?key=${apiKey}`;
+    
+    // Make the request to Vision API
+    const response = await fetch(apiKeyUrl, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify({ imageData })
+      body: JSON.stringify(requestBody)
     });
 
+    // Check if response is successful
     if (!response.ok) {
       const errorText = await response.text();
-      throw new Error(`OCR service error: ${response.status} ${errorText}`);
+      console.error('Vision API error:', errorText);
+      
+      // If we get an authentication error, try the direct API approach
+      if (response.status === 401 || response.status === 403) {
+        return await tryDirectVisionAPI(base64Image);
+      }
+      
+      throw new Error(`Google Vision API error: ${response.status} ${errorText}`);
     }
 
     const result = await response.json();
-    return result.text;
+    console.log('Vision API response:', result);
+
+    // Extract text from the response
+    const textAnnotations = result.responses[0]?.textAnnotations;
+    if (!textAnnotations || textAnnotations.length === 0) {
+      throw new Error('No text detected in the image');
+    }
+
+    // The first textAnnotation contains the entire text
+    const detectedText = textAnnotations[0].description;
+    console.log('Detected text:', detectedText);
+
+    return detectedText;
   } catch (error) {
-    console.error('Error processing image with OCR service:', error);
-    throw error;
+    console.error('Error processing image with Google Vision:', error);
+    
+    // Try the direct API approach as a fallback
+    try {
+      return await tryDirectVisionAPI(
+        imageData.includes('base64,') ? imageData.split('base64,')[1] : imageData
+      );
+    } catch (fallbackError) {
+      console.error('Fallback approach also failed:', fallbackError);
+      throw error;
+    }
   }
 };
 
