@@ -2,9 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { addMerchant } from '../../firebase/firestore';
 import SuccessNotification from '../common/SuccessNotification';
 import SearchableSelect from '../common/SearchableSelect';
-import ImageOCRMerchantInput from './ImageOCRMerchantInput';
+import GoogleVisionMerchantInput from './GoogleVisionMerchantInput';
 import { checkUserAuth } from '../../firebase/userAuth';
 import '../common/SearchableSelect.css';
+
 
 const EnhancedOcrMerchantForm = () => {
     const [activeTab, setActiveTab] = useState(0);
@@ -709,7 +710,7 @@ const EnhancedOcrMerchantForm = () => {
                                     : '上傳遊戲商人截圖，自動識別商品資訊'}
                             </p>
 
-                            <ImageOCRMerchantInput onItemsDetected={handleFirstScanItems} scanIndex={1} merchantType={merchantType} />
+                            <GoogleVisionMerchantInput onItemsDetected={handleFirstScanItems} scanIndex={1} merchantType={merchantType} />
 
                             <div className="ocr-skip-container">
                                 {merchantType === 'special' && (
@@ -739,7 +740,7 @@ const EnhancedOcrMerchantForm = () => {
                                 請上傳第二張截圖，含後3種商品（家園幣交易）
                             </p>
 
-                            <ImageOCRMerchantInput onItemsDetected={handleSecondScanItems} scanIndex={2} merchantType={merchantType}/>
+                            <GoogleVisionMerchantInput onItemsDetected={handleSecondScanItems} scanIndex={2} merchantType={merchantType}/>
 
                             <div className="ocr-skip-container">
                                 <button
