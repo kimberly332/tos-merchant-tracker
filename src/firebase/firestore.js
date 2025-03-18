@@ -161,6 +161,13 @@ export const updateMerchant = async (merchantId, merchantData) => {
     delete updateData.timestamp;
     delete updateData.playerId;
 
+    // FIX: Ensure isSpecialMerchant is a boolean and not undefined
+    if (updateData.isSpecialMerchant === undefined) {
+      // If it's undefined, check if any item is 家園幣
+      const hasHomeToken = processedItems.some(item => item.itemName === '家園幣');
+      updateData.isSpecialMerchant = hasHomeToken;
+    }
+
     // Update the document
     await updateDoc(merchantRef, updateData);
 

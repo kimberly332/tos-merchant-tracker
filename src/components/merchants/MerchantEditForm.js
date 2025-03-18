@@ -19,84 +19,6 @@ function MerchantEditForm({ merchant, merchantId, onUpdateSuccess }) {
     const [showNotification, setShowNotification] = useState(false);
     const [notificationMessage, setNotificationMessage] = useState('');
 
-    // Initialize form with merchant data
-    useEffect(() => {
-        if (merchant) {
-            // Format items with proper structure for the form
-            const formattedItems = merchant.items.map(item => ({
-                category: item.itemName,
-                customItem: item.itemName && !categoryGroups.flat().includes(item.itemName) ? item.itemName : '',
-                quantity: item.quantity || 1,
-                purchaseTimes: item.purchaseTimes || 1,
-                price: item.price || '',
-                allowsCoinExchange: item.allowsCoinExchange !== undefined ? item.allowsCoinExchange : true,
-                allowsBarterExchange: item.allowsBarterExchange || false,
-                exchangeItemName: item.exchangeItemName || '',
-                customExchangeItem: item.exchangeItemName && !exchangeCategoryGroups.flat().includes(item.exchangeItemName) ? item.exchangeItemName : '',
-                exchangeQuantity: item.exchangeQuantity || ''
-            }));
-
-            setFormData({
-                playerId: merchant.playerId || '',
-                discount: merchant.discount || '',
-                items: formattedItems
-            });
-
-            // Store original items for comparison
-            setOriginalItems(merchant.items);
-
-            // Check if this is a special merchant (contains 家園幣 items)
-            const hasHomeToken = merchant.items.some(item => item.itemName === '家園幣');
-            setIsSpecialMerchant(hasHomeToken || merchant.isSpecialMerchant);
-        }
-    }, [merchant]);
-
-    // Handle scroll indicator for mobile
-    useEffect(() => {
-        const handleItemScroll = () => {
-            const container = document.querySelector('.items-container');
-            if (!container) return;
-
-            // Determine which item is most visible
-            const items = Array.from(container.querySelectorAll('.item-entry-container'));
-            const containerLeft = container.scrollLeft;
-            const containerWidth = container.clientWidth;
-
-            // Find the item that is most in view
-            let mostVisibleIndex = 0;
-            let highestVisibility = 0;
-
-            items.forEach((item, index) => {
-                const itemLeft = item.offsetLeft;
-                const itemWidth = item.clientWidth;
-
-                // Calculate how much of the item is visible (0 to 1)
-                const visibleLeft = Math.max(itemLeft, containerLeft);
-                const visibleRight = Math.min(itemLeft + itemWidth, containerLeft + containerWidth);
-                const visibleWidth = Math.max(0, visibleRight - visibleLeft);
-                const visibilityRatio = visibleWidth / itemWidth;
-
-                if (visibilityRatio > highestVisibility) {
-                    highestVisibility = visibilityRatio;
-                    mostVisibleIndex = index;
-                }
-            });
-
-            setActiveItemIndex(mostVisibleIndex);
-        };
-
-        const container = document.querySelector('.items-container');
-        if (container) {
-            container.addEventListener('scroll', handleItemScroll);
-            // Initialize correctly
-            handleItemScroll();
-
-            return () => {
-                container.removeEventListener('scroll', handleItemScroll);
-            };
-        }
-    }, [formData.items.length]);
-
     // 定義分類和物品
     const categoryGroups = [
         {
@@ -210,6 +132,11 @@ function MerchantEditForm({ merchant, merchantId, onUpdateSuccess }) {
         }
     ];
 
+    // Helper function to flatten the category groups
+    const categoryGroups_flat = categoryGroups.reduce((acc, group) => {
+        return [...acc, ...group.items];
+    }, []);
+
     // 定義交換物品分類
     const exchangeCategoryGroups = [
         {
@@ -262,6 +189,89 @@ function MerchantEditForm({ merchant, merchantId, onUpdateSuccess }) {
             ]
         }
     ];
+
+    // Helper function to flatten exchange category groups
+    const exchangeCategoryGroups_flat = exchangeCategoryGroups.reduce((acc, group) => {
+        return [...acc, ...group.items];
+    }, []);
+
+    // Initialize form with merchant data
+    useEffect(() => {
+        if (merchant) {
+            // Format items with proper structure for the form
+            const formattedItems = merchant.items.map(item => ({
+                category: item.itemName,
+                customItem: item.itemName && !categoryGroups_flat.includes(item.itemName) ? item.itemName : '',
+                quantity: item.quantity || 1,
+                purchaseTimes: item.purchaseTimes || 1,
+                price: item.price || '',
+                allowsCoinExchange: item.allowsCoinExchange !== undefined ? item.allowsCoinExchange : true,
+                allowsBarterExchange: item.allowsBarterExchange || false,
+                exchangeItemName: item.exchangeItemName || '',
+                customExchangeItem: item.exchangeItemName && !exchangeCategoryGroups_flat.includes(item.exchangeItemName) ? item.exchangeItemName : '',
+                exchangeQuantity: item.exchangeQuantity || ''
+            }));
+
+            setFormData({
+                playerId: merchant.playerId || '',
+                discount: merchant.discount || '',
+                items: formattedItems
+            });
+
+            // Store original items for comparison
+            setOriginalItems(merchant.items);
+
+            // Check if this is a special merchant (contains 家園幣 items)
+            const hasHomeToken = merchant.items.some(item => item.itemName === '家園幣');
+            setIsSpecialMerchant(hasHomeToken || merchant.isSpecialMerchant);
+        }
+    }, [merchant]);
+
+    // Handle scroll indicator for mobile
+    useEffect(() => {
+        const handleItemScroll = () => {
+            const container = document.querySelector('.items-container');
+            if (!container) return;
+
+            // Determine which item is most visible
+            const items = Array.from(container.querySelectorAll('.item-entry-container'));
+            const containerLeft = container.scrollLeft;
+            const containerWidth = container.clientWidth;
+
+            // Find the item that is most in view
+            let mostVisibleIndex = 0;
+            let highestVisibility = 0;
+
+            items.forEach((item, index) => {
+                const itemLeft = item.offsetLeft;
+                const itemWidth = item.clientWidth;
+
+                // Calculate how much of the item is visible (0 to 1)
+                const visibleLeft = Math.max(itemLeft, containerLeft);
+                const visibleRight = Math.min(itemLeft + itemWidth, containerLeft + containerWidth);
+                const visibleWidth = Math.max(0, visibleRight - visibleLeft);
+                const visibilityRatio = visibleWidth / itemWidth;
+
+                if (visibilityRatio > highestVisibility) {
+                    highestVisibility = visibilityRatio;
+                    mostVisibleIndex = index;
+                }
+            });
+
+            setActiveItemIndex(mostVisibleIndex);
+        };
+
+        const container = document.querySelector('.items-container');
+        if (container) {
+            container.addEventListener('scroll', handleItemScroll);
+            // Initialize correctly
+            handleItemScroll();
+
+            return () => {
+                container.removeEventListener('scroll', handleItemScroll);
+            };
+        }
+    }, [formData.items.length]);
 
     const handleExchangeToggle = (index, exchangeType, isChecked) => {
         const updatedItems = [...formData.items];
@@ -376,14 +386,15 @@ function MerchantEditForm({ merchant, merchantId, onUpdateSuccess }) {
         // Process the form data for submission
         const processedData = {
             ...formData,
-            isSpecialMerchant,
+            // Explicitly set isSpecialMerchant as boolean rather than undefined
+            isSpecialMerchant: Boolean(isSpecialMerchant),
             items: formData.items.map(item => {
                 if (!item.quantity || !item.purchaseTimes) {
                     throw new Error('數量不能為空');
                 }
                 return {
                     ...item,
-                    price: Number(item.price),
+                    price: Number(item.price || 0),
                     quantity: Number(item.quantity),
                     purchaseTimes: Number(item.purchaseTimes),
                     exchangeQuantity: item.allowsBarterExchange ? Number(item.exchangeQuantity) : 0,
