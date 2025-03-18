@@ -215,54 +215,48 @@ const EnhancedOcrMerchantForm = () => {
     ];
 
     // 處理OCR檢測到的商品資訊 - 第一次截圖
-    const handleFirstScanItems = (detectedData) => {
-        // 確保 detectedData 存在且有 items
-        const detectedItems = detectedData?.items || [];
-      
+    const handleFirstScanItems = (detectedItems) => {
         // 更新表單數據，保留前 6 個物品位置的數據
         const updatedItems = [...formData.items];
-      
+
         detectedItems.forEach((item, index) => {
-          if (index < 6) { // 只處理前6個位置
-            updatedItems[index] = {
-              ...updatedItems[index],
-              category: item.category || '',
-              quantity: item.quantity || '',
-              purchaseTimes: item.quantity || '',
-              price: item.price || '',
-              allowsCoinExchange: item.allowsCoinExchange || false,
-              allowsBarterExchange: item.allowsBarterExchange || false,
-              exchangeItemName: item.exchangeItemName || '',
-              exchangeQuantity: item.exchangeQuantity || ''
-            };
-          }
+            if (index < 6) { // 只處理前6個位置
+                updatedItems[index] = item;
+            }
         });
-      
+
         // 如果檢測到的物品數量超過 6 個，提示用戶
         if (detectedItems.length > 6 && merchantType === 'regular') {
-          setNotificationMessage('檢測到超過6種商品，若為五商請選擇"五商(9種商品)"類型');
-          setShowNotification(true);
+            setNotificationMessage('檢測到超過6種商品，若為五商請選擇"五商(9種商品)"類型');
+            setShowNotification(true);
         }
-      
+
         // 如果檢測到了折扣資訊
-        setFormData(prev => ({
-          ...prev,
-          discount: detectedData?.discount || prev.discount,
-          items: updatedItems
-        }));
-      
+        if (detectedItems.discount) {
+            setFormData(prev => ({
+                ...prev,
+                discount: detectedItems.discount,
+                items: updatedItems
+            }));
+        } else {
+            setFormData(prev => ({
+                ...prev,
+                items: updatedItems
+            }));
+        }
+
         // 檢查是否有家園幣商品，若有則標記為特殊商人
         const hasHomeToken = updatedItems.some(item => item.category === '家園幣');
         setIsSpecialMerchant(hasHomeToken);
-      
+
         // 如果是五商，標記第一次掃描完成，等待第二次掃描
         if (merchantType === 'special') {
-          setFirstScanComplete(true);
+            setFirstScanComplete(true);
         } else {
-          // 普通商人只需要一次掃描，直接進入表單編輯
-          setShowOcrInterface(false);
+            // 普通商人只需要一次掃描，直接進入表單編輯
+            setShowOcrInterface(false);
         }
-      };
+    };
 
     // 處理OCR檢測到的商品資訊 - 第二次截圖 (僅五商適用)
     const handleSecondScanItems = (detectedItems) => {

@@ -1,7 +1,5 @@
-import itemDatabase from '../data/ItemDatabase';
-
 /**
- * Enhanced Utilities for parsing OCR text output specifically for Tree of Savior merchant data
+ * Utilities for parsing OCR text output specifically for Tree of Savior merchant data
  */
 
 /**
@@ -12,201 +10,268 @@ import itemDatabase from '../data/ItemDatabase';
  * @returns {Object} - Structured merchant data
  */
 export const parseMerchantOcrText = (ocrText, scanIndex, merchantType) => {
-  console.log('Parsing merchant OCR text:', ocrText);
-  
-  // Get all possible item names from the database
-  const allItemNames = new Set(
-    itemDatabase.categories
-      .flatMap(category => category.items)
-      .filter(item => item !== '其他' && item !== '家園幣')
-  );
-  
-  // Split text into lines and clean it
-  const lines = cleanAndSplitText(ocrText);
-  
-  // Initialize result structure
-  const result = {
-    merchantName: extractMerchantName(lines),
-    discount: extractDiscount(lines),
-    items: extractItems(lines, scanIndex, merchantType, allItemNames)
+    console.log('Parsing merchant OCR text:', ocrText);
+    
+    // Split text into lines and clean it
+    const lines = cleanAndSplitText(ocrText);
+    
+    // Initialize result structure
+    const result = {
+      merchantName: extractMerchantName(lines),
+      discount: extractDiscount(lines),
+      items: extractItems(lines, scanIndex, merchantType)
+    };
+    
+    return result;
   };
   
-  return result;
-};
-
-/**
- * Clean OCR text and split into useful lines
- * @param {string} text - Raw OCR text
- * @returns {Array<string>} - Array of cleaned text lines
- */
-const cleanAndSplitText = (text) => {
-  // Split by newlines and remove empty lines
-  const rawLines = text.split(/\n/);
-  
-  // Clean, trim, and filter lines
-  return rawLines
-    .map(line => line.trim())
-    .filter(line => line.length > 0);
-};
-
-/**
- * Extract merchant name from OCR text lines
- * @param {Array<string>} lines - OCR text lines
- * @returns {string} - Extracted merchant name
- */
-const extractMerchantName = (lines) => {
-  return '未知商人'; // Default merchant name
-};
-
-/**
- * Extract discount information from OCR text lines
- * @param {Array<string>} lines - OCR text lines
- * @returns {string} - Extracted discount
- */
-const extractDiscount = (lines) => {
-  // Look for lines with percentage symbols
-  const discountLines = lines.filter(line => line.includes('%'));
-  
-  // Extract the first discount value
-  const discountMatch = discountLines.map(line => {
-    const percentMatch = line.match(/(-\d+%)/);
-    return percentMatch ? percentMatch[1] : null;
-  }).find(match => match);
-  
-  return discountMatch || '';
-};
-
-/**
- * Extract quantity from a line about purchase limits
- * @param {string} line - Line containing purchase limit
- * @returns {number} - Extracted quantity
- */
-const extractQuantity = (line) => {
-  const match = line.match(/本攤位可購[:：]?(\d+)/);
-  return match ? parseInt(match[1]) : 1;
-};
-
-/**
- * Extract price from a line
- * @param {string} line - Line containing price
- * @returns {number} - Extracted price
- */
-const extractPrice = (line) => {
-  // Look for price with 家園幣
-  const coinMatch = line.match(/(\d+)\s*家園幣/);
-  return coinMatch ? parseInt(coinMatch[1]) : '';
-};
-
-/**
- * Extract quantity from an item line
- * @param {string} line - Line containing item and potential quantity
- * @returns {number} - Extracted quantity or 1 as default
- */
-const extractItemQuantity = (line) => {
-  // Look for standalone numeric values that could represent quantity
-  const quantityMatch = line.match(/^(\d+)$/);
-  return quantityMatch ? parseInt(quantityMatch[1]) : 1;
-};
-
-/**
- * Extract items from OCR text lines
- * @param {Array<string>} lines - OCR text lines
- * @param {number} scanIndex - Current scan index
- * @param {string} merchantType - Type of merchant
- * @param {Set} allItemNames - Set of all valid item names
- * @returns {Array<Object>} - Extracted item objects
- */
-const extractItems = (lines, scanIndex, merchantType, allItemNames) => {
-  const items = [];
-  const maxItems = (merchantType === 'special' && scanIndex === 2) ? 3 : 6;
-  
-  // Prepare context for parsing
-  const context = {
-    itemLines: [],
-    quantityLines: [],
-    priceLines: [],
-    homeTokenLines: []
+  /**
+   * Clean OCR text and split into useful lines
+   * @param {string} text - Raw OCR text
+   * @returns {Array<string>} - Array of cleaned text lines
+   */
+  const cleanAndSplitText = (text) => {
+    // Split by newlines
+    const rawLines = text.split('\n');
+    
+    // Clean and filter lines
+    return rawLines
+      .map(line => line.trim())
+      .filter(line => line.length > 0);
   };
-
-  // First pass: categorize lines
-  lines.forEach(line => {
-    if (line.includes('家園幣')) {
-      context.homeTokenLines.push(line);
-    } else if ([...allItemNames].some(itemName => line.includes(itemName))) {
-      context.itemLines.push(line);
-    } else if (line.match(/^(\d+)$/)) {
-      context.quantityLines.push(line);
-    } else if (line.match(/\d+\s*家園幣/)) {
-      context.priceLines.push(line);
+  
+  /**
+   * Extract merchant name from OCR text lines
+   * @param {Array<string>} lines - OCR text lines
+   * @returns {string} - Extracted merchant name
+   */
+  const extractMerchantName = (lines) => {
+    // Merchant name is usually at the top of the interface
+    for (let i = 0; i < Math.min(5, lines.length); i++) {
+      const line = lines[i];
+      
+      // Look for lines that might be merchant names
+      if (
+        (line.includes('商人') || line.includes('商店')) || 
+        (line.match(/[A-Za-z0-9_]+/) && !line.includes('家園幣') && !line.includes('x') && !line.includes('×'))
+      ) {
+        return line.trim();
+      }
     }
-  });
-
-  // Find items by matching with database names
-  const extractedItems = context.itemLines.map((itemLine, index) => {
-    // Find the exact item name
-    const matchedItem = [...allItemNames].find(itemName => 
-      itemLine.includes(itemName)
-    );
-
-    // Try to find corresponding quantity and price
-    const quantityMatch = context.quantityLines[index] || 
-      lines.find(l => l.includes('本攤位可購') && l.includes(matchedItem));
-    const priceMatch = context.priceLines[index];
-
-    const quantity = quantityMatch ? 
-      extractItemQuantity(quantityMatch.toString()) : 1;
     
-    const purchaseTimes = lines.find(l => l.includes('本攤位可購')) ? 
-      extractQuantity(lines.find(l => l.includes('本攤位可購'))) : quantity;
-
-    const price = priceMatch ? 
-      extractPrice(priceMatch) : '';
-    
-    return {
-      category: matchedItem,
-      quantity: 1,
-      purchaseTimes: purchaseTimes,
-      price: price,
-      allowsCoinExchange: !!price,
-      allowsBarterExchange: false,
-      exchangeItemName: '',
-      exchangeQuantity: ''
-    };
-  });
-
-  // Handle home tokens separately
-  const homeTokenItems = context.homeTokenLines.map(line => {
-    const priceMatch = line.match(/(\d+)\s*家園幣/);
-    const quantityMatch = line.match(/本攤位可購[:：]?(\d+)/);
-    
-    return {
-      category: '家園幣',
-      quantity: 1,
-      purchaseTimes: quantityMatch ? parseInt(quantityMatch[1]) : 1,
-      price: '',
-      allowsCoinExchange: false,
-      allowsBarterExchange: true,
-      exchangeItemName: '蜂蜜',
-      exchangeQuantity: 10
-    };
-  });
+    return '未知商人'; // Default if no name found
+  };
   
-  // Combine and ensure correct number of items
-  const combinedItems = [...extractedItems, ...homeTokenItems];
+  /**
+   * Extract discount information from OCR text lines
+   * @param {Array<string>} lines - OCR text lines
+   * @returns {string} - Extracted discount
+   */
+  const extractDiscount = (lines) => {
+    // Look for discount information in all lines
+    for (const line of lines) {
+      if (line.includes('折扣') || line.includes('減免') || line.includes('%')) {
+        // Extract numeric discount value with % sign
+        const discountMatch = line.match(/([0-9%-]+%)/);
+        if (discountMatch) {
+          return discountMatch[1];
+        }
+        
+        // Try extracting just numbers near discount text
+        const numericMatch = line.match(/折扣[：:]\s*([0-9-]+)/);
+        if (numericMatch) {
+          return numericMatch[1] + '%';
+        }
+      }
+    }
+    
+    return ''; // No discount found
+  };
   
-  // Pad with empty items if needed
-  while (combinedItems.length < maxItems) {
-    combinedItems.push({
-      category: '',
-      quantity: '',
-      purchaseTimes: '',
-      price: '',
-      allowsCoinExchange: true,
-      allowsBarterExchange: false,
-      exchangeItemName: '',
-      exchangeQuantity: ''
+  /**
+   * Extract items from OCR text lines
+   * @param {Array<string>} lines - OCR text lines
+   * @param {number} scanIndex - Current scan index
+   * @param {string} merchantType - Type of merchant
+   * @returns {Array<Object>} - Extracted item objects
+   */
+  const extractItems = (lines, scanIndex, merchantType) => {
+    const items = [];
+    const maxItems = (merchantType === 'special' && scanIndex === 2) ? 3 : 6;
+    
+    // Track the current item as we parse through lines
+    let currentItem = null;
+    
+    // Common item name patterns
+    const itemNameRegex = /([\u4e00-\u9fa5A-Za-z0-9_]+)\s*[xX×]?\s*(\d+)/;
+    const priceRegex = /(\d+)\s*(家園幣|園幣|家園|金幣)/i;
+    const exchangeRegex = /(\d+)\s*([\u4e00-\u9fa5A-Za-z0-9_]+)/;
+    
+    // Process each line to look for items and related info
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i].trim();
+      
+      // Skip very short lines
+      if (line.length < 2) continue;
+      
+      // Skip UI elements commonly found in screenshots
+      if (isUiElement(line)) continue;
+      
+      // Check if line contains an item name with quantity
+      const itemMatch = line.match(itemNameRegex);
+      if (itemMatch) {
+        // If we were tracking a previous item, add it to our list before starting a new one
+        if (currentItem && currentItem.category) {
+          items.push(currentItem);
+          
+          // Check if we've reached our item limit
+          if (items.length >= maxItems) break;
+        }
+        
+        // Extract item name and quantity
+        const itemName = cleanItemName(itemMatch[1]);
+        const quantity = itemMatch[2];
+        
+        // Skip if item name looks like a UI element
+        if (isUiElement(itemName)) continue;
+        
+        // Create a new item object
+        currentItem = {
+          category: itemName,
+          quantity: quantity,
+          purchaseTimes: quantity, // Default to quantity
+          price: '',
+          allowsCoinExchange: false,
+          allowsBarterExchange: false,
+          exchangeItemName: '',
+          exchangeQuantity: ''
+        };
+        
+        // For second scan of special merchants, ensure items are 家園幣
+        if (merchantType === 'special' && scanIndex === 2) {
+          currentItem.category = '家園幣';
+          currentItem.allowsBarterExchange = true;
+        }
+      } 
+      // Check if line contains price information
+      else if (currentItem && !currentItem.allowsCoinExchange && !currentItem.allowsBarterExchange) {
+        const priceMatch = line.match(priceRegex);
+        if (priceMatch) {
+          currentItem.price = priceMatch[1];
+          currentItem.allowsCoinExchange = true;
+          continue;
+        }
+        
+        // Check if line contains exchange item information
+        const exchangeMatch = line.match(exchangeRegex);
+        if (exchangeMatch && !line.includes('家園幣') && !line.includes('金幣')) {
+          const exchangeItemName = cleanItemName(exchangeMatch[2]);
+          
+          // Only use if it looks like a valid item name
+          if (exchangeItemName.length >= 2 && !isUiElement(exchangeItemName)) {
+            currentItem.allowsBarterExchange = true;
+            currentItem.exchangeQuantity = exchangeMatch[1];
+            currentItem.exchangeItemName = exchangeItemName;
+          }
+        }
+      }
+    }
+    
+    // Add the last item if we have one pending
+    if (currentItem && currentItem.category && items.length < maxItems) {
+      items.push(currentItem);
+    }
+    
+    // Make sure we have the right exchange methods set
+    items.forEach(item => {
+      // If no exchange method was found, default to coin exchange for regular items
+      if (!item.allowsCoinExchange && !item.allowsBarterExchange) {
+        if (item.category === '家園幣') {
+          item.allowsBarterExchange = true;
+        } else {
+          item.allowsCoinExchange = true;
+          // Provide a default price if none detected
+          if (!item.price) item.price = '1000';
+        }
+      }
+      
+      // Special merchants with 家園幣 items in second scan
+      if ((merchantType === 'special' && scanIndex === 2) || item.category === '家園幣') {
+        item.category = '家園幣';
+        item.allowsCoinExchange = false;
+        item.allowsBarterExchange = true;
+        
+        // Add default exchange values if none detected
+        if (!item.exchangeItemName) {
+          item.exchangeItemName = '蜂蜜';
+          item.exchangeQuantity = '10';
+        }
+      }
     });
-  }
+    
+    // Ensure we have the expected number of items
+    while (items.length < maxItems) {
+      // Add template items based on merchant type and scan
+      if (merchantType === 'special' && scanIndex === 2) {
+        items.push({
+          category: '家園幣',
+          quantity: '1000',
+          purchaseTimes: '1',
+          price: '',
+          allowsCoinExchange: false,
+          allowsBarterExchange: true,
+          exchangeItemName: '蜂蜜',
+          exchangeQuantity: '10'
+        });
+      } else {
+        items.push({
+          category: '',
+          quantity: '',
+          purchaseTimes: '',
+          price: '',
+          allowsCoinExchange: true,
+          allowsBarterExchange: false,
+          exchangeItemName: '',
+          exchangeQuantity: ''
+        });
+      }
+    }
+    
+    return items.slice(0, maxItems);
+  };
   
-  return combinedItems.slice(0, maxItems);
-};
+  /**
+   * Check if a string appears to be a UI element rather than an item
+   * @param {string} text - Text to check
+   * @returns {boolean} - True if it appears to be a UI element
+   */
+  const isUiElement = (text) => {
+    const uiElements = [
+      '確認', '取消', '關閉', '返回', '選擇', '購買', '販售', '信息', '信息',
+      '貨品', '商店', '家園', '確定', '按鈕', '確認', '頁', '頁碼'
+    ];
+    
+    return uiElements.some(el => text.includes(el)) || 
+           text.length <= 1 ||
+           text.match(/^\d+$/) !== null; // Just a number
+  };
+  
+  /**
+   * Clean item name from OCR artifacts
+   * @param {string} name - Raw item name from OCR
+   * @returns {string} - Cleaned item name
+   */
+  const cleanItemName = (name) => {
+    // Remove any numeric prefix or suffix that might have been incorrectly parsed
+    let cleaned = name.replace(/^\d+\s*/, '').replace(/\s*\d+$/, '');
+    
+    // Remove common OCR artifacts
+    cleaned = cleaned.replace(/[,.;:'"!?\/\\|_-]+$/, '');
+    
+    // Handle special cases
+    if (cleaned.includes('家園') && cleaned.includes('幣')) {
+      return '家園幣';
+    }
+    
+    return cleaned.trim();
+  }
