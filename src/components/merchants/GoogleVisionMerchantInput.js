@@ -46,8 +46,11 @@ const GoogleVisionMerchantInput = ({
       
       setOcrResults(parsedData);
       
-      // Pass detected items to parent component
-      onItemsDetected(parsedData.items);
+      // 傳遞完整的解析數據，包括 items 和 discount
+      onItemsDetected({
+        items: parsedData.items,
+        discount: parsedData.discount
+      });
       
     } catch (err) {
       console.error('Vision API processing error:', err);
