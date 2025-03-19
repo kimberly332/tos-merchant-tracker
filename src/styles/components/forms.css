@@ -150,3 +150,55 @@
   font-weight: bold;
   text-transform: uppercase;
 }
+
+/* Exchange type hint styling */
+.exchange-type-hint {
+  background-color: rgba(72, 114, 123, 0.1);
+  border-radius: 6px;
+  padding: 0.5rem 0.75rem;
+  margin-bottom: 0.75rem;
+  border-left: 3px solid var(--color-light-accent);
+}
+
+.exchange-type-hint p {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--color-light-accent);
+}
+
+/* Special hint styles for different types */
+.home-token-hint {
+  color: #8ABAB3 !important;
+}
+
+/* .barter-hint {
+  color: #ff8a80 !important; 
+} */
+
+.special-hint {
+  color: #e3b96a !important;
+}
+
+/* Forced option styling */
+.forced-option {
+  opacity: 0.8;
+  pointer-events: none;
+  font-style: italic;
+}
+
+.forced-option input[type="radio"] {
+  border-color: var(--color-light-accent);
+  opacity: 0.7;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .exchange-type-hint {
+    padding: 0.35rem 0.5rem;
+    margin-bottom: 0.5rem;
+  }
+  
+  .exchange-type-hint p {
+    font-size: 0.85rem;
+  }
+}

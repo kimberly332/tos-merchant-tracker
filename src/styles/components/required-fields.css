@@ -11,11 +11,11 @@
   }
   
   /* Special styling for required field inputs */
-  .form-group.required-field input:invalid,
+  /* .form-group.required-field input:invalid,
   .form-group.required-field select:invalid,
   .form-group.required-field .searchable-select-container input:invalid {
     border-color: rgba(244, 67, 54, 0.4);
-  }
+  } */
   
   /* Focus state for required fields */
   .form-group.required-field input:focus:invalid,
@@ -44,7 +44,7 @@
     position: relative;
   }
   
-  .form-group.required-field::before {
+  /* .form-group.required-field::before {
     content: "";
     position: absolute;
     top: 0;
@@ -53,7 +53,7 @@
     width: 3px;
     background-color: rgba(244, 67, 54, 0.3);
     border-radius: 2px;
-  }
+  } */
   
   /* Add a helper text about required fields at the top of the form */
   .merchant-form::before,
