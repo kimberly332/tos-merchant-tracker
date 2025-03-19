@@ -8,13 +8,14 @@ import '../common/SearchableSelect.css';
 function MerchantInputForm() {
   const [formData, setFormData] = useState({
     playerId: '',
-    discount: '',
+    discount: '', // 折扣值，將改為數字輸入
     items: [{
       category: '',
       customItem: '',
       quantity: '',  // 物品數量
       purchaseTimes: '', // 添加可購買數量欄位
       price: '',
+      originalPrice: '', // 存儲原始價格，用於折扣計算
       allowsCoinExchange: true,
       allowsBarterExchange: false,
       exchangeItemName: '',
@@ -24,7 +25,7 @@ function MerchantInputForm() {
   });
 
   const [activeItemIndex, setActiveItemIndex] = useState(0);
-  
+
   // Track scroll position for mobile view
   useEffect(() => {
     const handleItemScroll = () => {
@@ -88,9 +89,68 @@ function MerchantInputForm() {
 
   // 家園幣專用物品類別 - 這些物品預設使用家園幣交易
   const homeTokenCategories = [
-    '家園五商內容物', '底板', '邊框', '田園系列', '貴族系列', 
+    '家園五商內容物', '底板', '邊框', '田園系列', '貴族系列',
     '水果凳', '湛藍系列', '嫣紅系列', '明黃系列', '圍欄'
   ];
+
+  // 家園五商物品價格表
+  const homeTokenItemPrices = {
+    // 家園五商內容物
+    '諾恩女神像': 9000,
+    '塔樓風車': 7000,
+    '貼紙': 5000,
+
+    // 底板
+    '戲劇舞臺': '',
+    '藍藍天空': '',
+
+    // 邊框
+    '木質相框': '',
+    '奇妙思想': 5000,
+
+    // 田園系列
+    '田園圓桌': 6000,
+    '田園竹椅': 6000,
+    '田園陽傘': 9000,
+
+    // 貴族系列
+    '貴族圓桌': 6000,
+    '貴族椅子': 6000,
+    '貴族陽傘': 9000,
+
+    // 水果凳
+    '小小檸檬凳': 9000,
+    '小小奇異果凳': 9000,
+    '小小西瓜凳': 9000,
+    '小小香橙凳': 9000,
+
+    // 湛藍系列
+    '湛藍方門': 5000,
+    '湛藍薰衣草花圃': 9000,
+    '湛藍花壇': 9000,
+    '湛藍盆栽': 9000,
+
+    // 嫣紅系列
+    '嫣紅拱門': 5000,
+    '嫣紅鬱金香花圃': 9000,
+    '嫣紅花壇': 9000,
+    '嫣紅盆栽': 9000,
+    '紫紅薰衣草花圃': 9000,
+
+    // 明黃系列
+    '明黃木門': 5000,
+    '明黃鬱金香花圃': 9000,
+    '明黃花壇': 9000,
+    '明黃盆栽': 9000,
+
+    // 圍欄
+    '白蠟木庭院圍欄': 9000,
+    '紅橡木庭院圍欄': 9000,
+    '淺灰尖頭圍欄': 9000,
+    '淺藍尖頭圍欄': 9000,
+    '淺色原木圍欄': 9000,
+    '深色原木圍欄': 9000
+  };
 
   // 家園幣專用物品清單 - 從這些類別中提取的所有物品
   const homeTokenItems = [
@@ -287,12 +347,45 @@ function MerchantInputForm() {
   const [showNotification, setShowNotification] = useState(false);
   const [notificationMessage, setNotificationMessage] = useState('');
 
+  // 計算折扣後的價格
+  const calculateDiscountedPrice = (originalPrice, discount) => {
+    if (!discount || discount <= 0 || !originalPrice) return originalPrice;
+
+    // 計算折扣後價格 (原價 * (100 - 折扣百分比) / 100)
+    const discountedPrice = Math.floor(originalPrice * (100 - discount) / 100);
+    return discountedPrice;
+  };
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
       [name]: value
     }));
+
+    // 如果是折扣變更，則重新計算所有物品的價格
+    if (name === 'discount') {
+      const discount = parseInt(value);
+
+      // 更新所有物品的價格
+      setFormData(prev => {
+        const updatedItems = prev.items.map(item => {
+          if (item.allowsCoinExchange && item.originalPrice) {
+            const discountedPrice = calculateDiscountedPrice(item.originalPrice, discount);
+            return {
+              ...item,
+              price: discountedPrice
+            };
+          }
+          return item;
+        });
+
+        return {
+          ...prev,
+          items: updatedItems
+        };
+      });
+    }
   };
 
   // 檢查物品是否為家園幣交易專用
@@ -309,7 +402,7 @@ function MerchantInputForm() {
   const handleExchangeToggle = (index, exchangeType, isChecked) => {
     const updatedItems = [...formData.items];
     const currentItem = updatedItems[index];
-    
+
     // 只有未指定物品或「其他」類別才允許手動切換交易類型
     if (currentItem.category === '' || currentItem.category === '其他') {
       if (isChecked) {
@@ -365,7 +458,7 @@ function MerchantInputForm() {
       } else if (!updatedItems.some(item => item.category === '家園幣')) {
         setIsSpecialMerchant(false);
       }
-      
+
       // 檢查是否為家園幣專用物品
       const isHomeTokenOnly = isHomeTokenOnlyItem(value);
       if (isHomeTokenOnly) {
@@ -374,8 +467,20 @@ function MerchantInputForm() {
         updatedItems[index].allowsBarterExchange = false;
         // 家園裝飾物品數量固定為1
         updatedItems[index].quantity = '1';
+
+        // 設置推薦價格
+        const recommendedPrice = homeTokenItemPrices[value] || '';
+        updatedItems[index].originalPrice = recommendedPrice;
+
+        // 如果有折扣，計算折扣後的價格
+        const discount = parseInt(formData.discount);
+        if (discount && discount > 0) {
+          updatedItems[index].price = calculateDiscountedPrice(recommendedPrice, discount);
+        } else {
+          updatedItems[index].price = recommendedPrice;
+        }
       }
-      
+
       // 檢查是否為以物易物專用物品
       const isBarterOnly = isBarterOnlyItem(value);
       if (isBarterOnly) {
@@ -383,6 +488,11 @@ function MerchantInputForm() {
         updatedItems[index].allowsCoinExchange = false;
         updatedItems[index].allowsBarterExchange = true;
       }
+    }
+
+    // 當價格改變時，更新原始價格
+    if (name === 'price' && updatedItems[index].allowsCoinExchange && !updatedItems[index].originalPrice) {
+      updatedItems[index].originalPrice = value;
     }
 
     setFormData(prev => ({
@@ -393,10 +503,33 @@ function MerchantInputForm() {
 
   const handleDiscountChange = (e) => {
     const { value } = e.target;
+
+    // 更新折扣值
     setFormData(prev => ({
       ...prev,
       discount: value
     }));
+
+    // 根據折扣更新所有物品的價格
+    const discount = parseInt(value);
+    if (discount && discount > 0) {
+      setFormData(prev => {
+        const updatedItems = prev.items.map(item => {
+          if (item.allowsCoinExchange && item.originalPrice) {
+            return {
+              ...item,
+              price: calculateDiscountedPrice(item.originalPrice, discount)
+            };
+          }
+          return item;
+        });
+
+        return {
+          ...prev,
+          items: updatedItems
+        };
+      });
+    }
   };
 
   const addItemField = () => {
@@ -408,6 +541,7 @@ function MerchantInputForm() {
         quantity: '',
         purchaseTimes: '',
         price: '',
+        originalPrice: '',
         allowsCoinExchange: true,
         allowsBarterExchange: false,
         exchangeItemName: '',
@@ -431,7 +565,7 @@ function MerchantInputForm() {
       items: updatedItems
     }));
   };
-  
+
   const scrollToItem = (index) => {
     const container = document.querySelector('.items-container');
     const item = container.querySelectorAll('.item-entry-container')[index];
@@ -495,6 +629,7 @@ function MerchantInputForm() {
             quantity: '',
             purchaseTimes: '',
             price: '',
+            originalPrice: '',
             allowsCoinExchange: true,
             allowsBarterExchange: false,
             exchangeItemName: '',
@@ -543,15 +678,18 @@ function MerchantInputForm() {
         </div>
 
         <div className="form-group">
-          <label htmlFor="discount">今日折扣</label>
+          <label htmlFor="discount">今日折扣 (百分比)</label>
           <input
-            type="text"
+            type="number"
             id="discount"
             name="discount"
             value={formData.discount}
             onChange={handleDiscountChange}
-            placeholder="例如: 20% 或 特殊折扣活動"
+            placeholder="輸入折扣百分比，例如：-25% = 25"
+            min="0"
+            max="100"
           />
+          <small>輸入折扣百分比數字，若無折扣請留空或填0。</small>
         </div>
 
         <h3>商人販售的商品</h3>
@@ -562,7 +700,7 @@ function MerchantInputForm() {
             const isHomeTokenOnly = isHomeTokenOnlyItem(item.category);
             const isBarterOnly = isBarterOnlyItem(item.category);
             const isHomeToken = item.category === '家園幣';
-            
+
             return (
               <div key={index} className="item-entry-container">
                 <div className="item-section">
@@ -634,7 +772,7 @@ function MerchantInputForm() {
 
                 <div className="exchange-section">
                   {/* 顯示特殊提示，如果是特殊物品類型 */}
-                  {(isHomeTokenOnly || isBarterOnly || isHomeToken) && (
+                  {/* {(isHomeTokenOnly || isBarterOnly || isHomeToken) && (
                     <div className="exchange-type-hint">
                       {isHomeTokenOnly && (
                         <p className="home-token-hint">此物品只能使用家園幣購買</p>
@@ -646,7 +784,7 @@ function MerchantInputForm() {
                         <p className="special-hint">家園幣必須使用以物易物方式交換</p>
                       )}
                     </div>
-                  )}
+                  )} */}
 
                   {/* 只在一般物品和「其他」時顯示兩個交易選項 */}
                   {(item.category === '' || item.category === '其他') && (
@@ -721,8 +859,11 @@ function MerchantInputForm() {
                           onChange={(e) => handleItemChange(index, e)}
                           required={item.allowsCoinExchange}
                           min="1"
-                          placeholder=""
+                          placeholder={isHomeTokenOnly ? `建議售價: ${homeTokenItemPrices[item.category] || ''}` : ""}
                         />
+                        {isHomeTokenOnly && item.originalPrice && formData.discount > 0 && (
+                          <small>原價: {item.originalPrice} 家園幣，折扣後: {item.price} 家園幣</small>
+                        )}
                       </div>
                     </div>
                   )}
