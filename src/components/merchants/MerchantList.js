@@ -26,7 +26,7 @@ function MerchantList() {
   const [showRegularMerchants, setShowRegularMerchants] = useState(true);
   const [showSpecialMerchants, setShowSpecialMerchants] = useState(true);
   const [showHoneyMerchants, setShowHoneyMerchants] = useState(true);
-  
+
   // 移動設備篩選選項 - 使用單一選擇模式
   const [mobileFilterType, setMobileFilterType] = useState('all');
 
@@ -136,15 +136,15 @@ function MerchantList() {
     // Check for honey merchants and mark them
     results = results.map(merchant => {
       let hasHoneyTrade = false;
-      
+
       // Check if any item requires 蜂蜜 for exchange
       if (merchant.items && merchant.items.length > 0) {
-        hasHoneyTrade = merchant.items.some(item => 
-          item.allowsBarterExchange && 
+        hasHoneyTrade = merchant.items.some(item =>
+          item.allowsBarterExchange &&
           item.exchangeItemName === '蜂蜜'
         );
       }
-      
+
       return {
         ...merchant,
         hasHoneyTrade
@@ -224,7 +224,7 @@ function MerchantList() {
     // Merchant type filtering - 根據視圖類型使用不同的篩選模式
     if (isMobileView) {
       // 移動設備視圖 - 使用單一選擇模式
-      switch(mobileFilterType) {
+      switch (mobileFilterType) {
         case 'special':
           results = results.filter(merchant => merchant.isSpecialMerchant);
           break;
@@ -240,7 +240,7 @@ function MerchantList() {
       }
     } else {
       // 桌面視圖 - 使用複選框模式
-      results = results.filter(merchant => 
+      results = results.filter(merchant =>
         (showRegularMerchants && !merchant.isSpecialMerchant && !merchant.hasHoneyTrade) ||
         (showSpecialMerchants && merchant.isSpecialMerchant) ||
         (showHoneyMerchants && merchant.hasHoneyTrade)
@@ -249,6 +249,37 @@ function MerchantList() {
 
     // Sorting
     switch (sortOption) {
+      case "discountDesc":
+        // 折扣高至低排序
+        results.sort((a, b) => {
+          // 五商優先
+          if (a.isSpecialMerchant && !b.isSpecialMerchant) return -1;
+          if (!a.isSpecialMerchant && b.isSpecialMerchant) return 1;
+
+          // 解析折扣字符串，提取數字部分
+          const getDiscountValue = (merchant) => {
+            if (!merchant.discount) return 0;
+
+            // 嘗試從字符串中提取數字
+            const discountMatch = merchant.discount.match(/(\d+)/);
+            if (discountMatch && discountMatch[1]) {
+              return parseInt(discountMatch[1], 10);
+            }
+            return 0;
+          };
+
+          const aDiscount = getDiscountValue(a);
+          const bDiscount = getDiscountValue(b);
+
+          // 折扣高的優先顯示
+          if (aDiscount !== bDiscount) {
+            return bDiscount - aDiscount;
+          }
+
+          // 如果折扣相同，則按時間排序（最新優先）
+          return new Date(b.timestamp) - new Date(a.timestamp);
+        });
+        break;
       case 'newest':
         results.sort((a, b) => {
           if (a.isSpecialMerchant && !b.isSpecialMerchant) return -1;
@@ -373,12 +404,12 @@ function MerchantList() {
 
   // Count merchants by type for filter displays
   const specialMerchantCount = merchants.filter(m => m.isSpecialMerchant).length;
-  const honeyMerchantCount = merchants.filter(m => 
+  const honeyMerchantCount = merchants.filter(m =>
     m.items && m.items.some(item => item.allowsBarterExchange && item.exchangeItemName === '蜂蜜')
   ).length;
   const regularMerchantCount = merchants.filter(m => {
     const isSpecial = m.isSpecialMerchant;
-    const hasHoneyTrade = m.items && m.items.some(item => 
+    const hasHoneyTrade = m.items && m.items.some(item =>
       item.allowsBarterExchange && item.exchangeItemName === '蜂蜜'
     );
     return !isSpecial && !hasHoneyTrade;
@@ -405,25 +436,25 @@ function MerchantList() {
           /* 移動設備視圖 - 標籤式過濾器 */
           <div className="filter-row">
             <div className="merchant-type-tabs">
-              <button 
+              <button
                 className={`merchant-type-tab ${mobileFilterType === 'all' ? 'active' : ''}`}
                 onClick={() => handleMobileFilterChange('all')}
               >
                 全部 ({merchants.length})
               </button>
-              <button 
+              <button
                 className={`merchant-type-tab ${mobileFilterType === 'special' ? 'active' : ''}`}
                 onClick={() => handleMobileFilterChange('special')}
               >
                 五商 ({specialMerchantCount})
               </button>
-              <button 
+              <button
                 className={`merchant-type-tab ${mobileFilterType === 'honey' ? 'active' : ''}`}
                 onClick={() => handleMobileFilterChange('honey')}
               >
                 蜂蜜交易 ({honeyMerchantCount})
               </button>
-              <button 
+              <button
                 className={`merchant-type-tab ${mobileFilterType === 'regular' ? 'active' : ''}`}
                 onClick={() => handleMobileFilterChange('regular')}
               >
@@ -431,18 +462,20 @@ function MerchantList() {
               </button>
             </div>
 
+
             <div className="sort-options">
-    <select
-      id="sort-select"
-      value={sortOption}
-      onChange={handleSortChange}
-      className="sort-select"
-    >
-      <option value="specialMerchantFirst">五商優先</option>
-      <option value="newest">最新發布</option>
-      <option value="oldest">最早發布</option>
-    </select>
-  </div>
+              <select
+                id="sort-select"
+                value={sortOption}
+                onChange={handleSortChange}
+                className="sort-select"
+              >
+                <option value="specialMerchantFirst">五商優先</option>
+                <option value="discountDesc">折扣高至低</option>
+                <option value="newest">最新發布</option>
+                <option value="oldest">最早發布</option>
+              </select>
+            </div>
           </div>
         ) : (
           /* 桌面視圖 - 複選框過濾器 */
@@ -475,18 +508,19 @@ function MerchantList() {
             </div>
 
             <div className="sort-options">
-    <label htmlFor="sort-select">排序方式:</label>
-    <select
-      id="sort-select"
-      value={sortOption}
-      onChange={handleSortChange}
-      className="sort-select"
-    >
-      <option value="specialMerchantFirst">五商優先</option>
-      <option value="newest">最新發布</option>
-      <option value="oldest">最早發布</option>
-    </select>
-  </div>
+              <label htmlFor="sort-select">排序方式:</label>
+              <select
+                id="sort-select"
+                value={sortOption}
+                onChange={handleSortChange}
+                className="sort-select"
+              >
+                <option value="specialMerchantFirst">五商優先</option>
+                <option value="discountDesc">折扣高至低</option>
+                <option value="newest">最新發布</option>
+                <option value="oldest">最早發布</option>
+              </select>
+            </div>
           </div>
         )}
 
@@ -526,10 +560,10 @@ function MerchantList() {
               merchant.allItems.length > merchant.filteredItems.length;
 
             // Determine merchant card class based on merchant type
-            const merchantCardClass = merchant.isSpecialMerchant 
-              ? 'merchant-card special-merchant-card' 
-              : merchant.hasHoneyTrade 
-                ? 'merchant-card honey-merchant-card' 
+            const merchantCardClass = merchant.isSpecialMerchant
+              ? 'merchant-card special-merchant-card'
+              : merchant.hasHoneyTrade
+                ? 'merchant-card honey-merchant-card'
                 : 'merchant-card';
 
             return (
