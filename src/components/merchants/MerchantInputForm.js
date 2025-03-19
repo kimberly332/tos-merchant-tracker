@@ -96,7 +96,7 @@ function MerchantInputForm() {
   // 家園五商物品價格表
   const homeTokenItemPrices = {
     // 家園五商內容物
-    '諾恩女神像': 9000,
+    '諾恩女神像': 7000,
     '塔樓風車': 7000,
     '貼紙': 5000,
 
