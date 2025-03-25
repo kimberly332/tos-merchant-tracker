@@ -121,9 +121,6 @@ function ItemCategoryFilter({ onCategorySelect, selectedCategories }) {
     }
   ];
   
-  // Create flat list of all categories for internal use
-  const allCategories = categoryGroups.flatMap(group => group.items);
-  
   // Only show the initial group when not expanded
   const visibleGroups = isExpanded ? categoryGroups : [categoryGroups[0]];
 

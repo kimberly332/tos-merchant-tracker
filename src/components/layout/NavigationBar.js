@@ -6,7 +6,7 @@ import { checkUserAuth, logoutUser } from '../../firebase/userAuth';
 function NavigationBar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [user, setUser] = useState(null);
-  const [cartItemCount, setCartItemCount] = useState(0);
+  const [, setCartItemCount] = useState(0);
   const navigate = useNavigate();
   const location = useLocation();
 

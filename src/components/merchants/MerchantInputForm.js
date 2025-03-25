@@ -87,11 +87,11 @@ function MerchantInputForm() {
   // State to track if current item is 家園幣
   const [isSpecialMerchant, setIsSpecialMerchant] = useState(false);
 
-  // 家園幣專用物品類別 - 這些物品預設使用家園幣交易
-  const homeTokenCategories = [
-    '家園五商內容物', '底板', '邊框', '田園系列', '貴族系列',
-    '水果凳', '湛藍系列', '嫣紅系列', '明黃系列', '圍欄'
-  ];
+  // 家園幣專用物品類別 - 這些物品預設使用家園幣交易np 
+  // const homeTokenCategories = [
+  //   '家園五商內容物', '底板', '邊框', '田園系列', '貴族系列',
+  //   '水果凳', '湛藍系列', '嫣紅系列', '明黃系列', '圍欄'
+  // ];
 
   // 家園五商物品價格表
   const homeTokenItemPrices = {

@@ -1,16 +1,136 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { updateMerchant } from '../../firebase/firestore';
 import SearchableSelect from '../common/SearchableSelect';
 import SuccessNotification from '../common/SuccessNotification';
 
 function MerchantEditForm({ merchant, merchantId, onUpdateSuccess }) {
+    // Define categories and exchange groups with useMemo before they're used in useEffect
+    const categoryGroups = useMemo(() => [
+        {
+            name: '原料',
+            items: ['小麥', '玉米', '胡蘿蔔', '番茄', '甘蔗', '草莓', '雞蛋', '牛奶', '蜂蜜']
+        },
+        {
+            name: '加工品',
+            items: [
+                '小麵包', '玉米麵包', '曲奇餅', '鮮奶油', '奶油', '起司',
+                '胡蘿蔔汁', '番茄汁', '草莓鮮奶汁', '混合果汁',
+                '番茄醬', '披薩醬', '草莓醬', '魚露',
+                '砂糖', '方糖', '糖漿',
+                '玉米霜淇淋', '奶油霜淇淋', '草莓霜淇淋', '鮮奶油霜淇淋',
+                '鮮奶油蛋糕', '胡蘿蔔蛋糕', '起司蛋糕', '蜂蜜蛋糕', '草莓蛋糕',
+                '田園披薩', '起司披薩', '水果披薩', '海鮮披薩'
+            ]
+        },
+        {
+            name: '礦產',
+            items: ['燃火黏土', '幽藍黏土', '耐火黏土', '赤晶石', '赤鐵礦', '蒼天石', '夜鐵礦']
+        },
+        {
+            name: '果品',
+            items: ['黃金汁液', '緋紅汁液', '濃綢汁液', '百里香', '阿奇米果', '高嶺樹果', '飛雲菇']
+        },
+        {
+            name: '海產',
+            items: ['智慧香精', '暗紫香精', '海結晶', '胸棘鯛魚', '利齒蛤蜊', '魔龍鱒', '丁香龍蝦']
+        },
+        {
+            name: '樹脂',
+            items: ['赤紅樹脂', '黏性樹脂']
+        },
+        {
+            name: '家園五商內容物',
+            items: ['諾恩女神像', '塔樓風車', '貼紙']
+        },
+        {
+            name: '底板',
+            items: ['戲劇舞臺', '藍藍天空']
+        },
+        {
+            name: '邊框',
+            items: ['木質相框', '奇妙思想']
+        },
+        {
+            name: '田園系列',
+            items: ['田園圓桌', '田園竹椅', '田園陽傘']
+        },
+        {
+            name: '貴族系列',
+            items: ['貴族圓桌', '貴族椅子', '貴族陽傘']
+        },
+        {
+            name: '水果凳',
+            items: ['小小檸檬凳', '小小奇異果凳', '小小西瓜凳', '小小香橙凳']
+        },
+        {
+            name: '湛藍系列',
+            items: ['湛藍方門', '湛藍薰衣草花圃', '湛藍花壇', '湛藍盆栽']
+        },
+        {
+            name: '嫣紅系列',
+            items: ['嫣紅拱門', '嫣紅鬱金香花圃', '嫣紅花壇', '嫣紅盆栽', '紫紅薰衣草花圃']
+        },
+        {
+            name: '明黃系列',
+            items: ['明黃木門', '明黃鬱金香花圃', '明黃花壇', '明黃盆栽']
+        },
+        {
+            name: '圍欄',
+            items: ['白蠟木庭院圍欄', '紅橡木庭院圍欄', '淺灰尖頭圍欄', '淺藍尖頭圍欄', '淺色原木圍欄', '深色原木圍欄']
+        },
+        {
+            name: '其他物品',
+            items: ['家園幣', '其他']
+        }
+    ], []);
+
+    // Define exchange categories with useMemo
+    const exchangeCategoryGroups = useMemo(() => [
+        {
+            name: '原料',
+            items: ['小麥', '玉米', '胡蘿蔔', '番茄', '甘蔗', '草莓', '雞蛋', '牛奶', '蜂蜜']
+        },
+        {
+            name: '加工品',
+            items: [
+                '小麵包', '玉米麵包', '曲奇餅', '鮮奶油', '奶油', '起司',
+                '胡蘿蔔汁', '番茄汁', '草莓鮮奶汁', '混合果汁',
+                '番茄醬', '披薩醬', '草莓醬', '魚露',
+                '砂糖', '方糖', '糖漿',
+                '玉米霜淇淋', '奶油霜淇淋', '草莓霜淇淋', '鮮奶油霜淇淋',
+                '鮮奶油蛋糕', '胡蘿蔔蛋糕', '起司蛋糕', '蜂蜜蛋糕', '草莓蛋糕',
+                '田園披薩', '起司披薩', '水果披薩', '海鮮披薩'
+            ]
+        },
+        {
+            name: '礦產',
+            items: ['燃火黏土', '幽藍黏土', '耐火黏土', '赤晶石', '赤鐵礦', '蒼天石', '夜鐵礦']
+        },
+        {
+            name: '果品',
+            items: ['黃金汁液', '緋紅汁液', '濃綢汁液', '百里香', '阿奇米果', '高嶺樹果', '飛雲菇']
+        },
+        {
+            name: '海產',
+            items: ['智慧香精', '暗紫香精', '海結晶', '胸棘鯛魚', '利齒蛤蜊', '魔龍鱒', '丁香龍蝦']
+        },
+        {
+            name: '樹脂',
+            items: ['赤紅樹脂', '黏性樹脂']
+        },
+        {
+            name: '其他物品',
+            items: ['家園幣', '其他']
+        }
+    ], []);
+
     const [formData, setFormData] = useState({
         playerId: '',
         discount: '',
         items: []
     });
 
-    const [originalItems, setOriginalItems] = useState([]);
+    const [, setOriginalItems] = useState([]);    
     const [isSpecialMerchant, setIsSpecialMerchant] = useState(false);
     const [submitting, setSubmitting] = useState(false);
     const [submitResult, setSubmitResult] = useState(null);
@@ -19,13 +139,13 @@ function MerchantEditForm({ merchant, merchantId, onUpdateSuccess }) {
     const [notificationMessage, setNotificationMessage] = useState('');
 
     // 家園幣專用物品類別 - 這些物品預設使用家園幣交易
-    const homeTokenCategories = [
-        '家園五商內容物', '底板', '邊框', '田園系列', '貴族系列',
-        '水果凳', '湛藍系列', '嫣紅系列', '明黃系列', '圍欄'
-    ];
+    // const homeTokenCategories = [
+    //     '家園五商內容物', '底板', '邊框', '田園系列', '貴族系列',
+    //     '水果凳', '湛藍系列', '嫣紅系列', '明黃系列', '圍欄'
+    // ];
 
     // 家園五商物品價格表
-    const homeTokenItemPrices = {
+    const homeTokenItemPrices = useMemo(() => ({
         // 家園五商內容物
         '諾恩女神像': 7000,
         '塔樓風車': 7000,
@@ -81,7 +201,7 @@ function MerchantEditForm({ merchant, merchantId, onUpdateSuccess }) {
         '淺藍尖頭圍欄': 9000,
         '淺色原木圍欄': 9000,
         '深色原木圍欄': 9000
-    };
+    }), []);
 
     // 家園幣專用物品清單 - 從這些類別中提取的所有物品
     const homeTokenItems = [
@@ -147,7 +267,7 @@ function MerchantEditForm({ merchant, merchantId, onUpdateSuccess }) {
             const hasHomeToken = merchant.items.some(item => item.itemName === '家園幣');
             setIsSpecialMerchant(hasHomeToken || merchant.isSpecialMerchant);
         }
-    }, [merchant]);
+    }, [merchant, categoryGroups, exchangeCategoryGroups, homeTokenItemPrices]);
 
     // Handle scroll indicator for mobile
     useEffect(() => {
@@ -447,126 +567,6 @@ function MerchantEditForm({ merchant, merchantId, onUpdateSuccess }) {
         }
     };
 
-    // 定義分類和物品
-    const categoryGroups = [
-        {
-            name: '原料',
-            items: ['小麥', '玉米', '胡蘿蔔', '番茄', '甘蔗', '草莓', '雞蛋', '牛奶', '蜂蜜']
-        },
-        {
-            name: '加工品',
-            items: [
-                '小麵包', '玉米麵包', '曲奇餅', '鮮奶油', '奶油', '起司',
-                '胡蘿蔔汁', '番茄汁', '草莓鮮奶汁', '混合果汁',
-                '番茄醬', '披薩醬', '草莓醬', '魚露',
-                '砂糖', '方糖', '糖漿',
-                '玉米霜淇淋', '奶油霜淇淋', '草莓霜淇淋', '鮮奶油霜淇淋',
-                '鮮奶油蛋糕', '胡蘿蔔蛋糕', '起司蛋糕', '蜂蜜蛋糕', '草莓蛋糕',
-                '田園披薩', '起司披薩', '水果披薩', '海鮮披薩'
-            ]
-        },
-        {
-            name: '礦產',
-            items: ['燃火黏土', '幽藍黏土', '耐火黏土', '赤晶石', '赤鐵礦', '蒼天石', '夜鐵礦']
-        },
-        {
-            name: '果品',
-            items: ['黃金汁液', '緋紅汁液', '濃綢汁液', '百里香', '阿奇米果', '高嶺樹果', '飛雲菇']
-        },
-        {
-            name: '海產',
-            items: ['智慧香精', '暗紫香精', '海結晶', '胸棘鯛魚', '利齒蛤蜊', '魔龍鱒', '丁香龍蝦']
-        },
-        {
-            name: '樹脂',
-            items: ['赤紅樹脂', '黏性樹脂']
-        },
-        {
-            name: '家園五商內容物',
-            items: ['諾恩女神像', '塔樓風車', '貼紙']
-        },
-        {
-            name: '底板',
-            items: ['戲劇舞臺', '藍藍天空']
-        },
-        {
-            name: '邊框',
-            items: ['木質相框', '奇妙思想']
-        },
-        {
-            name: '田園系列',
-            items: ['田園圓桌', '田園竹椅', '田園陽傘']
-        },
-        {
-            name: '貴族系列',
-            items: ['貴族圓桌', '貴族椅子', '貴族陽傘']
-        },
-        {
-            name: '水果凳',
-            items: ['小小檸檬凳', '小小奇異果凳', '小小西瓜凳', '小小香橙凳']
-        },
-        {
-            name: '湛藍系列',
-            items: ['湛藍方門', '湛藍薰衣草花圃', '湛藍花壇', '湛藍盆栽']
-        },
-        {
-            name: '嫣紅系列',
-            items: ['嫣紅拱門', '嫣紅鬱金香花圃', '嫣紅花壇', '嫣紅盆栽', '紫紅薰衣草花圃']
-        },
-        {
-            name: '明黃系列',
-            items: ['明黃木門', '明黃鬱金香花圃', '明黃花壇', '明黃盆栽']
-        },
-        {
-            name: '圍欄',
-            items: ['白蠟木庭院圍欄', '紅橡木庭院圍欄', '淺灰尖頭圍欄', '淺藍尖頭圍欄', '淺色原木圍欄', '深色原木圍欄']
-        },
-        {
-            name: '其他物品',
-            items: ['家園幣', '其他']
-        }
-    ];
-
-    // 定義交換物品分類
-    const exchangeCategoryGroups = [
-        {
-            name: '原料',
-            items: ['小麥', '玉米', '胡蘿蔔', '番茄', '甘蔗', '草莓', '雞蛋', '牛奶', '蜂蜜']
-        },
-        {
-            name: '加工品',
-            items: [
-                '小麵包', '玉米麵包', '曲奇餅', '鮮奶油', '奶油', '起司',
-                '胡蘿蔔汁', '番茄汁', '草莓鮮奶汁', '混合果汁',
-                '番茄醬', '披薩醬', '草莓醬', '魚露',
-                '砂糖', '方糖', '糖漿',
-                '玉米霜淇淋', '奶油霜淇淋', '草莓霜淇淋', '鮮奶油霜淇淋',
-                '鮮奶油蛋糕', '胡蘿蔔蛋糕', '起司蛋糕', '蜂蜜蛋糕', '草莓蛋糕',
-                '田園披薩', '起司披薩', '水果披薩', '海鮮披薩'
-            ]
-        },
-        {
-            name: '礦產',
-            items: ['燃火黏土', '幽藍黏土', '耐火黏土', '赤晶石', '赤鐵礦', '蒼天石', '夜鐵礦']
-        },
-        {
-            name: '果品',
-            items: ['黃金汁液', '緋紅汁液', '濃綢汁液', '百里香', '阿奇米果', '高嶺樹果', '飛雲菇']
-        },
-        {
-            name: '海產',
-            items: ['智慧香精', '暗紫香精', '海結晶', '胸棘鯛魚', '利齒蛤蜊', '魔龍鱒', '丁香龍蝦']
-        },
-        {
-            name: '樹脂',
-            items: ['赤紅樹脂', '黏性樹脂']
-        },
-        {
-            name: '其他物品',
-            items: ['家園幣', '其他']
-        }
-    ];
-
     return (
         <div className="merchant-form-container">
             {submitResult && (
@@ -681,21 +681,6 @@ function MerchantEditForm({ merchant, merchantId, onUpdateSuccess }) {
                                 </div>
 
                                 <div className="exchange-section">
-                                    {/* 顯示特殊提示，如果是特殊物品類型 */}
-                                    {/* {(isHomeTokenOnly || isBarterOnly || isHomeToken) && (
-                                        <div className="exchange-type-hint">
-                                            {isHomeTokenOnly && (
-                                                <p className="home-token-hint">此物品只能使用家園幣購買</p>
-                                            )}
-                                            {isBarterOnly && (
-                                                <p className="barter-hint">此物品只能使用以物易物方式交換</p>
-                                            )}
-                                            {isHomeToken && (
-                                                <p className="special-hint">家園幣必須使用以物易物方式交換</p>
-                                            )}
-                                        </div>
-                                    )} */}
-
                                     {/* 只在一般物品和「其他」時顯示兩個交易選項 */}
                                     {(item.category === '' || item.category === '其他') && (
                                         <div className="exchange-options">
@@ -868,7 +853,7 @@ function MerchantEditForm({ merchant, merchantId, onUpdateSuccess }) {
                 <div className="form-buttons">
                     <button
                         type="button"
-                        className="edit-cancel-btn" // Changed from cancel-btn to edit-cancel-btn
+                        className="edit-cancel-btn"
                         onClick={() => window.history.back()}
                     >
                         取消

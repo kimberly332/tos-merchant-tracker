@@ -1,7 +1,7 @@
 // src/pages/EditMerchantPage.js
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { getMerchantById, updateMerchant } from '../firebase/firestore';
+import { getMerchantById } from '../firebase/firestore';
 import MerchantEditForm from '../components/merchants/MerchantEditForm';
 import { checkUserAuth } from '../firebase/userAuth';
 import SuccessNotification from '../components/common/SuccessNotification';
@@ -12,7 +12,7 @@ function EditMerchantPage() {
   const [loading, setLoading] = useState(true);
   const [merchant, setMerchant] = useState(null);
   const [error, setError] = useState(null);
-  const [user, setUser] = useState(null);
+  const [, setUser] = useState(null);
   const [showNotification, setShowNotification] = useState(false);
   const [notificationMessage, setNotificationMessage] = useState('');
 
